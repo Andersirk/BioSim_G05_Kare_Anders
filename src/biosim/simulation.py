@@ -3,8 +3,8 @@
 """
 """
 
-__author__ = "Kåre Johnsen and Anders Karlsen"
-__email__ = "kajohnse.nmbu.no and anderska@nmbu.no"
+__author__ = "Kåre Johnsen & Anders Karlsen"
+__email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 
 class BioSim:
