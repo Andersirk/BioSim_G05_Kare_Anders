@@ -11,12 +11,16 @@ class Topography:
         self.animals = []
         self.fodder = None
 
-    def increase_fodder(self):
-        """Increases """
-        pass
-
     def decrease_fodder(self, decrease_amount):
-        pass
+        if decrease_amount <= self.fodder:
+            self.fodder -= decrease_amount
+            return decrease_amount
+        elif decrease_amount > self.fodder:
+            remaining_fodder = self.fodder
+            self.fodder = 0
+            return remaining_fodder
+        elif self.fodder <= 0:
+            return 0
 
     def remove_animal(self):
         pass
@@ -32,10 +36,14 @@ class Jungle(Topography):
     def __init__(self):
         super().__init__()
         self.accessible = True
+        self.jungle_max_fodder = 800
 
     def set_attributes(self):
         pass
 
+    def increase_fodder(self):
+        """Increases """
+        self.fodder = self.jungle_max_fodder
 
 class Savanna(Topography):
     def __init__(self):
@@ -43,6 +51,10 @@ class Savanna(Topography):
         self.accessible = True
 
     def set_attributes(self):
+        pass
+
+    def increase_fodder(self):
+        """Increases """
         pass
 
 
