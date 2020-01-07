@@ -42,6 +42,14 @@ class BioSim:
         img_base should contain a path and beginning of a file name.
         """
 
+    def _create_map(self, island_map):
+         """ Creates a dictionary where the keys are coordinates and values
+         are a class with the relevant topography category.
+
+         :param island_map:
+         :return dictinary,
+         """
+
     def set_animal_parameters(self, species, params):
         """
         Set parameters for animal species.
