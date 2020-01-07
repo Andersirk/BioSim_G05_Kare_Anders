@@ -51,4 +51,12 @@ class Desert(Topography):
         self.accessible = True
 
 
+class Mountain:
+    def __init__(self):
+        self.accessible = False
+
+
+class Ocean:
+    def __init__(self):
+        self.accessible = False
 
