@@ -49,6 +49,30 @@ class BioSim:
          :param island_map:
          :return dictinary,
          """
+        island_map_no_spaces = island_map.replace(" ", "")
+        x, y = 0, -1
+        map = {}
+        for number, landscape_code in enumerate(island_map_no_spaces):
+            y += 1
+            if landscape_code == "D":
+                map[(x, y)] = Desert()
+            elif landscape_code == "J":
+                map[(x, y)] = Jungle()
+            elif landscape_code == "S":
+                map[(x, y)] = Savanna()
+            elif landscape_code == "O":
+                map[(x, y)] = Ocean()
+            elif landscape_code == "M":
+                map[(x, y)] = Mountain()
+            elif landscape_code == "\n":
+                y = -1
+                x += 1
+            if x == 0 and landscape_code != "O":
+                raise ValueError
+            elif y == 0 and landscape_code != "O":
+                raise ValueError
+            if landscape_code not in ["O", "M", "J", "S", "D"]:
+                raise ValueError
 
     def set_animal_parameters(self, species, params):
         """
