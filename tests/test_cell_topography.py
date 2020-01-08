@@ -11,19 +11,28 @@ def test_test():
     assert ke.fodder == 800
 
 
-def test_current_occupants_int_test():
+def test_current_occupants_int():
     instance = topo.Topography()
     assert type(instance.current_occupants()["Herbivores"]) == int and type(instance.current_occupants()["Carnivores"]) == int
 
 
-def test_current_occupants_positive_test():
+def test_current_occupants_positive():
     instance = topo.Topography()
     assert instance.current_occupants()["Herbivores"] >= 0 and instance.current_occupants()["Carnivores"] >= 0
 
 
-def test_animal_list_test():
+def test_animal_list():
     instance = topo.Topography()
     assert type(instance.animals) == list
+
+
+def test_current_fodder():
+    instance = topo.Topography()
+    assert type(instance.current_fodder()) == int and instance.current_fodder() >= 0
+
+
+
+
 
 
 
