@@ -44,16 +44,18 @@ class Topography:
 
 
 class Jungle(Topography):
+    parameters = {"f_max": 800}
+
     def __init__(self):
         super().__init__()
-        self.f_max = 800.0
-        self.fodder = self.f_max
+        self.fodder = self.parameters["f_max"]
 
-    def set_parameters(self, parameters):
-        for parameter, value in parameters.items():
+    @classmethod
+    def set_parameters(cls, new_parameters):
+        for parameter, value in new_parameters.items():
             if parameter == "f_max":
                 if value >= 0:
-                    self.f_max = value
+                    cls.parameters["f_max"] = value
                 else:
                     raise ValueError("f_max requires a positive value")
             else:
@@ -63,30 +65,32 @@ class Jungle(Topography):
         """Increases """
         self.fodder = self.f_max
 
+
 class Savanna(Topography):
+    parameters = {"f_max": 300, "alpha": 0.3}
+
     def __init__(self):
         super().__init__()
-        self.f_max = 300.0
-        self.alpha = 0.3
-        self.fodder = self.f_max
+        self.fodder = self.parameters["f_max"]
 
-    def set_parameters(self, parameters):
+    @classmethod
+    def set_parameters(cls, parameters):
         for parameter, value in parameters.items():
             if parameter == "f_max":
                 if value >= 0:
-                    self.f_max = value
+                    cls.parameters["f_max"] = value
                 else:
                     raise ValueError("f_max requires a positive value")
             elif parameter == "alpha":
                 if value >= 0:
-                    self.alpha = value
+                    cls.parameters["alpha"] = value
                 else:
                     raise ValueError("alpha requires a positive value")
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
     def increase_fodder(self):
-        self.fodder += self.alpha * (self.f_max - self.fodder)
+        self.fodder += self.parameters["alpha"] * (self.parameters["f_max"] - self.fodder)
 
 
 
@@ -107,62 +111,14 @@ class Ocean:
         self.fodder = 0
 
 
-def create_map(island_map):
-    """ Creates a dictionary where the keys are coordinates and values
-    are a class with the relevant topography category.
 
-    :param island_map:
-    :return dictinary,
-    """
-    island_map_no_spaces = island_map.replace(" ", "")
-    x, y = 0, -1
-    raster_model = {}
-    for number, landscape_code in enumerate(island_map_no_spaces):
-        y += 1
-        if landscape_code == "D":
-            raster_model[(x, y)] = Desert()
-        elif landscape_code == "J":
-            raster_model[(x, y)] = Jungle()
-        elif landscape_code == "S":
-            raster_model[(x, y)] = Savanna()
-        elif landscape_code == "O":
-            raster_model[(x, y)] = Ocean()
-        elif landscape_code == "M":
-            raster_model[(x, y)] = Mountain()
-        elif landscape_code == "\n":
-            y = -1
-            x += 1
-        if x == 0 and landscape_code != "O":
-            raise ValueError("The border of the map needs to "
-                            "consist solely of ocean tiles")
-        elif y == 0 and landscape_code != "O":
-            raise ValueError("The border of the map needs to "
-                              "consist solely of ocean tiles")
-        if landscape_code not in ["O", "M", "J", "S", "D", "\n"]:
-            raise ValueError ("The tiles need to be one of the"
-                              "predetermined tiles: O, M, J, S or D")
-    return raster_model
 
 
 
 if __name__ == "__main__":
-    geogr = """\
-                OOOOOOOOOOOOOOOOOOOOO
-                OOOOOOOOSMMMMJJJJJJJO
-                OSSSSSJJJJMMJJJJJJJOO
-                OSSSSSSSSSMMJJJJJJOOO
-                OSSSSSJJJJJJJJJJJJOOO
-                OSSSSSJJJDDJJJSJJJOOO
-                OSSJJJJJDDDJJJSSSSOOO
-                OOSSSSJJJDDJJJSOOOOOO
-                OSSSJJJJJDDJJJJJJJOOO
-                OSSSSJJJJDDJJJJOOOOOO
-                OOSSSSJJJJJJJJOOOOOOO
-                OOOSSSSJJJJJJJOOOOOOO
-                OOOOOOOOOOOOOOOOOOOOO"""
 
 
-    mappp = create_map(geogr)
-    for key, value in mappp.items():
-        if value.__class__.__name__ != "Ocean" and value.__class__.__name__ != "Mountain":
-            print (f'Coordinate: {key}, has {value.fodder} fodder and the geography is {value.__class__.__name__}, {value.current_occupants()}')
+    keke = [Savanna() for _ in range(5)]
+    [print(kok.parameters) for kok in keke]
+    Savanna.set_parameters({"f_max":2000, "alpha": 69})
+    [print(kok.parameters) for kok in keke]
