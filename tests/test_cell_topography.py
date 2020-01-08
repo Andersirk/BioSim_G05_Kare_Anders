@@ -45,12 +45,6 @@ def test_Topo_current_occupants_positive():
     assert instance.current_occupants()["Herbivores"] >= 0 and instance.current_occupants()["Carnivores"] >= 0
 
 
-def test_Topo_animal_list():
-    """Test that the output is a list"""
-    instance = topo.Topography()
-    assert type(instance.animals) == list
-
-
 def test_Topo_current_fodder():
     """Test that the amount of fodder is a float and greater than 0"""
     instance = topo.Topography()
