@@ -46,28 +46,47 @@ class Topography:
 class Jungle(Topography):
     def __init__(self):
         super().__init__()
-        self.f_max_jungle = 800.0
-        self.fodder = self.f_max_jungle
+        self.f_max = 800.0
+        self.fodder = self.f_max
 
-    def set_attributes(self):
-        pass
+    def set_parameters(self, parameters):
+        for parameter, value in parameters.items():
+            if parameter == "f_max":
+                if value >= 0:
+                    self.f_max = value
+                else:
+                    raise ValueError("f_max requires a positive value")
+            else:
+                raise ValueError(f"{parameter} is not an accepted parameter")
 
     def increase_fodder(self):
         """Increases """
-        self.fodder = self.f_max_jungle
+        self.fodder = self.f_max
 
 class Savanna(Topography):
     def __init__(self):
         super().__init__()
-        self.f_max_savanna = 300.0
+        self.f_max = 300.0
         self.alpha = 0.3
-        self.fodder = self.f_max_savanna
+        self.fodder = self.f_max
 
-    def set_attributes(self):
-        pass
+    def set_parameters(self, parameters):
+        for parameter, value in parameters.items():
+            if parameter == "f_max":
+                if value >= 0:
+                    self.f_max = value
+                else:
+                    raise ValueError("f_max requires a positive value")
+            elif parameter == "alpha":
+                if value >= 0:
+                    self.alpha = value
+                else:
+                    raise ValueError("alpha requires a positive value")
+            else:
+                raise ValueError(f"{parameter} is not an accepted parameter")
 
     def increase_fodder(self):
-        self.fodder += self.alpha * (self.f_max_savanna - self.fodder)
+        self.fodder += self.alpha * (self.f_max - self.fodder)
 
 
 
@@ -114,11 +133,14 @@ def create_map(island_map):
             y = -1
             x += 1
         if x == 0 and landscape_code != "O":
-            raise ValueError
+            raise ValueError("The border of the map needs to "
+                            "consist solely of ocean tiles")
         elif y == 0 and landscape_code != "O":
-            raise ValueError
+            raise ValueError("The border of the map needs to "
+                              "consist solely of ocean tiles")
         if landscape_code not in ["O", "M", "J", "S", "D", "\n"]:
-            raise ValueError
+            raise ValueError ("The tiles need to be one of the"
+                              "predetermined tiles: O, M, J, S or D")
     return raster_model
 
 
