@@ -46,7 +46,7 @@ class Topography:
 class Jungle(Topography):
     def __init__(self):
         super().__init__()
-        self.f_max_jungle = 800
+        self.f_max_jungle = 800.0
         self.fodder = self.f_max_jungle
 
     def set_attributes(self):
@@ -59,7 +59,7 @@ class Jungle(Topography):
 class Savanna(Topography):
     def __init__(self):
         super().__init__()
-        self.f_max_savanna = 300
+        self.f_max_savanna = 300.0
         self.alpha = 0.3
         self.fodder = self.f_max_savanna
 

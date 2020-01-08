@@ -28,7 +28,7 @@ def test_animal_list():
 
 def test_current_fodder():
     instance = topo.Topography()
-    assert type(instance.current_fodder()) == int and instance.current_fodder() >= 0
+    assert type(instance.current_fodder()) == float and instance.current_fodder() >= float
 
 
 def test_remove_animal():
