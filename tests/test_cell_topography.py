@@ -31,9 +31,18 @@ def test_current_fodder():
     assert type(instance.current_fodder()) == int and instance.current_fodder() >= 0
 
 
+def test_remove_animal():
+    instance = topo.Topography()
+    instance.animals = [1, 2, 3, 4]
+    instance.remove_animal(4)
+    assert instance.animals == [1, 2, 3]
 
 
-
+def test_add_animal():
+    instance = topo.Topography()
+    instance.animals = [1, 2, 3, 4]
+    instance.add_animal(5)
+    assert instance.animals == [1, 2, 3, 4, 5]
 
 
 
