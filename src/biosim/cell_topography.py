@@ -45,6 +45,7 @@ class Topography:
 
 
 class Jungle(Topography):
+
     parameters = {"f_max": 800}
 
     def __init__(self):
@@ -68,6 +69,11 @@ class Jungle(Topography):
 
 
 class Savanna(Topography):
+    """
+    Construct the active subclass 'Savanna'.
+    The fodder produced in this topography class has a lower growth rate than
+    the jungle and is therefore vulnerable for overgrazing"
+    """
     parameters = {"f_max": 300, "alpha": 0.3}
 
     def __init__(self):
@@ -76,6 +82,7 @@ class Savanna(Topography):
 
     @classmethod
     def set_parameters(cls, parameters):
+        """ Sets the editable default parameters for this subclass"""
         for parameter, value in parameters.items():
             if parameter == "f_max":
                 if value >= 0:
@@ -91,21 +98,32 @@ class Savanna(Topography):
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
     def increase_fodder(self):
+        """Sets the yearly fodder growth rate for this topography class"""
         self.fodder += self.parameters["alpha"] * (self.parameters["f_max"] - self.fodder)
 
 
 class Desert(Topography):
+    """
+    Construct the active subclass 'Desert', which dosent allow the herbivore
+    to feed due to the harsh climate. Movement and breeding for all
+    animals is allowed.
+    """
     def __init__(self):
         super().__init__()
 
 
 class Mountain:
+    """Construct the passive and non accessible class 'Mountain' """
     def __init__(self):
         self.accessible = False
         self.fodder = 0.0
 
 
 class Ocean:
+    """
+    Construct the passive and non accessible class 'Ocean',
+    witch surrounds the island
+    """
     def __init__(self):
         self.accessible = False
         self.fodder = 0.0
