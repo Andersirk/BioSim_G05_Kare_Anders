@@ -8,6 +8,7 @@ class Topography:
     def __init__(self):
         self.accessible = True
         self.animals = []
+        self.fodder = 0
 
     def decrease_fodder(self, decrease_amount):
         if decrease_amount <= self.fodder:
@@ -73,7 +74,6 @@ class Savanna(Topography):
 class Desert(Topography):
     def __init__(self):
         super().__init__()
-        self.fodder = 0
 
 
 class Mountain:
