@@ -5,12 +5,26 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 
 class Topography:
+    """
+    Topography superclass from where all active cell-types are subclassed.
+    Represents a single cell on the map
+    """
     def __init__(self):
+        """
+        Topography superclass constructor
+        """
         self.accessible = True
         self.animals = []
         self.fodder = 0.0
 
     def decrease_fodder(self, decrease_amount):
+        """
+        Takes a request for how much fodder the animal would like to consume
+        and returns the amount it is allowed to consume and decreases the
+        the fodder in the cell by the same amount.
+        :param decrease_amount: The animals desired amount of fodder.
+        :return: The allowed amount of fodder.
+        """
         if decrease_amount <= self.fodder:
             self.fodder -= decrease_amount
             return decrease_amount
@@ -22,15 +36,32 @@ class Topography:
             return 0.0
 
     def remove_animal(self, animal):
+        """
+        Removes the instance of an animal from the list of animal instances
+        in the cell.
+        :param animal: An instance of an animal class.
+        """
         self.animals.remove(animal)
 
     def add_animal(self, animal):
+        """
+        Adds the instance of an animal to the list of animal instances
+        in the cell.
+        :param animal: An instance of an animal class.
+        """
         self.animals.append(animal)
 
     def current_fodder(self):
+        """Returns the amount of fodder in the cell. """
         return self.fodder
 
     def current_occupants(self):
+        """
+        Counts the animals in the list of animals and returns a dictionary
+        with the amount of Herbivores, Carnivores and the total of both.
+        :return: A dictionary with Herbivores, Carnivores and total as keys,
+                 and their population in the cell as values.
+        """
         herbivore_count = 0
         carnivore_count = 0
         for animal in self.animals:
@@ -48,11 +79,20 @@ class Jungle(Topography):
     parameters = {"f_max": 800}
 
     def __init__(self):
+        """Constructor for the Jungle subclass, sets the inital fodder based
+        on the initial value of f_max"""
         super().__init__()
         self.fodder = self.parameters["f_max"]
 
     @classmethod
     def set_parameters(cls, new_parameters):
+        """
+        Sets the parameters of all Jungle instances to the provided
+         new_parameters.
+        :param new_parameters: A dictionary with keys as the parameter to
+        be changed and values as the new parameter value. It is possible to
+        change preexisting parameters only.
+        """
         for parameter, value in new_parameters.items():
             if parameter == "f_max":
                 if value >= 0:
@@ -63,7 +103,7 @@ class Jungle(Topography):
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
     def increase_fodder(self):
-        """Increases """
+        """Increases the fodder for the Jungle cell"""
         self.fodder = self.f_max
 
 
