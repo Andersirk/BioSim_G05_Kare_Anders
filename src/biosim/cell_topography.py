@@ -6,7 +6,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 class Topography:
     def __init__(self):
-        self.accessible = False
+        self.accessible = True
         self.animals = []
 
     def decrease_fodder(self, decrease_amount):
@@ -45,7 +45,6 @@ class Topography:
 class Jungle(Topography):
     def __init__(self):
         super().__init__()
-        self.accessible = True
         self.f_max_jungle = 800
         self.fodder = self.f_max_jungle
 
@@ -59,7 +58,6 @@ class Jungle(Topography):
 class Savanna(Topography):
     def __init__(self):
         super().__init__()
-        self.accessible = True
         self.f_max_savanna = 300
         self.alpha = 0.3
         self.fodder = self.f_max_savanna
@@ -75,7 +73,6 @@ class Savanna(Topography):
 class Desert(Topography):
     def __init__(self):
         super().__init__()
-        self.accessible = True
         self.fodder = 0
 
 
