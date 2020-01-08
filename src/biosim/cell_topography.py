@@ -8,7 +8,7 @@ class Topography:
     def __init__(self):
         self.accessible = True
         self.animals = []
-        self.fodder = 0
+        self.fodder = 0.0
 
     def decrease_fodder(self, decrease_amount):
         if decrease_amount <= self.fodder:
@@ -16,10 +16,10 @@ class Topography:
             return decrease_amount
         elif decrease_amount > self.fodder:
             remaining_fodder = self.fodder
-            self.fodder = 0
+            self.fodder = 0.0
             return remaining_fodder
-        elif self.fodder <= 0:
-            return 0
+        elif self.fodder <= 0.0:
+            return 0.0
 
     def remove_animal(self, animal):
         self.animals.remove(animal)
@@ -41,6 +41,7 @@ class Topography:
         return {"Herbivores": herbivore_count,
                 "Carnivores": carnivore_count,
                 "Total": len(self.animals)}
+
 
 
 class Jungle(Topography):
@@ -93,7 +94,6 @@ class Savanna(Topography):
         self.fodder += self.parameters["alpha"] * (self.parameters["f_max"] - self.fodder)
 
 
-
 class Desert(Topography):
     def __init__(self):
         super().__init__()
@@ -102,13 +102,13 @@ class Desert(Topography):
 class Mountain:
     def __init__(self):
         self.accessible = False
-        self.fodder = 0
+        self.fodder = 0.0
 
 
 class Ocean:
     def __init__(self):
         self.accessible = False
-        self.fodder = 0
+        self.fodder = 0.0
 
 
 
