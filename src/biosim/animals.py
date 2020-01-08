@@ -10,3 +10,6 @@ class Animals:
     def eat(self):
         """This function makes the animal eat
         """
+
+    @classmethod
+    def age
