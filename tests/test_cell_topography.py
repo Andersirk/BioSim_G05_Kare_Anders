@@ -4,34 +4,40 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import src.biosim.cell_topography as topo
+import pytest
 
+@pytest.fixture
+def basic_topography():
+    return topo.Topography()
 
-def test_Topo_decrease_fodder_abundance():
+@pytest.mark.parametrize("fodder, requested, dec_amunt, fodder_result",
+                         [(400, 200, 200, 200),
+                          (100, 200, 100, 0),
+                          (0, 200, 0, 0 )])
+
+def test_Topo_decrease_fodder_abundance(basic_topography, fodder, requested, dec_amunt, fodder_result):
     """Tests that the amount of fodder can be decreased"""
-    instance = topo.Topography()
-    instance.fodder = 400
-    decrease_amount = instance.decrease_fodder(200)
-    assert decrease_amount == 200
-    assert instance.current_fodder() == 200
+    basic_topography.fodder = fodder
+    decrease_amount = basic_topography.decrease_fodder(requested)
+    assert decrease_amount == dec_amunt
+    assert basic_topography.current_fodder() == fodder_result
 
 
-def test_Topo_decrease_fodder_scarce():
-    """Tests that the fodder decrease stops when the amount is zero """
-    instance = topo.Topography()
-    instance.fodder = 100
-    decrease_amount = instance.decrease_fodder(200)
-    assert decrease_amount == 100
-    assert instance.current_fodder() == 0
-
-
-def test_Topo_decrease_fodder_zero():
-    """Tests that the amount of fodder cant be decrased if the current amount of food allredy is zero"""
-    instance = topo.Topography()
-    instance.fodder = 0
-    decrease_amount = instance.decrease_fodder(200)
-    assert decrease_amount == 0
-    assert instance.current_fodder() == 0
-    
+# def test_Topo_decrease_fodder_scarce(basic_topography):
+#     """Tests that the fodder decrease stops when the amount is zero """
+#     basic_topography.fodder = 100
+#     decrease_amount = basic_topography.decrease_fodder(200)
+#     assert decrease_amount == 100
+#     assert basic_topography.current_fodder() == 0
+#
+#
+# def test_Topo_decrease_fodder_zero(basic_topography):
+#     """Tests that the amount of fodder cant be decrased if the current amount of food allredy is zero"""
+#     basic_topography.fodder = 0
+#     decrease_amount = basic_topography.decrease_fodder(200)
+#     assert decrease_amount == 0
+#     assert basic_topography.current_fodder() == 0
+#
 
 def test_Topo_current_occupants_int():
     """Test that the numbers of herbivore and carnivores occupants in a cell is an int"""
