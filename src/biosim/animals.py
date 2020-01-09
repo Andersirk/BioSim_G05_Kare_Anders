@@ -89,7 +89,7 @@ class Herbivores(Animals):
         pass
 
 
-class Herbivores(Animals):
+class Carnivores(Animals):
     """
     This is the class for the meat eating carnivores which lives on
     the island
