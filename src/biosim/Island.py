@@ -3,12 +3,12 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
-from .cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
-
+from biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
+from biosim.animals import Herbivores, Carnivores, Animals
 
 class Island:
     def __init__(self, island_map):
-        raster_model = self.create_map(island_map)
+        self.raster_model = self.create_map(island_map)
 
     def create_map(self, island_map):
         """ Creates a dictionary where the keys are coordinates and values
@@ -54,6 +54,23 @@ class Island:
                     raise ValueError("The border of the map needs to "
                                      "consist solely of ocean tiles")
 
+    def populate_island(self, population_list):
+        for dictionary in population_list:
+            if dictionary["loc"] not in self.raster_model.keys():
+                raise ValueError("These coordinates do not exist in this map's coordiante system.")
+            if self.raster_model[dictionary["loc"]].is_accessible:
+                for population in dictionary["pop"]:
+                    if population["species"] == "Herbivore":
+                        self.raster_model[dictionary["loc"]].add_animal(Herbivores(dictionary["loc"], age=population["age"], weight=population["weight"]))
+                    elif population["species"] == "Carnivore":
+                        self.raster_model[dictionary["loc"]].add_animal(Carnivores(dictionary["loc"], age=population["age"], weight=population["weight"]))
+            else:
+                raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
+
+
+
+
+
 
 if __name__ == "__main__":
     geogr = """\
@@ -70,3 +87,28 @@ if __name__ == "__main__":
                 OOSSSSJJJJJJJJOOOOOOO
                 OOOSSSSJJJJJJJOOOOOOO
                 OOOOOOOOOOOOOOOOOOOOO"""
+    island = Island(geogr)
+    terk = [{'loc': (1, 12),
+      'pop': [{'species': 'Herbivore',
+               'age': 10, 'weight': 12.5},
+              {'species': 'Herbivore',
+               'age': 9, 'weight': 10.3},
+              {'species': 'Carnivore',
+               'age': 5, 'weight': 8.1}]},
+     {'loc': (4, 4),
+      'pop': [{'species': 'Herbivore',
+               'age': 10, 'weight': 12.5},
+              {'species': 'Carnivore',
+               'age': 3, 'weight': 7.3},
+              {'species': 'Carnivore',
+               'age': 5, 'weight': 8.1}]}]
+
+    island.populate_island(terk)
+    print(island.raster_model[(3,4)].animals)
+    print(island.raster_model[(3,4)].animals[0].__dict__)
+    print(island.raster_model[(3,4)].animals[1].__dict__)
+    print(island.raster_model[(3,4)].animals[2].__dict__)
+    print(Animals.instances[0].__dict__)
+
+
+
