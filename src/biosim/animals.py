@@ -5,15 +5,18 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 from math import exp
 import numpy as np
+import random
 
 
 class Animals:
     instances = []
     """This is the overall class for the animals which lives on the island"""
 
-    def __init__(self, age=0):
+    def __init__(self, current_coordinates, age=0, weight=None):
         self.age = age
-        self.weight = self.birth_weight()
+        self.weight = self.birth_weight() if weight is None else weight
+        self.current_coordinates = current_coordinates
+        Animals.instances.append(self)
 
     def birth_weight(self):
         return np.random.normal(
@@ -34,16 +37,20 @@ class Animals:
                         self.weight - self.parameters["w_half"]))) ** -1
 
 
-    def migration(self):
-        """This function decides if, and to which cell, an animal shall move"""
-
-
     def breeding(self):
         """This function decides if an animal will breed"""
 
 
     def death(self):
         """This function decides if an animal will die"""
+
+    def will_migrate(self):
+        """This function decides if, and to which cell, an animal shall move"""
+        probability_to_move = self.parameters["mu"] * self.fitness
+        if random.random() < probability_to_move:
+            return True
+        else:
+            return False
 
 
     @classmethod
@@ -81,12 +88,20 @@ class Herbivores(Animals):
                   "DeltaPhiMax": None
                   }
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, current_coordinates, age, weight):
+        super().__init__(current_coordinates, age, weight)
 
     def eat(self):
         """This function makes the herbivores try to eat """
         pass
+
+    def migrate(self):
+        pass
+
+
+
+
+
 
 
 class Carnivores(Animals):
@@ -111,12 +126,14 @@ class Carnivores(Animals):
                   "F": 50,
                   "DeltaPhiMax": 10}
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, current_coordinates, age, weight):
+        super().__init__(current_coordinates, age, weight)
 
     def eat(self):
         """This function makes the carnivores try to eat """
         pass
 
+    def migration(self):
+        """This function decides if, and to which cell, an animal shall move"""
 
 
