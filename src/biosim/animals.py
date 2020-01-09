@@ -96,7 +96,12 @@ class Herbivores(Animals):
         pass
 
     def migrate(self):
-        pass
+        if self.will_migrate():
+            neighbouring_cells = [(self.current_coordinates[0]+1, self.current_coordinates[1]),
+                                  (self.current_coordinates[0]-1, self.current_coordinates[1]),
+                                  (self.current_coordinates[0], self.current_coordinates[1]+1),
+                                  (self.current_coordinates[0], self.current_coordinates[1]-1)]
+            #ta resten i island
 
 
 
