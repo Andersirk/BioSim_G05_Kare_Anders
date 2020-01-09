@@ -13,7 +13,7 @@ class Topography:
         """
         Topography superclass constructor
         """
-        self.accessible = True
+        self.is_accessible = True
         self.animals = []
         self.fodder = 0.0
 
@@ -155,7 +155,7 @@ class Desert(Topography):
 class Mountain:
     """Construct the passive and non accessible class 'Mountain' """
     def __init__(self):
-        self.accessible = False
+        self.is_accessible = False
         self.fodder = 0.0
 
 
@@ -165,7 +165,7 @@ class Ocean:
     witch surrounds the island
     """
     def __init__(self):
-        self.accessible = False
+        self.is_accessible = False
         self.fodder = 0.0
 
 
@@ -173,10 +173,10 @@ class Ocean:
 
 
 
-if __name__ == "__main__":
-
-
-    keke = [Savanna() for _ in range(5)]
-    [print(kok.parameters) for kok in keke]
-    Savanna.set_parameters({"f_max":2000, "alpha": 69})
-    [print(kok.parameters) for kok in keke]
+# if __name__ == "__main__":
+#
+#
+#     keke = [Savanna() for _ in range(5)]
+#     [print(kok.parameters) for kok in keke]
+#     Savanna.set_parameters({"f_max":2000, "alpha": 69})
+#     [print(kok.parameters) for kok in keke]
