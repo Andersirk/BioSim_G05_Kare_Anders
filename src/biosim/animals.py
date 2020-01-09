@@ -28,11 +28,16 @@ class Animals:
             self.weight = 0
         else:
             self.fitness =
-            (1 + exp(self.parameters["phi"] * (
-                        self.age - self.parameters["a_half"]))) ** -1 *
-            (1 + exp(-self.weight * (self.parameters["weight_half"] -
-                                         self.parameters[
-                                             "phi_weight"]))) ** -1
+            (1 + exp(self.parameters["phi_age"] * (
+                        self.age - self.parameters["a_half"])
+                     )
+             )** -1
+            *
+            (1 + exp(-self.self.parameters["phi_weight"] *
+                     (self.weight - self.parameters["w_half"])
+                     )
+             )** -1
+
 
     @classmethod
     def fitness_update_all(cls):
@@ -61,7 +66,6 @@ class Animals:
     @classmethod
     def weight_decrease(cls):
         """This function makes the animal lose weight"""
-
         for instance in cls.instances:
             instance.weight = instance.parameters["eta"] * instance.weight
 
