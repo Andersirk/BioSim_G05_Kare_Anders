@@ -14,8 +14,6 @@ class Animals:
     def __init__(self, age=0):
         self.age = age
         self.weight = self.birth_weight()
-        self.fitness = 0
-        self.fitness_update()
 
     def birth_weight(self):
         return np.random.normal(
@@ -23,19 +21,17 @@ class Animals:
             self.parameters["sigma_birth"]
         )
 
-    def fitness_update(self):
+    @property
+    def fitness(self):
         if self.weight <= 0:
-            self.weight = 0
+            return 0
         else:
-            self.fitness = (1 + exp(self.parameters["phi_age"] * (self.age - self.parameters["a_half"])))** -1 * (
-                    1 + exp(-self.self.parameters["phi_weight"] *(self.weight - self.parameters["w_half"])))** -1
-
-
-    @classmethod
-    def fitness_update_all(cls):
-        """This function calculates the instances fitness condition """
-        for instance in cls.instances:
-            instance.fitness_update()
+            return (1 + exp(
+                self.parameters["phi_age"] * (
+                        self.age - self.parameters["a_half"])))** -1 * (
+                    1 + exp(
+                -self.self.parameters["phi_weight"] *(
+                        self.weight - self.parameters["w_half"]))) ** -1
 
 
     def migration(self):
@@ -85,9 +81,8 @@ class Herbivores(Animals):
                   "DeltaPhiMax": None
                   }
 
-
     def __init__(self):
-        pass
+        super().__init__()
 
     def eat(self):
         """This function makes the herbivores try to eat """
@@ -117,7 +112,7 @@ class Herbivores(Animals):
                   "DeltaPhiMax": 10}
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def eat(self):
         """This function makes the carnivores try to eat """
