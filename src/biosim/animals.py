@@ -4,6 +4,7 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 from math import exp
+import numpy as np
 
 
 class Animals:
@@ -12,21 +13,15 @@ class Animals:
 
     def __init__(self, age=0):
         self.age = age
-        self.weight = initial_weight()
+        self.weight = self.birth_weight()
         self.fitness = 0
         self.fitness_update()
 
-    @classmethod
-    def fitness_update_all(cls):
-        """This function calculates the instances fitness condition """
-        for instance in cls.instances:
-            instance.fitness_update()
-            # if instance.weight <= 0:
-            #     instance.weight = 0
-            # else:
-            #     instance.phi =
-            #     (1 + exp(instance.parameters["phi"]*(instance.age-instance.parameters["a_half"])))**-1 *
-            #     (1 + exp(-instance.weight*(instance.parameters["weight_half"] - instance.parameters["phi_weight"]))) ** -1
+    def birth_weight(self):
+        return np.random.normal(
+            self.parameters["w_birth"],
+            self.parameters["sigma_birth"]
+        )
 
     def fitness_update(self):
         if self.weight <= 0:
@@ -39,6 +34,12 @@ class Animals:
                                          self.parameters[
                                              "phi_weight"]))) ** -1
 
+    @classmethod
+    def fitness_update_all(cls):
+        """This function calculates the instances fitness condition """
+        for instance in cls.instances:
+            instance.fitness_update()
+
 
     def migration(self):
         """This function decides if, and to which cell, an animal shall move"""
@@ -46,6 +47,7 @@ class Animals:
 
     def breeding(self):
         """This function decides if an amimal will breed"""
+
 
     def death(self):
         """This function decides if an animal will die"""
@@ -55,7 +57,6 @@ class Animals:
     def age_up(cls):
         for instance in cls.instances:
             instance.age += 1
-
 
     @classmethod
     def weight_decrease(cls):
@@ -120,4 +121,6 @@ class Herbivores(Animals):
 
     def eat(self):
     """This function makes the carnivores try to eat """
+
+
 
