@@ -27,16 +27,8 @@ class Animals:
         if self.weight <= 0:
             self.weight = 0
         else:
-            self.fitness =
-            (1 + exp(self.parameters["phi_age"] * (
-                        self.age - self.parameters["a_half"])
-                     )
-             )** -1
-            *
-            (1 + exp(-self.self.parameters["phi_weight"] *
-                     (self.weight - self.parameters["w_half"])
-                     )
-             )** -1
+            self.fitness = (1 + exp(self.parameters["phi_age"] * (self.age - self.parameters["a_half"])))** -1 * (
+                    1 + exp(-self.self.parameters["phi_weight"] *(self.weight - self.parameters["w_half"])))** -1
 
 
     @classmethod
@@ -51,7 +43,7 @@ class Animals:
 
 
     def breeding(self):
-        """This function decides if an amimal will breed"""
+        """This function decides if an animal will breed"""
 
 
     def death(self):
@@ -89,14 +81,17 @@ class Herbivores(Animals):
                   "zeta": 3.5,
                   "xi": 1.2,
                   "omega": 0.4,
-                  "F": 10
-                  "DeltaPhiMax": None}
+                  "F": 10,
+                  "DeltaPhiMax": None
+                  }
 
 
     def __init__(self):
+        pass
 
     def eat(self):
-    """This function makes the herbivores try to eat """
+        """This function makes the herbivores try to eat """
+        pass
 
 
 class Herbivores(Animals):
@@ -118,13 +113,15 @@ class Herbivores(Animals):
                   "zeta": 3.5,
                   "xi": 1.1,
                   "omega": 0.9,
-                  "F": 50
+                  "F": 50,
                   "DeltaPhiMax": 10}
 
     def __init__(self):
+        pass
 
     def eat(self):
-    """This function makes the carnivores try to eat """
+        """This function makes the carnivores try to eat """
+        pass
 
 
 
