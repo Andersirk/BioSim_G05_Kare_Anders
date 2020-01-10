@@ -15,6 +15,8 @@ class Topography:
         """
         self.is_accessible = True
         self.animals = []
+        self.herbivore_list = []
+        self.carnivore_list = []
         self.fodder = 0.0
 
     def decrease_fodder(self, decrease_amount):
@@ -41,7 +43,11 @@ class Topography:
         in the cell.
         :param animal: An instance of an animal class.
         """
-        self.animals.remove(animal)
+        if animal.__class__.__name__ == "Herbivore":
+            self.herbivore_list.remove(animal)
+        elif animal.__class__.__name__ == "Carnivore":
+            self.carnivore_list.remove(animal)
+
 
     def add_animal(self, animal):
         """
@@ -49,7 +55,12 @@ class Topography:
         in the cell.
         :param animal: An instance of an animal class.
         """
-        self.animals.append(animal)
+        if animal.__class__.__name__ == "Herbivore":
+            self.herbivore_list.append(animal)
+        elif animal.__class__.__name__ == "Carnivore":
+            self.carnivore_list.append(animal)
+
+
 
     def current_fodder(self):
         """Returns the amount of fodder in the cell. """
@@ -62,16 +73,10 @@ class Topography:
         :return: A dictionary with Herbivores, Carnivores and total as keys,
                  and their population in the cell as values.
         """
-        herbivore_count = 0
-        carnivore_count = 0
-        for animal in self.animals:
-            if animal.__class__.__name__ == "Herbivore":
-                herbivore_count += 1
-            elif animal.__class__.__name__ == "Carnivore":
-                carnivore_count += 1
-        return {"Herbivores": herbivore_count,
-                "Carnivores": carnivore_count,
-                "Total": len(self.animals)}
+
+        return {"Herbivores": len(self.herbivore_list),
+                "Carnivores": len(self.carnivore_list),
+                "Total": len(self.carnivore_list) + len(self.herbivore_list)}
 
 
 
