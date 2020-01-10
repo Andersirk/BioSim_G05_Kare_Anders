@@ -5,6 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 from biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
 from biosim.animals import Herbivores, Carnivores, Animals
+import numpy as np
 
 class Island:
     def __init__(self, island_map):
@@ -66,6 +67,46 @@ class Island:
                         self.raster_model[dictionary["loc"]].add_animal(Carnivores(dictionary["loc"], age=population["age"], weight=population["weight"]))
             else:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
+
+    def migrate_herbivores(self):
+        herbivore_ek = {}
+        last_years_raster_model = self.raster_model
+        for location, cell in last_years_raster_model.items():
+            if cell.is_accessible:
+                herbivore_ek[location] = cell.current_fodder() / (
+                        (len(cell.herbivore_list) + 1
+                         ) * Herbivores.parameters["F"])
+        for location, cell in last_years_raster_model.items():
+            for animal in cell.herbivore_list:
+                neighbouring_cells = self.find_neighbouring_cells(location)
+                cell_to_migrate = self.what_cell_to_migrate_to(
+                                            neighbouring_cells, herbivore_ek)
+                self.raster_model[location].remove_animal(animal)
+                self.raster_model[cell_to_migrate].add_animal(animal)
+
+
+
+    def what_cell_to_migrate_to(self, neighbouring_cells, herbivore_ek):
+        sum_ek_neighbours = 0
+        cell_probability = []
+        for cell in neighbouring_cells:
+            sum_ek_neighbours += herbivore_ek[cell]
+        for cell in neighbouring_cells:
+            cell_probability.append(herbivore_ek[cell]/sum_ek_neighbours)
+        cumumlative_probability = np.cumsum(cell_probability)
+        rand_num = np.random.random()
+        n = 0
+        while rand_num >= cumumlative_probability[n]:
+            n += 1
+        return neighbouring_cells[n]
+
+
+    def find_neighbouring_cells(self, coordinates):
+        neighbouring_cells = [(coordinates[0]+1, coordinates[1]),
+                              (coordinates[0]-1, coordinates[1]),
+                              (coordinates[0], coordinates[1]+1),
+                              (coordinates[0], coordinates[1]-1)]
+        return neighbouring_cells
 
 
 
