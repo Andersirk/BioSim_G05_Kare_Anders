@@ -95,13 +95,6 @@ class Herbivores(Animals):
         """This function makes the herbivores try to eat """
         pass
 
-    def migrate(self):
-        if self.will_migrate():
-            neighbouring_cells = [(self.current_coordinates[0]+1, self.current_coordinates[1]),
-                                  (self.current_coordinates[0]-1, self.current_coordinates[1]),
-                                  (self.current_coordinates[0], self.current_coordinates[1]+1),
-                                  (self.current_coordinates[0], self.current_coordinates[1]-1)]
-            #ta resten i island
 
 
 
