@@ -43,9 +43,9 @@ class Topography:
         in the cell.
         :param animal: An instance of an animal class.
         """
-        if animal.__class__.__name__ == "Herbivore":
+        if animal.__class__.__name__ == "Herbivores":
             self.herbivore_list.remove(animal)
-        elif animal.__class__.__name__ == "Carnivore":
+        elif animal.__class__.__name__ == "Carnivores":
             self.carnivore_list.remove(animal)
 
 
@@ -55,9 +55,9 @@ class Topography:
         in the cell.
         :param animal: An instance of an animal class.
         """
-        if animal.__class__.__name__ == "Herbivore":
+        if animal.__class__.__name__ == "Herbivores":
             self.herbivore_list.append(animal)
-        elif animal.__class__.__name__ == "Carnivore":
+        elif animal.__class__.__name__ == "Carnivores":
             self.carnivore_list.append(animal)
 
 
