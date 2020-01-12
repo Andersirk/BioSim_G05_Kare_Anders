@@ -6,6 +6,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 from biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
 from biosim.animals import Herbivores, Carnivores, Animals
 import numpy as np
+import copy
 
 class Island:
     def __init__(self, island_map):
@@ -62,37 +63,43 @@ class Island:
             if self.raster_model[dictionary["loc"]].is_accessible:
                 for population in dictionary["pop"]:
                     if population["species"] == "Herbivore":
-                        self.raster_model[dictionary["loc"]].add_animal(Herbivores(dictionary["loc"], age=population["age"], weight=population["weight"]))
+                        self.raster_model[dictionary["loc"]].add_animal(Herbivores(age=population["age"], weight=population["weight"]))
                     elif population["species"] == "Carnivore":
-                        self.raster_model[dictionary["loc"]].add_animal(Carnivores(dictionary["loc"], age=population["age"], weight=population["weight"]))
+                        self.raster_model[dictionary["loc"]].add_animal(Carnivores(age=population["age"], weight=population["weight"]))
             else:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
 
     def migrate_herbivores(self):
         herbivore_ek = {}
-        last_years_raster_model = self.raster_model
+        last_years_raster_model = copy.copy(self.raster_model)
         for location, cell in last_years_raster_model.items():
             if cell.is_accessible:
                 herbivore_ek[location] = cell.current_fodder() / (
                         (len(cell.herbivore_list) + 1
                          ) * Herbivores.parameters["F"])
         for location, cell in last_years_raster_model.items():
-            for animal in cell.herbivore_list:
-                neighbouring_cells = self.find_neighbouring_cells(location)
-                cell_to_migrate = self.what_cell_to_migrate_to(
-                                            neighbouring_cells, herbivore_ek)
-                self.raster_model[location].remove_animal(animal)
-                self.raster_model[cell_to_migrate].add_animal(animal)
+            if cell.is_accessible:
+                cell_list = copy.copy(cell.herbivore_list)
+                for animal in cell_list:
+                    neighbouring_cells = self.find_neighbouring_cells(location)
+                    cell_to_migrate = self.what_cell_to_migrate_to(
+                                                neighbouring_cells, herbivore_ek)
+                    self.raster_model[location].remove_animal(animal)
+                    self.raster_model[cell_to_migrate].add_animal(animal)
 
 
 
     def what_cell_to_migrate_to(self, neighbouring_cells, herbivore_ek):
         sum_ek_neighbours = 0
         cell_probability = []
+        original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
+        for cell in original_neighbouring_cells:
+            if cell not in herbivore_ek.keys():
+                neighbouring_cells.remove(cell)
         for cell in neighbouring_cells:
-            sum_ek_neighbours += herbivore_ek[cell]
+                sum_ek_neighbours += herbivore_ek[cell]
         for cell in neighbouring_cells:
-            cell_probability.append(herbivore_ek[cell]/sum_ek_neighbours)
+                cell_probability.append(herbivore_ek[cell]/sum_ek_neighbours)
         cumumlative_probability = np.cumsum(cell_probability)
         rand_num = np.random.random()
         n = 0
