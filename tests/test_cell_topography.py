@@ -5,6 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import src.biosim.cell_topography as topo
 import pytest
+import biosim.animals as animals
 
 @pytest.fixture
 def basic_topography():
@@ -65,12 +66,11 @@ def test_Topo_remove_animal():
     assert instance.animals == [1, 2, 3]
 
 
-def test_Topo_add_animal():
+def test_Topo_add_herbviore():
     """Tests that an imigranting animal can be added to the new cells animal list"""
     instance = topo.Topography()
-    instance.animals = [1, 2, 3, 4]
-    instance.add_animal(5)
-    assert instance.animals == [1, 2, 3, 4, 5]
+    instance.add_animal(animals.Herbivores())
+    assert len(instance.herbivore_list) == 1
 
 
 def test_desert_fodder():
