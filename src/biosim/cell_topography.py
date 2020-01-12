@@ -93,18 +93,30 @@ class Topography:
             herbivore.weight -= herbivore.parameters["xi"]*new_kid.weight
             self.add_animal(new_kid)
 
-
-
-
-
-
-
-
-
-
-
     def breeding_carnivore(self):
-        for
+        breedable_carnivores = len(self.carnivore_list)
+        for carnivore in self.carnivore_list:
+            breeding_prop = min(1, carnivore.parameters["gamma"] * carnivore.fitness * (breedable_carnivores - 1))
+            if carnivore.weight < carnivore.parameters["zeta"]*(carnivore.parameters["w_birth"]+(carnivore.parameters["sigma_birth"])):
+                continue
+            if random.random() > breeding_prop:
+                continue
+            new_kid = animals.Carnivore()
+            if carnivore.parameters["xi"]*new_kid.weight > carnivore.weight:
+                continue
+            carnivore.weight -= carnivore.parameters["xi"]*new_kid.weight
+            self.add_animal(new_kid)
+
+    def death_herbivore(self):
+        for herbivore in self.herbivore_list:
+            if herbivore.fitness == 0:
+                self.remove_animal(herbivore)
+            elif random.random() > herbivore.weight*(1 - herbivore.fitness):
+                self.remove_animal(herbivore)
+            else:
+                continue
+
+
 class Jungle(Topography):
 
     parameters = {"f_max": 800}
