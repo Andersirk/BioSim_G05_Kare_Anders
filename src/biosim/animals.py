@@ -12,10 +12,9 @@ class Animals:
     instances = []
     """This is the overall class for the animals which lives on the island"""
 
-    def __init__(self, current_coordinates, age=0, weight=None):
+    def __init__(self, age=0, weight=None):
         self.age = age
         self.weight = self.birth_weight() if weight is None else weight
-        self.current_coordinates = current_coordinates
         Animals.instances.append(self)
 
     def birth_weight(self):
@@ -88,8 +87,8 @@ class Herbivores(Animals):
                   "DeltaPhiMax": None
                   }
 
-    def __init__(self, current_coordinates, age, weight):
-        super().__init__(current_coordinates, age, weight)
+    def __init__(self, age = 0, weight = None):
+        super().__init__(age = 0, weight = None)
 
     def eat(self):
         """This function makes the herbivores try to eat """
@@ -124,8 +123,8 @@ class Carnivores(Animals):
                   "F": 50,
                   "DeltaPhiMax": 10}
 
-    def __init__(self, current_coordinates, age, weight):
-        super().__init__(current_coordinates, age, weight)
+    def __init__(self, age = 0, weight = None):
+        super().__init__(age = 0, weight = None)
 
     def eat(self):
         """This function makes the carnivores try to eat """
@@ -135,3 +134,5 @@ class Carnivores(Animals):
         """This function decides if, and to which cell, an animal shall move"""
 
 
+if __name__ == "__main__":
+    print(Herbivores().__class__.__name__)
