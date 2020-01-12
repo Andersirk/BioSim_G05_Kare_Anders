@@ -16,7 +16,6 @@ class AnimalsTest(unittest.TestCase):
         self.assertAlmostEqual(ani.Herbivores.birth_weight(ani.Herbivores()), 10)
 
 
-
 @pytest.fixture
 def herbivore_zero_weight():
     instance = ani.Herbivores()
