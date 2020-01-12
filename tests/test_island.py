@@ -77,6 +77,31 @@ def surrounding_ocean_cell(standard_map):
 def test_one_option_migration(surrounding_ocean_cell):
     surrounding_ocean_cell.migrate_herbivores()
     assert len(surrounding_ocean_cell.raster_model[(1,18)].herbivore_list) == 2
+    assert len(surrounding_ocean_cell.raster_model[(1,19)].herbivore_list) == 0
+
+@pytest.fixture
+def surrounding_ocean_cell():
+    geogr = """\
+                OOO
+                OSO
+                OOO"""
+    island = Island(geogr)
+    occupants = [{'loc': (1, 1),
+           'pop': [{'species': 'Herbivore',
+               'age': 10, 'weight': 12.5},
+              {'species': 'Herbivore',
+               'age': 9, 'weight': 10.3}]}]
+    island.populate_island(occupants)
+    return island
+
+def test_surrounded_by_occean(surrounding_ocean_cell):
+    surrounding_ocean_cell.migrate_herbivores()
+    assert len(surrounding_ocean_cell.raster_model[(1,1)].herbivore_list) == 2
+
+def test_find_neighbouring_cells(surrounding_ocean_cell):
+    assert surrounding_ocean_cell.find_neighbouring_cells([1,1]) == [(2,1),(0,1),(1,2),(1,0)]
+    assert surrounding_ocean_cell.find_neighbouring_cells([1,1]) != [(0,1),(2,1),(1,2),(1,0)]
+
 
 @pytest.fixture
 def mock_ek_and_neighbouring_cells():
@@ -89,4 +114,5 @@ def test_what_cell(standard_map, mock_ek_and_neighbouring_cells):
     neighbouring_cells, herbivore_ek = mock_ek_and_neighbouring_cells
     te = standard_map.what_cell_to_migrate_to(neighbouring_cells, herbivore_ek)
     assert te == (11,10)
+
 
