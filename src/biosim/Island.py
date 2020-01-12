@@ -143,6 +143,22 @@ if __name__ == "__main__":
                 OOOSSSSJJJJJJJOOOOOOO
                 OOOOOOOOOOOOOOOOOOOOO"""
     island = Island(geogr)
+    island.populate_island([{'loc': (1, 18),
+           'pop': [{'species': 'Herbivore',
+               'age': 10, 'weight': 12.5},
+              {'species': 'Herbivore',
+               'age': 9, 'weight': 10.3},
+                   {'species': 'Herbivore',
+                    'age': 10, 'weight': 25.5},
+                   {'species': 'Herbivore',
+                    'age': 10, 'weight': 20.5}]}])
+    for x in island.raster_model[(1,18)].herbivore_list:
+        print (x.fitness)
 
+    print("##############")
+    list = sorted(island.raster_model[(1,18)].herbivore_list, key=lambda x: x.fitness)
+
+    for x in list:
+        print(x.fitness)
 
 
