@@ -115,4 +115,40 @@ def test_what_cell(standard_map, mock_ek_and_neighbouring_cells):
     te = standard_map.what_cell_to_migrate_to(neighbouring_cells, herbivore_ek)
     assert te == (11,10)
 
+def test_empty_island():
+    """Empty island can be created"""
+    BioSim(island_map="OO\nOO", ini_pop=[], seed=1)
+
+
+def test_minimal_island():
+    """Island of single jungle cell"""
+    BioSim(island_map="OOO\nOJO\nOOO", ini_pop=[], seed=1)
+
+
+def test_all_types():
+    """All types of landscape can be created"""
+    BioSim(island_map="OOOO\nOJSO\nOMDO\nOOOO", ini_pop=[], seed=1)
+
+
+@pytest.mark.parametrize("bad_boundary", ["J", "S", "M", "D"])
+def test_invalid_boundary(bad_boundary):
+    """Non-ocean boundary must raise error"""
+    with pytest.raises(ValueError):
+        BioSim(
+            island_map="{}OO\nOJO\nOOO".format(bad_boundary),
+            ini_pop=[],
+            seed=1,
+        )
+
+
+def test_invalid_landscape():
+    """Invalid landscape type must raise error"""
+    with pytest.raises(ValueError):
+        BioSim(island_map="OOO\nORO\nOOO", ini_pop=[], seed=1)
+
+
+def test_inconsistent_length():
+    """Inconsistent line length must raise error"""
+    with pytest.raises(ValueError):
+        BioSim(island_map="OOO\nOJJO\nOOO", ini_pop=[], seed=1)
 
