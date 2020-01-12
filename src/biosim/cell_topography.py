@@ -107,6 +107,16 @@ class Topography:
             carnivore.weight -= carnivore.parameters["xi"]*new_kid.weight
             self.add_animal(new_kid)
 
+    def death_herbivore(self):
+        for herbivore in self.herbivore_list:
+            if herbivore.fitness == 0:
+                self.remove_animal(herbivore)
+            elif random.random() > herbivore.weight*(1 - herbivore.fitness):
+                self.remove_animal(herbivore)
+            else:
+                continue
+
+
 class Jungle(Topography):
 
     parameters = {"f_max": 800}
