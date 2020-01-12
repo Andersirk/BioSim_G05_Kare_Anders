@@ -32,12 +32,13 @@ class Animals:
                 self.parameters["phi_age"] * (
                         self.age - self.parameters["a_half"])))** -1 * (
                     1 + exp(
-                -self.self.parameters["phi_weight"] *(
+                -self.parameters["phi_weight"] *(
                         self.weight - self.parameters["w_half"]))) ** -1
 
 
     def breeding(self):
         """This function decides if an animal will breed"""
+
 
 
     def death(self):

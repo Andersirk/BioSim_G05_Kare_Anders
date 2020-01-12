@@ -3,6 +3,8 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
+import random
+import src.animals.py as animals
 
 class Topography:
     """
@@ -61,7 +63,6 @@ class Topography:
             self.carnivore_list.append(animal)
 
 
-
     def current_fodder(self):
         """Returns the amount of fodder in the cell. """
         return self.fodder
@@ -78,8 +79,32 @@ class Topography:
                 "Carnivores": len(self.carnivore_list),
                 "Total": len(self.carnivore_list) + len(self.herbivore_list)}
 
+    def breeding_herbivore(self):
+        breedable_herbivores = len(self.herbivore_list)
+        for herbivore in self.herbivore_list:
+            breeding_prop = min(1, herbivore.parameters["gamma"] * herbivore.fitness * (breedable_herbivores - 1))
+            if herbivore.weight < herbivore.parameters["zeta"]*(herbivore.parameters["w_birth"]+(herbivore.parameters["sigma_birth"])):
+                continue
+            if random.random() > breeding_prop:
+                continue
+            new_kid = animals.Herbivores()
+            if herbivore.parameters["xi"]*new_kid.weight > herbivore.weight:
+                continue
+            herbivore.weight -= herbivore.parameters["xi"]*new_kid.weight
+            self.add_animal(new_kid)
 
 
+
+
+
+
+
+
+
+
+
+    def breeding_carnivore(self):
+        for
 class Jungle(Topography):
 
     parameters = {"f_max": 800}
