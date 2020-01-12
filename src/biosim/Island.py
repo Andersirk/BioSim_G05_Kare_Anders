@@ -81,17 +81,17 @@ class Island:
             if cell.is_accessible:
                 cell_list = copy.copy(cell.herbivore_list)
                 for animal in cell_list:
-                    neighbouring_cells = self.find_neighbouring_cells(location)
                     cell_to_migrate = self.what_cell_to_migrate_to(
-                                                neighbouring_cells, herbivore_ek)
+                                                location, herbivore_ek)
                     self.raster_model[location].remove_animal(animal)
                     self.raster_model[cell_to_migrate].add_animal(animal)
 
 
 
-    def what_cell_to_migrate_to(self, neighbouring_cells, herbivore_ek):
+    def what_cell_to_migrate_to(self, current_cell, herbivore_ek):
         sum_ek_neighbours = 0
         cell_probability = []
+        neighbouring_cells = self.find_neighbouring_cells(current_cell)
         original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
         for cell in original_neighbouring_cells:
             if cell not in herbivore_ek.keys():
@@ -102,6 +102,8 @@ class Island:
                 cell_probability.append(herbivore_ek[cell]/sum_ek_neighbours)
         cumumlative_probability = np.cumsum(cell_probability)
         rand_num = np.random.random()
+        if len(neighbouring_cells) == 0:
+            return current_cell
         n = 0
         while rand_num >= cumumlative_probability[n]:
             n += 1
