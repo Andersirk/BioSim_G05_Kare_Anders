@@ -6,6 +6,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 import unittest
 import src.biosim.animals as ani
 import pytest
+import random
 
 
 class AnimalsTest(unittest.TestCase):
@@ -23,8 +24,21 @@ def herbivore_zero_weight():
     return instance
 
 
-def test_fitnesslevel_is_zero(herbivore_zero_weight):
+def test_fitnesslevel_is_zero_when_weight_is_zero(herbivore_zero_weight):
     assert herbivore_zero_weight.fitness == 0
+
+@pytest.fixture
+def herbivore_great_age_and_weight():
+    instance = ani.Herbivores()
+    instance.weight = 1000
+    instance.age = 1000
+    return instance
+
+def test_fitnesslevel_is_between_zero_and_one(herbivore_great_age_and_weight):
+    assert herbivore_great_age_and_weight.fitness >= 0
+    assert herbivore_great_age_and_weight.fitness <= 1
+
+
 
 
 

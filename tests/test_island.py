@@ -117,7 +117,7 @@ def test_what_cell(standard_map, mock_ek_and_neighbouring_cells):
 
 def test_empty_island():
     """Empty island can be created"""
-    BioSim(island_map="OO\nOO", ini_pop=[], seed=1)
+    Island(island_map="OO\nOO", ini_pop=[], seed=1)
 
 
 def test_minimal_island():
