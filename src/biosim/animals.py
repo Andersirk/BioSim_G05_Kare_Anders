@@ -59,7 +59,7 @@ class Animals:
             instance.age += 1
 
     @classmethod
-    def weight_decrease(cls):
+    def annual_weight_decrease(cls):
         """This function makes the animal lose weight"""
         for instance in cls.instances:
             instance.weight = instance.parameters["eta"] * instance.weight
