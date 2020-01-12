@@ -8,6 +8,7 @@ from biosim.animals import Herbivores, Carnivores, Animals
 import numpy as np
 import copy
 
+
 class Island:
     def __init__(self, island_map):
         self.raster_model = self.create_map(island_map)
@@ -35,6 +36,9 @@ class Island:
             elif landscape_code == "M":
                 raster_model[(x, y)] = Mountain()
             elif landscape_code == "\n":
+                if x != 0 and y != previous_y_max:
+                    raise ValueError("The board needs to be uniform.")
+                previous_y_max = y
                 y = -1
                 x += 1
             if landscape_code not in ["O", "M", "J", "S", "D", "\n"]:
@@ -81,17 +85,18 @@ class Island:
             if cell.is_accessible:
                 cell_list = copy.copy(cell.herbivore_list)
                 for animal in cell_list:
-                    neighbouring_cells = self.find_neighbouring_cells(location)
                     cell_to_migrate = self.what_cell_to_migrate_to(
-                                                neighbouring_cells, herbivore_ek)
+                                                location, herbivore_ek)
                     self.raster_model[location].remove_animal(animal)
                     self.raster_model[cell_to_migrate].add_animal(animal)
 
 
 
-    def what_cell_to_migrate_to(self, neighbouring_cells, herbivore_ek):
+
+    def what_cell_to_migrate_to(self, current_cell, herbivore_ek):
         sum_ek_neighbours = 0
         cell_probability = []
+        neighbouring_cells = self.find_neighbouring_cells(current_cell)
         original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
         for cell in original_neighbouring_cells:
             if cell not in herbivore_ek.keys():
@@ -102,6 +107,8 @@ class Island:
                 cell_probability.append(herbivore_ek[cell]/sum_ek_neighbours)
         cumumlative_probability = np.cumsum(cell_probability)
         rand_num = np.random.random()
+        if len(neighbouring_cells) == 0:
+            return current_cell
         n = 0
         while rand_num >= cumumlative_probability[n]:
             n += 1
@@ -136,27 +143,6 @@ if __name__ == "__main__":
                 OOOSSSSJJJJJJJOOOOOOO
                 OOOOOOOOOOOOOOOOOOOOO"""
     island = Island(geogr)
-    terk = [{'loc': (1, 12),
-      'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
-              {'species': 'Herbivore',
-               'age': 9, 'weight': 10.3},
-              {'species': 'Carnivore',
-               'age': 5, 'weight': 8.1}]},
-     {'loc': (4, 4),
-      'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
-              {'species': 'Carnivore',
-               'age': 3, 'weight': 7.3},
-              {'species': 'Carnivore',
-               'age': 5, 'weight': 8.1}]}]
-
-    island.populate_island(terk)
-    print(island.raster_model[(3,4)].animals)
-    print(island.raster_model[(3,4)].animals[0].__dict__)
-    print(island.raster_model[(3,4)].animals[1].__dict__)
-    print(island.raster_model[(3,4)].animals[2].__dict__)
-    print(Animals.instances[0].__dict__)
 
 
 
