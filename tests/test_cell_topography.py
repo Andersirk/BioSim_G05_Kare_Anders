@@ -91,13 +91,23 @@ def test_Ocean_fodder():
     assert instance.fodder == 0
 
 
+@
+
 def test_animal_with_fitnessleves_0_dies():
     animal = animals.Herbivores()
     instance = topo.Jungle()
     instance.add_animal(animal)
-    instance.herbivore_list[0].weight = 0.5
-    instance.herbivore_list[0].age = 200
+    instance.herbivore_list[0].weight = 1
+    instance.herbivore_list[0].age = 100
     instance.natural_death()
     assert len(instance.herbivore_list) == 0
+
+def test_breeding_animals():
+    animal = animals.Herbivores()
+    instance = topo.Jungle()
+    instance.add_animal(animal)
+
+
+
 
 
