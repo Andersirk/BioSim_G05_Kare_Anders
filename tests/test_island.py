@@ -88,7 +88,7 @@ def surrounding_ocean_cell():
     return island
 
 def test_one_option_migration(surrounding_ocean_cell):
-    surrounding_ocean_cell.migrate_herbivores()
+    surrounding_ocean_cell.migrate_all_herbivores()
     assert len(surrounding_ocean_cell.raster_model[(1,18)].herbivore_list) == 2
     assert len(surrounding_ocean_cell.raster_model[(1, 19)].herbivore_list) == 0
 
@@ -108,7 +108,7 @@ def surrounding_ocean_cell_small():
     return island
 
 def test_surrounded_by_occean(surrounding_ocean_cell_small):
-    surrounding_ocean_cell_small.migrate_herbivores()
+    surrounding_ocean_cell_small.migrate_all_herbivores()
     assert len(surrounding_ocean_cell_small.raster_model[(1,1)].herbivore_list) == 2
 
 def test_find_neighbouring_cells(surrounding_ocean_cell_small):
