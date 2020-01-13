@@ -4,7 +4,7 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import random
-import src.animals.py as animals
+import src.biosim.animals as animals
 import copy
 import itertools
 
