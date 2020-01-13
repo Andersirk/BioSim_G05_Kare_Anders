@@ -122,17 +122,39 @@ class Topography:
                 continue
 
     def feeding_herbivores(self):
-        sorted_by_fitness = sorted(self.herbivore_list,
+        herbivore_fitness_sort = sorted(self.herbivore_list,
                                    key=lambda herbi: herbi.fitness)
-        for herbivore in sorted_by_fitness:
+        for herbivore in herbivore_fitness_sort:
             allowed_amount = self.decrease_fodder(herbivore.parameters["F"])
             herbivore.eat_fodder_increase_weight(allowed_amount)
             if self.fodder <= 0:
                 break
 
     def feeding_carnivores(self):
-        sorted_by_fitness = sorted(self.carnivore_list,
+        herbivore_fitness_sort = sorted(self.herbivore_list,
+                                   key=lambda herbi: herbi.fitness, reverse=True)
+        carnivore_fitness_sort = sorted(self.carnivore_list,
                                    key=lambda carni: carni.fitness)
+        for carnivore in carnivore_fitness_sort:
+            carnivore_eaten_this_year = 0
+            for herbivore in herbivore_fitness_sort:
+                if carnivore.fitness < herbivore.fitness or carnivore_eaten_this_year > carnivore.parameters["DeltaPhiMax"]:
+                    break
+                elif (carnivore.fitness - herbivore.fitness)\
+                        < carnivore.parameters["DeltaPhiMax"]:
+                    killing_prop = (carnivore.fitness - herbivore.fitness) / carnivore.parameters["DeltaPhiMax"]
+                    if random.random() < killing_prop:
+                        carnivore_eaten_this_year += herbivore.weight
+                        carnivore.eat_increase_weight(herbivore.weight)
+                        self.herbivore_list.remove(herbivore)
+                else:
+                    carnivore_eaten_this_year += herbivore.weight
+                    carnivore.eat_increase_weight(herbivore.weight)
+                    self.herbivore_list.remove(herbivore)
+
+
+
+
 
 class Jungle(Topography):
 
