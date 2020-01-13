@@ -56,6 +56,10 @@ class Animals:
         for instance in cls.instances:
             instance.weight = instance.parameters["eta"] * instance.weight
 
+    def eat_increase_weight(self, food):
+        """This function makes the animal eat x amount of fodder"""
+        self.weight += self.parameters["beta"] * food
+
 
 class Herbivores(Animals):
     """
@@ -83,9 +87,7 @@ class Herbivores(Animals):
     def __init__(self, age = 0, weight = None):
         super().__init__(age = 0, weight = None)
 
-    def eat_fodder_increase_weight(self, fodder):
-        """This function makes the animal eat x amount of fodder"""
-        self.weight += self.parameters["beta"] * fodder
+
 
 
 
