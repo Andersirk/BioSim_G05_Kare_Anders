@@ -12,7 +12,7 @@ class Animals:
     instances = []
     """This is the overall class for the animals which lives on the island"""
 
-    def __init__(self, age=0, weight=None):
+    def __init__(self, age, weight):
         self.age = age
         self.weight = self.birth_weight() if weight is None else weight
         Animals.instances.append(self)
@@ -54,7 +54,7 @@ class Animals:
     def annual_weight_decrease(cls):
         """This function makes the animal lose weight"""
         for instance in cls.instances:
-            instance.weight = instance.parameters["eta"] * instance.weight
+            instance.weight -= instance.parameters["eta"] * instance.weight
 
     def eat_increase_weight(self, food):
         """This function makes the animal eat x amount of fodder"""
@@ -85,7 +85,7 @@ class Herbivores(Animals):
                   }
 
     def __init__(self, age = 0, weight = None):
-        super().__init__(age = 0, weight = None)
+        super().__init__(age, weight)
 
 
 
@@ -118,8 +118,8 @@ class Carnivores(Animals):
                   "F": 50,
                   "DeltaPhiMax": 10}
 
-    def __init__(self, age = 0, weight = None):
-        super().__init__(age = 0, weight = None)
+    def __init__(self, age=0, weight=None):
+        super().__init__(age, weight)
 
     def eat(self):
         """This function makes the carnivores try to eat """
@@ -130,4 +130,7 @@ class Carnivores(Animals):
 
 
 if __name__ == "__main__":
-    print(Herbivores().__class__.__name__)
+    animal = Herbivores()
+    animal.weight = 88
+    animal.age = 26
+    print(animal.fitness)
