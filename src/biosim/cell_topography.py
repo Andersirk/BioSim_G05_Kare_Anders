@@ -5,6 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import random
 import src.animals.py as animals
+import itertools
 
 class Topography:
     """
@@ -107,12 +108,15 @@ class Topography:
             carnivore.weight -= carnivore.parameters["xi"]*new_kid.weight
             self.add_animal(new_kid)
 
-    def death_herbivore(self):
-        for herbivore in self.herbivore_list:
-            if herbivore.fitness == 0:
-                self.remove_animal(herbivore)
-            elif random.random() > herbivore.weight*(1 - herbivore.fitness):
-                self.remove_animal(herbivore)
+    def natural_death(self):
+        animal_list = [animal for animal in itertools.chain(self.herbivore_list, self.carnivore_list)]
+        for animal in animal_list:
+            if animal.fitness == 0:
+                self.remove_animal(animal)
+                animals.Animals.instances.remove(animal)
+            elif random.random() > animal.weight*(1 - animal.fitness):
+                self.remove_animal(animal)
+                animals.Animals.instances.remove(animal)
             else:
                 continue
 
