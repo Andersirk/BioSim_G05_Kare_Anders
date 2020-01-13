@@ -36,14 +36,6 @@ class Animals:
                         self.weight - self.parameters["w_half"]))) ** -1
 
 
-    def breeding(self):
-        """This function decides if an animal will breed"""
-
-
-
-    def death(self):
-        """This function decides if an animal will die"""
-
     def will_migrate(self):
         """This function decides if, and to which cell, an animal shall move"""
         probability_to_move = self.parameters["mu"] * self.fitness
@@ -91,9 +83,9 @@ class Herbivores(Animals):
     def __init__(self, age = 0, weight = None):
         super().__init__(age = 0, weight = None)
 
-    def eat(self):
-        """This function makes the herbivores try to eat """
-        pass
+    def eat_fodder_increase_weight(self, fodder):
+        """This function makes the animal eat x amount of fodder"""
+        self.weight += self.parameters["beta"] * fodder
 
 
 

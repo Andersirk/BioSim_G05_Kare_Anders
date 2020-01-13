@@ -5,6 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import random
 import src.animals.py as animals
+import copy
 import itertools
 
 class Topography:
@@ -120,6 +121,18 @@ class Topography:
             else:
                 continue
 
+    def feeding_herbivores(self):
+        sorted_by_fitness = sorted(self.herbivore_list,
+                                   key=lambda herbi: herbi.fitness)
+        for herbivore in sorted_by_fitness:
+            allowed_amount = self.decrease_fodder(herbivore.parameters["F"])
+            herbivore.eat_fodder_increase_weight(allowed_amount)
+            if self.fodder <= 0:
+                break
+
+    def feeding_carnivores(self):
+        sorted_by_fitness = sorted(self.carnivore_list,
+                                   key=lambda carni: carni.fitness)
 
 class Jungle(Topography):
 

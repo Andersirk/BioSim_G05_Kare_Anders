@@ -73,7 +73,7 @@ class Island:
             else:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
 
-    def migrate_herbivores(self):
+    def migrate_all_herbivores(self):
         herbivore_ek = {}
         last_years_raster_model = copy.copy(self.raster_model)
         for location, cell in last_years_raster_model.items():
