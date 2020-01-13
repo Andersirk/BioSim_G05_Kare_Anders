@@ -91,28 +91,43 @@ class Island:
                     self.raster_model[cell_to_migrate].add_animal(animal)
 
 
-
-
-    def what_cell_to_migrate_to(self, current_cell, herbivore_ek):
+    def what_cell_to_migrate_to(self, current_cell, ek_dict):
         sum_ek_neighbours = 0
         cell_probability = []
         neighbouring_cells = self.find_neighbouring_cells(current_cell)
         original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
         for cell in original_neighbouring_cells:
-            if cell not in herbivore_ek.keys():
+            if cell not in ek_dict.keys():
                 neighbouring_cells.remove(cell)
         for cell in neighbouring_cells:
-                sum_ek_neighbours += herbivore_ek[cell]
+            sum_ek_neighbours += ek_dict[cell]
         for cell in neighbouring_cells:
-                cell_probability.append(herbivore_ek[cell]/sum_ek_neighbours)
-        cumumlative_probability = np.cumsum(cell_probability)
+            cell_probability.append(ek_dict[cell]/sum_ek_neighbours)
+        cumulative_probability = np.cumsum(cell_probability)
         rand_num = np.random.random()
         if len(neighbouring_cells) == 0:
             return current_cell
         n = 0
-        while rand_num >= cumumlative_probability[n]:
+        while rand_num >= cumulative_probability[n]:
             n += 1
         return neighbouring_cells[n]
+
+    def migrate_all_carnivores(self):
+        carnivore_ek = {}
+        last_years_raster_model = copy.copy(self.raster_model)
+        for location, cell in last_years_raster_model.items():
+            if cell.is_accessible:
+                carnivore_ek[location] = cell.weight_of_all_herbivores() / (
+                        (len(cell.carnivore_list) + 1
+                         ) * Carnivores.parameters["F"])
+        for location, cell in last_years_raster_model.items():
+            if cell.is_accessible:
+                cell_list = copy.copy(cell.carnivore_list)
+                for animal in cell_list:
+                    cell_to_migrate = self.what_cell_to_migrate_to(
+                                                location, carnivore_ek)
+                    self.raster_model[location].remove_animal(animal)
+                    self.raster_model[cell_to_migrate].add_animal(animal)
 
 
     def find_neighbouring_cells(self, coordinates):
@@ -121,6 +136,37 @@ class Island:
                               (coordinates[0], coordinates[1]+1),
                               (coordinates[0], coordinates[1]-1)]
         return neighbouring_cells
+
+    def feed_all_animals(self):
+        for cell in self.raster_model.items():
+            if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
+                cell.feeding_herbivores()
+        for cell in self.raster_model.items():
+            if cell.is_accessible:
+                cell.feeding_carnivores()
+
+
+    def increase_fodder_all_cells(self):
+        for cell in self.raster_model.items():
+            if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
+                cell.increase_fodder()
+
+    def annual_death_all_cells(self):
+        for cell in self.raster_model.items():
+            if cell.is_accessible:
+                cell.natural_death()
+
+
+    def annual_cycle(self):
+        self.increase_fodder_all_cells()
+        self.feed_all_animals()
+        self.annual_death_all_cells()
+        self.migrate_all_herbivores()
+        self.migrate_all_carnivores()
+        Animals.age_up()
+        Animals.annual_weight_decrease()
+
+
 
 
 
