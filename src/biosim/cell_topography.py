@@ -5,6 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import random
 import src.animals.py as animals
+import copy
 
 class Topography:
     """
@@ -108,13 +109,24 @@ class Topography:
             self.add_animal(new_kid)
 
     def death_herbivore(self):
-        for herbivore in self.herbivore_list:
+        herbivore_reference_list = copy.copy(self.herbivore_list)
+        for herbivore in herbivore_reference_list:
             if herbivore.fitness == 0:
                 self.remove_animal(herbivore)
             elif random.random() > herbivore.weight*(1 - herbivore.fitness):
                 self.remove_animal(herbivore)
             else:
                 continue
+
+    def feeding_herbivores(self):
+        sorted_by_fitness = sorted(self.herbivore_list,
+                                   key=lambda herbivore: herbivore.fitness)
+        for herbivore in sorted_by_fitness:
+            allowed_amount = self.decrease_fodder(herbivore.parameters["F"])
+            herbivore.eat_fodder_increase_weight(allowed_amount)
+            if self.fodder <= 0:
+                break
+
 
 
 class Jungle(Topography):
