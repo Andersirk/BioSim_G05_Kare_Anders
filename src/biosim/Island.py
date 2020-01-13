@@ -3,8 +3,8 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
-from biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
-from biosim.animals import Herbivores, Carnivores, Animals
+from src.biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
+from src.biosim.animals import Herbivores, Carnivores, Animals
 import numpy as np
 import copy
 
