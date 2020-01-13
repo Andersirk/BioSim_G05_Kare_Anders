@@ -30,14 +30,13 @@ def test_fitnesslevel_is_zero_when_weight_is_zero(herbivore_zero_weight):
 @pytest.fixture
 def herbivore_great_age_and_weight():
     instance = ani.Herbivores()
-    instance.weight = 1000
-    instance.age = 1000
+    instance.weight = 80
+    instance.age = 20
     return instance
 
 def test_fitnesslevel_is_between_zero_and_one(herbivore_great_age_and_weight):
     assert herbivore_great_age_and_weight.fitness >= 0
     assert herbivore_great_age_and_weight.fitness <= 1
-
 
 
 

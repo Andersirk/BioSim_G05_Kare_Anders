@@ -5,7 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import src.biosim.cell_topography as topo
 import pytest
-import biosim.animals as animals
+import src.biosim.animals as animals
 
 @pytest.fixture
 def basic_topography():
@@ -89,3 +89,15 @@ def test_Ocean_fodder():
     """Tests that the oceans dont have any fooder"""
     instance = topo.Ocean()
     assert instance.fodder == 0
+
+
+def test_animal_with_fitnessleves_0_dies():
+    animal = animals.Herbivores()
+    instance = topo.Jungle()
+    instance.add_animal(animal)
+    instance.herbivore_list[0].weight = 0.5
+    instance.herbivore_list[0].age = 200
+    instance.natural_death()
+    assert len(instance.herbivore_list) == 0
+
+
