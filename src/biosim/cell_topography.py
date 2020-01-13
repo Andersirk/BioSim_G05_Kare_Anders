@@ -4,7 +4,7 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import random
-import src.animals.py as animals
+import src.biosim.animals as animals
 import copy
 import itertools
 
@@ -115,11 +115,18 @@ class Topography:
             if animal.fitness == 0:
                 self.remove_animal(animal)
                 animals.Animals.instances.remove(animal)
-            elif random.random() > animal.weight*(1 - animal.fitness):
+            elif random.random() > animal.parameters["omega"]*(1 - animal.fitness):
                 self.remove_animal(animal)
                 animals.Animals.instances.remove(animal)
             else:
                 continue
+
+    def weight_of_all_herbivores(self):
+        weight_sum = 0
+        for herbivore in self.herbivore_list:
+            weight_sum += herbivore.weight
+        return weight_sum
+
 
     def feeding_herbivores(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
@@ -151,9 +158,6 @@ class Topography:
                     carnivore_eaten_this_year += herbivore.weight
                     carnivore.eat_increase_weight(herbivore.weight)
                     self.herbivore_list.remove(herbivore)
-
-
-
 
 
 class Jungle(Topography):
