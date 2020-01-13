@@ -115,7 +115,7 @@ class Topography:
             if animal.fitness == 0:
                 self.remove_animal(animal)
                 animals.Animals.instances.remove(animal)
-            elif random.random() > animal.parameters["omega"]*(1 - animal.fitness):
+            elif random.random() < animal.parameters["omega"]*(1 - animal.fitness):
                 self.remove_animal(animal)
                 animals.Animals.instances.remove(animal)
             else:
@@ -133,7 +133,7 @@ class Topography:
                                    key=lambda herbi: herbi.fitness)
         for herbivore in herbivore_fitness_sort:
             allowed_amount = self.decrease_fodder(herbivore.parameters["F"])
-            herbivore.eat_fodder_increase_weight(allowed_amount)
+            herbivore.eat_increase_weight(allowed_amount)
             if self.fodder <= 0:
                 break
 
@@ -190,7 +190,7 @@ class Jungle(Topography):
 
     def increase_fodder(self):
         """Increases the fodder for the Jungle cell"""
-        self.fodder = self.f_max
+        self.fodder = self.parameters["f_max"]
 
 
 class Savanna(Topography):

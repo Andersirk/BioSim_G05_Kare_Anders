@@ -101,12 +101,15 @@ class Island:
                 neighbouring_cells.remove(cell)
         for cell in neighbouring_cells:
             sum_ek_neighbours += ek_dict[cell]
+        if sum_ek_neighbours == 0:
+            return current_cell
         for cell in neighbouring_cells:
             cell_probability.append(ek_dict[cell]/sum_ek_neighbours)
-        cumulative_probability = np.cumsum(cell_probability)
-        rand_num = np.random.random()
         if len(neighbouring_cells) == 0:
             return current_cell
+        cumulative_probability = np.cumsum(cell_probability)
+        rand_num = np.random.random()
+
         n = 0
         while rand_num >= cumulative_probability[n]:
             n += 1
@@ -138,33 +141,40 @@ class Island:
         return neighbouring_cells
 
     def feed_all_animals(self):
-        for cell in self.raster_model.items():
+        for cell in self.raster_model.values():
             if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
                 cell.feeding_herbivores()
-        for cell in self.raster_model.items():
+        for cell in self.raster_model.values():
             if cell.is_accessible:
                 cell.feeding_carnivores()
 
-
     def increase_fodder_all_cells(self):
-        for cell in self.raster_model.items():
+        for cell in self.raster_model.values():
             if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
                 cell.increase_fodder()
 
     def annual_death_all_cells(self):
-        for cell in self.raster_model.items():
+        for cell in self.raster_model.values():
             if cell.is_accessible:
                 cell.natural_death()
+
+    def breed_in_all_cells(self):
+        for cell in self.raster_model.values():
+            if cell.is_accessible:
+                cell.breeding_herbivore()
+                cell.breeding_carnivore()
 
 
     def annual_cycle(self):
         self.increase_fodder_all_cells()
         self.feed_all_animals()
-        self.annual_death_all_cells()
+        self.breed_in_all_cells()
         self.migrate_all_herbivores()
         self.migrate_all_carnivores()
         Animals.age_up()
         Animals.annual_weight_decrease()
+        self.annual_death_all_cells()
+
 
 
 
@@ -191,20 +201,26 @@ if __name__ == "__main__":
     island = Island(geogr)
     island.populate_island([{'loc': (1, 18),
            'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
+               'age': 0, 'weight': 80},
               {'species': 'Herbivore',
-               'age': 9, 'weight': 10.3},
+               'age': 0, 'weight': 80.3},
                    {'species': 'Herbivore',
-                    'age': 10, 'weight': 25.5},
+                    'age': 0, 'weight': 80.5},
                    {'species': 'Herbivore',
-                    'age': 10, 'weight': 20.5}]}])
-    for x in island.raster_model[(1,18)].herbivore_list:
-        print (x.fitness)
+                    'age': 0, 'weight': 10.5}]}])
 
-    print("##############")
-    list = sorted(island.raster_model[(1,18)].herbivore_list, key=lambda x: x.fitness)
+    island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': 80} for _ in range(100)]}])
 
-    for x in list:
-        print(x.fitness)
+    for x in range(2000):
+        island.annual_cycle()
+        print("year", x)
+        print("total ani", len(Animals.instances))
+        print(len(island.raster_model[(1,18)].herbivore_list))
+        print(island.raster_model[(1,18)].weight_of_all_herbivores())
+        print("############")
+
+
+
+
 
 
