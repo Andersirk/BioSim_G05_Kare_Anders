@@ -65,10 +65,10 @@ class Animals:
         self.weight += self.parameters["beta"] * food
 
     def breed(self, cell, cell_population):
-        breeding_prop = min(1, self.parameters["gamma"] * self.fitness * (cell_population - 1))
+        breeding_probability = min(1, self.parameters["gamma"] * self.fitness * (cell_population - 1))
         if self.weight < self.parameters["zeta"]*(self.parameters["w_birth"]+(self.parameters["sigma_birth"])):
             return
-        if random.random() > breeding_prop:
+        if random.random() > breeding_probability:
             return
         newborn = self.__class__()
         if self.parameters["xi"]*newborn.weight > self.weight:
@@ -77,8 +77,7 @@ class Animals:
         cell.add_animal(newborn)
 
     def will_die_natural_death(self):
-        if self.fitness == 0 or random.random() < self.parameters["omega"] * (
-                                                            1 - self.fitness):
+        if self.fitness == 0 or random.random() < self.parameters["omega"] * (1 - self.fitness):
             return True
         else:
             return False
@@ -150,6 +149,20 @@ class Herbivores(Animals):
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self.eat_increase_weight(allowed_amount)
 
+    @classmethod
+    def set_parameters(cls, new_parameters):
+        for parameter, value in new_parameters.items():
+            if parameter in cls.parameters.keys():
+                if value < 0:
+                    raise ValueError(f"{parameter} value must be positive")
+                if parameter == "DeltaPhiMax" and value <= 0:
+                    raise ValueError(f"{parameter} value must be strictly positive")
+                if parameter == "eta" and value > 1:
+                    raise ValueError(f"{parameter} value must be 0, 1 or in between")
+                cls.parameters[parameter] = value
+            else:
+                raise ValueError(f"{parameter} is not an accepted parameter")
+
 
 
 
@@ -181,8 +194,8 @@ class Carnivores(Animals):
 
     def kills_herbivore(self, herbivore):
         """This function makes the carnivores try to eat """
-        if self.fitness < herbivore.fitness or self.eaten_this_year > \
-                self.parameters["DeltaPhiMax"]:
+        if self.fitness < herbivore.fitness or self.eaten_this_year >= \
+                self.parameters["F"]:
             return False
         elif (self.fitness - herbivore.fitness) < self.parameters["DeltaPhiMax"]:
             killing_prop = (self.fitness - herbivore.fitness) / self.parameters["DeltaPhiMax"]
@@ -200,10 +213,22 @@ class Carnivores(Animals):
     def reset_amount_eaten_this_year(self):
         self.eaten_this_year = 0
 
+    @classmethod
+    def set_parameters(cls, new_parameters):
+        for parameter, value in new_parameters.items():
+            if parameter in cls.parameters.keys():
+                if value < 0:
+                    raise ValueError(f"{parameter} value must be positive")
+                if parameter == "DeltaPhiMax" and value <= 0:
+                    raise ValueError(f"{parameter} value must be strictly positive")
+                if parameter == "eta" and value > 1:
+                    raise ValueError(f"{parameter} value must be 0, 1 or in between")
+                cls.parameters[parameter] = value
+            else:
+                raise ValueError(f"{parameter} is not an accepted parameter")
 
 if __name__ == "__main__":
     animal = Herbivores()
-    animal.weight = 80
-    animal.age = 50
-    cell = topo.Jungle()
-    animal.breed(cell,100)
+    animal.weight = 12.5
+    animal.age = 0
+    print(animal.fitness)
