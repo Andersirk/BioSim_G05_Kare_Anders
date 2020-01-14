@@ -5,6 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import unittest
 import src.biosim.animals as ani
+import src.biosim.cell_topography as topo
 import pytest
 import src.biosim.cell_topography as topo
 
@@ -92,6 +93,38 @@ def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
 
 
 
+def test_breed_certain_probability():
+    cell = topo.Jungle()
+    herbivore = ani.Herbivores()
+    herbivore.weight, herbivore.age = 80, 30
+    cell.add_animal(herbivore)
+    herbivore.breed(cell, 100)
+    assert len(cell.herbivore_list) == 2
+    assert isinstance(cell.herbivore_list[0], ani.Herbivores)
+    assert isinstance(cell.herbivore_list[1], ani.Herbivores)
+
+def test_breed_uncertain_probability():
+    #about 0.4 probabilty for birth
+    born=0
+    for _ in range(1000):
+        cell = topo.Jungle()
+        herbivore = ani.Herbivores()
+        herbivore.weight, herbivore.age = 400, 10
+        cell.add_animal(herbivore)
+        herbivore.breed(cell, 3)
+        if len(cell.herbivore_list) == 2:
+            born += 1
+    assert born > 350
+    assert born < 450
+
+def test_breed_certain_probability_all_in_cell():
+    cell = topo.Jungle()
+    herbivore = ani.Herbivores()
+    herbivore.weight, herbivore.age = 80, 30
+    for _ in range(100):
+        cell.add_animal(ani.Herbivores(age=10, weight=100))
+    cell.breed_all_animals_in_cell()
+    assert len(cell.herbivore_list) == 200
 
 
 

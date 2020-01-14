@@ -81,22 +81,42 @@ class Topography:
                 "Total": len(self.carnivore_list) + len(self.herbivore_list)}
 
     def breed_all_animals_in_cell(self):
+        self.breed_all_herbivores_in_cell()
+        self.breed_all_carnivores_in_cell()
+
+
+    def breed_all_herbivores_in_cell(self):
         number_of_herbivores = len(self.herbivore_list)
-        number_of_carnivores = len(self.carnivore_list)
-        animals_reference_list = copy.copy(zip(self.herbivore_list, self.carnivore_list))
-        for herbivore, carnivore in animals_reference_list:
+        herbivore_reference_list = copy.copy(self.herbivore_list)
+        for herbivore in herbivore_reference_list:
             herbivore.breed(self, number_of_herbivores)
+
+    def breed_all_carnivores_in_cell(self):
+        number_of_carnivores = len(self.carnivore_list)
+        carnivore_reference_list = copy.copy(self.carnivore_list)
+        for carnivore in carnivore_reference_list:
             carnivore.breed(self, number_of_carnivores)
 
     def natural_death_all_animals_in_cell(self):
-        animals_reference_list = copy.copy(zip(self.herbivore_list, self.carnivore_list))
-        for herbivore, carnivore in animals_reference_list:
-            if herbivore.will_die_natural_death(self):
-                self.remove_animal(herbivore)
-                animals.Animals.instances.remove(herbivore)
-            if carnivore.will_die_natural_death(self):
+        self.natural_death_all_herbivores_in_cell()
+        self.natural_death_all_carnivores_in_cell()
+
+    def natural_death_all_carnivores_in_cell(self):
+        carnivores_reference_list = copy.copy(self.carnivore_list)
+        for carnivore in carnivores_reference_list:
+            if carnivore.will_die_natural_death():
                 self.remove_animal(carnivore)
                 animals.Animals.instances.remove(carnivore)
+
+    def natural_death_all_herbivores_in_cell(self):
+        herbivores_reference_list = copy.copy(self.herbivore_list)
+        for herbivore in herbivores_reference_list:
+            if herbivore.will_die_natural_death():
+                self.remove_animal(herbivore)
+                animals.Animals.instances.remove(herbivore)
+
+
+
 
     def biomass_herbivores(self):
         weight_sum = 0
