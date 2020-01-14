@@ -181,8 +181,8 @@ class Carnivores(Animals):
 
     def kills_herbivore(self, herbivore):
         """This function makes the carnivores try to eat """
-        if self.fitness < herbivore.fitness or self.eaten_this_year > \
-                self.parameters["DeltaPhiMax"]:
+        if self.fitness < herbivore.fitness or self.eaten_this_year >= \
+                self.parameters["F"]:
             return False
         elif (self.fitness - herbivore.fitness) < self.parameters["DeltaPhiMax"]:
             killing_prop = (self.fitness - herbivore.fitness) / self.parameters["DeltaPhiMax"]
@@ -202,8 +202,7 @@ class Carnivores(Animals):
 
 
 if __name__ == "__main__":
-    animal = Herbivores()
-    animal.weight = 80
-    animal.age = 50
-    cell = topo.Jungle()
-    animal.breed(cell,100)
+    animal = Carnivores()
+    animal.weight = 15
+    animal.age = 52
+    print(animal.fitness)
