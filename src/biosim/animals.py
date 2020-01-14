@@ -76,13 +76,12 @@ class Animals:
         self.weight -= self.parameters["xi"]*newborn.weight
         cell.add_animal(newborn)
 
-    def check_natural_death(self, cell):
-        if self.fitness == 0:
-            cell.remove_animal(animal)
-            Animals.instances.remove(animal)
-        elif random.random() < self.parameters["omega"] * (1 - self.fitness):
-            cell.remove_animal(animal)
-            Animals.instances.remove(animal)
+    def will_die_natural_death(self):
+        if self.fitness == 0 or random.random() < self.parameters["omega"] * (
+                                                            1 - self.fitness):
+            return True
+        else:
+            return False
 
     def what_cell_to_migrate_to(self, current_cell, ek_dict):
         self.has_tried_migration_this_year = True
@@ -94,7 +93,8 @@ class Animals:
             for cell in original_neighbouring_cells:
                 if cell not in ek_dict.keys():
                     neighbouring_cells.remove(cell)
-                sum_ek_neighbours += ek_dict[cell]
+                else:
+                    sum_ek_neighbours += ek_dict[cell]
             if sum_ek_neighbours == 0 or len(neighbouring_cells) == 0:
                 return current_cell
             for cell in neighbouring_cells:
@@ -105,6 +105,7 @@ class Animals:
             while random_number >= cumulative_probability[n]:
                 n += 1
             return neighbouring_cells[n]
+        return current_cell
 
     def find_neighbouring_cells(self, coordinates):
         neighbouring_cells = [(coordinates[0]+1, coordinates[1]),
@@ -146,7 +147,7 @@ class Herbivores(Animals):
 
 
     def eat(self, cell):
-        allowed_amount = cell.try_eating_amount(self.parameters["F"])
+        allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self.eat_increase_weight(allowed_amount)
 
 
@@ -178,29 +179,26 @@ class Carnivores(Animals):
         super().__init__(age, weight)
         self.eaten_this_year = 0
 
-    def eat(self, cell, herbivore):
+    def kills_herbivore(self, herbivore):
         """This function makes the carnivores try to eat """
         if self.fitness < herbivore.fitness or self.eaten_this_year > \
                 self.parameters["DeltaPhiMax"]:
-            pass
+            return False
         elif (self.fitness - herbivore.fitness) < self.parameters["DeltaPhiMax"]:
             killing_prop = (self.fitness - herbivore.fitness) / self.parameters["DeltaPhiMax"]
             if random.random() < killing_prop:
                 self.eaten_this_year += herbivore.weight
                 self.eat_increase_weight(herbivore.weight)
-                cell.herbivore_list.remove(herbivore)
-                Animals.instances.remove(herbivore)
+                return True
+            else:
+                return False
         else:
             self.eaten_this_year += herbivore.weight
             self.eat_increase_weight(herbivore.weight)
-            cell.herbivore_list.remove(herbivore)
-            Animals.instances.remove(herbivore)
+            return True
 
     def reset_amount_eaten_this_year(self):
         self.eaten_this_year = 0
-
-    def migration(self):
-        """This function decides if, and to which cell, an animal shall move"""
 
 
 if __name__ == "__main__":

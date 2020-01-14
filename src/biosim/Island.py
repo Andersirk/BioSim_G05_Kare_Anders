@@ -77,9 +77,8 @@ class Island:
         carnivore_ek, herbivore_ek = island.generate_ek_for_board()
         for location, cell in self.raster_model.items():
             if cell.is_accessible:
-                cell.migrate_all_in_cell(self, location, carnivore_ek, herbivore_ek)
+                cell.migrate_all_animals_in_cell(self, location, carnivore_ek, herbivore_ek)
         Animals.reset_migration_attempt()
-
 
     def generate_ek_for_board(self):
         carnivore_ek = {}
@@ -90,14 +89,13 @@ class Island:
                 herbivore_ek[location] = cell.ek_for_cell("Herbivores")
         return carnivore_ek, herbivore_ek
 
-
     def feed_all_animals(self):
         for cell in self.raster_model.values():
             if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
-                cell.feeding_herbivores()
+                cell.feed_herbivores_in_cell()
         for cell in self.raster_model.values():
             if cell.is_accessible:
-                cell.feeding_carnivores()
+                cell.feed_carnivores_in_cell()
 
     def increase_fodder_all_cells(self):
         for cell in self.raster_model.values():
@@ -107,21 +105,18 @@ class Island:
     def annual_death_all_cells(self):
         for cell in self.raster_model.values():
             if cell.is_accessible:
-                cell.natural_death()
+                cell.natural_death_all_animals_in_cell()
 
     def breed_in_all_cells(self):
         for cell in self.raster_model.values():
             if cell.is_accessible:
-                cell.breeding_herbivore()
-                cell.breeding_carnivore()
-
+                cell.breed_all_animals_in_cell()
 
     def annual_cycle(self):
         self.increase_fodder_all_cells()
         self.feed_all_animals()
         self.breed_in_all_cells()
-        self.migrate_all_herbivores()
-        self.migrate_all_carnivores()
+        self.migrate_all_cells()
         Animals.age_up()
         Animals.annual_weight_decrease()
         self.annual_death_all_cells()
@@ -167,7 +162,7 @@ if __name__ == "__main__":
         print("year", x)
         print("total ani", len(Animals.instances))
         print(len(island.raster_model[(1,18)].herbivore_list))
-        print(island.raster_model[(1,18)].weight_of_all_herbivores())
+        print(island.raster_model[(1,18)].biomass_herbivores())
         print("############")
 
 

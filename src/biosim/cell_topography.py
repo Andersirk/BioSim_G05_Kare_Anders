@@ -22,7 +22,7 @@ class Topography:
         self.carnivore_list = []
         self.fodder = 0.0
 
-    def try_eating_amount(self, decrease_amount):
+    def allowed_fodder_to_consume(self, decrease_amount):
         """
         Takes a request for how much fodder the animal would like to consume
         and returns the amount it is allowed to consume and decreases the
@@ -88,16 +88,17 @@ class Topography:
             herbivore.breed(self, number_of_herbivores)
             carnivore.breed(self, number_of_carnivores)
 
-
-
     def natural_death_all_animals_in_cell(self):
         animals_reference_list = copy.copy(zip(self.herbivore_list, self.carnivore_list))
         for herbivore, carnivore in animals_reference_list:
-            herbivore.check_natural_death(self)
-            carnivore.check_natural_death(self)
+            if herbivore.will_die_natural_death(self):
+                self.remove_animal(herbivore)
+                animals.Animals.instances.remove(herbivore)
+            if carnivore.will_die_natural_death(self):
+                self.remove_animal(carnivore)
+                animals.Animals.instances.remove(carnivore)
 
-
-    def weight_of_all_herbivores(self):
+    def biomass_herbivores(self):
         weight_sum = 0
         for herbivore in self.herbivore_list:
             weight_sum += herbivore.weight
@@ -118,12 +119,14 @@ class Topography:
                                    key=lambda carni: carni.fitness)
         for carnivore in carnivore_fitness_sort:
             for herbivore in herbivore_fitness_sort:
-                carnivore.eat(self, herbivore)
+                if carnivore.kills_herbivore(herbivore):
+                    self.remove_animal(herbivore)
+                    animals.Animals.instances.remove(herbivore)
             carnivore.reset_amount_eaten_this_year()
 
     def ek_for_cell(self, species):
         if species == "Carnivores":
-            return self.weight_of_all_herbivores() / (
+            return self.biomass_herbivores() / (
                         (len(self.carnivore_list) + 1
                          ) * animals.Carnivores.parameters["F"])
         elif species == "Herbivores":
@@ -131,7 +134,7 @@ class Topography:
                         (len(self.herbivore_list) + 1
                          ) * animals.Herbivores.parameters["F"])
 
-    def migrate_all_in_cell(self, island, current_cell, carnivore_ek, herbivore_ek):
+    def migrate_all_herbivores_in_cell(self, island, current_cell, herbivore_ek):
         for herbivore in self.herbivore_list:
             if not herbivore.has_tried_migration_this_year:
                 new_location = herbivore.what_cell_to_migrate_to(current_cell, herbivore_ek)
@@ -139,6 +142,7 @@ class Topography:
                     self.remove_animal(herbivore)
                     island.raster_model[new_location].add_animal(herbivore)
 
+    def migrate_all_carnivores_in_cell(self, island, current_cell, carnivore_ek):
         for carnivore in self.carnivore_list:
             if not carnivore.has_tried_migration_this_year:
                 new_location = carnivore.what_cell_to_migrate_to(current_cell, carnivore_ek)
@@ -146,6 +150,9 @@ class Topography:
                     self.remove_animal(carnivore)
                     island.raster_model[new_location].add_animal(carnivore)
 
+    def migrate_all_animals_in_cell(self, island, current_cell, carnivore_ek, herbivore_ek):
+        self.migrate_all_herbivores_in_cell(island, current_cell, herbivore_ek)
+        self.migrate_all_carnivores_in_cell(island, current_cell, carnivore_ek)
 
 
 
