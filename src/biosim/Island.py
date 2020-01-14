@@ -73,72 +73,23 @@ class Island:
             else:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
 
-    def migrate_all_herbivores(self):
-        herbivore_ek = {}
-        last_years_raster_model = copy.copy(self.raster_model)
-        for location, cell in last_years_raster_model.items():
+    def migrate_all_cells(self):
+        carnivore_ek, herbivore_ek = island.generate_ek_for_board()
+        for location, cell in self.raster_model.items():
             if cell.is_accessible:
-                herbivore_ek[location] = cell.current_fodder() / (
-                        (len(cell.herbivore_list) + 1
-                         ) * Herbivores.parameters["F"])
-        for location, cell in last_years_raster_model.items():
-            if cell.is_accessible:
-                cell_list = copy.copy(cell.herbivore_list)
-                for animal in cell_list:
-                    cell_to_migrate = self.what_cell_to_migrate_to(
-                                                location, herbivore_ek)
-                    self.raster_model[location].remove_animal(animal)
-                    self.raster_model[cell_to_migrate].add_animal(animal)
+                cell.migrate_all_in_cell(self, location, carnivore_ek, herbivore_ek)
+        Animals.reset_migration_attempt()
 
 
-    def what_cell_to_migrate_to(self, current_cell, ek_dict):
-        sum_ek_neighbours = 0
-        cell_probability = []
-        neighbouring_cells = self.find_neighbouring_cells(current_cell)
-        original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
-        for cell in original_neighbouring_cells:
-            if cell not in ek_dict.keys():
-                neighbouring_cells.remove(cell)
-        for cell in neighbouring_cells:
-            sum_ek_neighbours += ek_dict[cell]
-        if sum_ek_neighbours == 0:
-            return current_cell
-        for cell in neighbouring_cells:
-            cell_probability.append(ek_dict[cell]/sum_ek_neighbours)
-        if len(neighbouring_cells) == 0:
-            return current_cell
-        cumulative_probability = np.cumsum(cell_probability)
-        rand_num = np.random.random()
-
-        n = 0
-        while rand_num >= cumulative_probability[n]:
-            n += 1
-        return neighbouring_cells[n]
-
-    def migrate_all_carnivores(self):
+    def generate_ek_for_board(self):
         carnivore_ek = {}
-        last_years_raster_model = copy.copy(self.raster_model)
-        for location, cell in last_years_raster_model.items():
+        herbivore_ek = {}
+        for location, cell in self.raster_model.items():
             if cell.is_accessible:
-                carnivore_ek[location] = cell.weight_of_all_herbivores() / (
-                        (len(cell.carnivore_list) + 1
-                         ) * Carnivores.parameters["F"])
-        for location, cell in last_years_raster_model.items():
-            if cell.is_accessible:
-                cell_list = copy.copy(cell.carnivore_list)
-                for animal in cell_list:
-                    cell_to_migrate = self.what_cell_to_migrate_to(
-                                                location, carnivore_ek)
-                    self.raster_model[location].remove_animal(animal)
-                    self.raster_model[cell_to_migrate].add_animal(animal)
+                carnivore_ek[location] = cell.ek_for_cell("Carnivores")
+                herbivore_ek[location] = cell.ek_for_cell("Herbivores")
+        return carnivore_ek, herbivore_ek
 
-
-    def find_neighbouring_cells(self, coordinates):
-        neighbouring_cells = [(coordinates[0]+1, coordinates[1]),
-                              (coordinates[0]-1, coordinates[1]),
-                              (coordinates[0], coordinates[1]+1),
-                              (coordinates[0], coordinates[1]-1)]
-        return neighbouring_cells
 
     def feed_all_animals(self):
         for cell in self.raster_model.values():

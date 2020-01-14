@@ -6,6 +6,8 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 from math import exp
 import numpy as np
 import random
+import biosim.cell_topography as topo
+import copy
 
 
 class Animals:
@@ -16,6 +18,7 @@ class Animals:
         self.age = age
         self.weight = self.birth_weight() if weight is None else weight
         Animals.instances.append(self)
+        self.has_tried_migration_this_year = False
 
     def birth_weight(self):
         return np.random.normal(
@@ -50,6 +53,7 @@ class Animals:
         for instance in cls.instances:
             instance.age += 1
 
+
     @classmethod
     def annual_weight_decrease(cls):
         """This function makes the animal lose weight"""
@@ -60,6 +64,59 @@ class Animals:
         """This function makes the animal eat x amount of fodder"""
         self.weight += self.parameters["beta"] * food
 
+    def breed(self, cell, cell_population):
+        breeding_prop = min(1, self.parameters["gamma"] * self.fitness * (cell_population - 1))
+        if self.weight < self.parameters["zeta"]*(self.parameters["w_birth"]+(self.parameters["sigma_birth"])):
+            return
+        if random.random() > breeding_prop:
+            return
+        newborn = self.__class__()
+        if self.parameters["xi"]*newborn.weight > self.weight:
+            return
+        self.weight -= self.parameters["xi"]*newborn.weight
+        cell.add_animal(newborn)
+
+    def check_natural_death(self, cell):
+        if self.fitness == 0:
+            cell.remove_animal(animal)
+            Animals.instances.remove(animal)
+        elif random.random() < self.parameters["omega"] * (1 - self.fitness):
+            cell.remove_animal(animal)
+            Animals.instances.remove(animal)
+
+    def what_cell_to_migrate_to(self, current_cell, ek_dict):
+        self.has_tried_migration_this_year = True
+        if self.will_migrate():
+            sum_ek_neighbours = 0
+            cell_probability = []
+            neighbouring_cells = self.find_neighbouring_cells(current_cell)
+            original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
+            for cell in original_neighbouring_cells:
+                if cell not in ek_dict.keys():
+                    neighbouring_cells.remove(cell)
+                sum_ek_neighbours += ek_dict[cell]
+            if sum_ek_neighbours == 0 or len(neighbouring_cells) == 0:
+                return current_cell
+            for cell in neighbouring_cells:
+                cell_probability.append(ek_dict[cell] / sum_ek_neighbours)
+            cumulative_probability = np.cumsum(cell_probability)
+            random_number = np.random.random()
+            n = 0
+            while random_number >= cumulative_probability[n]:
+                n += 1
+            return neighbouring_cells[n]
+
+    def find_neighbouring_cells(self, coordinates):
+        neighbouring_cells = [(coordinates[0]+1, coordinates[1]),
+                              (coordinates[0]-1, coordinates[1]),
+                              (coordinates[0], coordinates[1]+1),
+                              (coordinates[0], coordinates[1]-1)]
+        return neighbouring_cells
+
+    @classmethod
+    def reset_migration_attempt(cls):
+        for instance in cls.instances:
+            instance.has_tried_migration_this_year = False
 
 class Herbivores(Animals):
     """
@@ -88,10 +145,9 @@ class Herbivores(Animals):
         super().__init__(age, weight)
 
 
-
-
-
-
+    def eat(self, cell):
+        allowed_amount = cell.try_eating_amount(self.parameters["F"])
+        self.eat_increase_weight(allowed_amount)
 
 
 
@@ -120,10 +176,28 @@ class Carnivores(Animals):
 
     def __init__(self, age=0, weight=None):
         super().__init__(age, weight)
+        self.eaten_this_year = 0
 
-    def eat(self):
+    def eat(self, cell, herbivore):
         """This function makes the carnivores try to eat """
-        pass
+        if self.fitness < herbivore.fitness or self.eaten_this_year > \
+                self.parameters["DeltaPhiMax"]:
+            pass
+        elif (self.fitness - herbivore.fitness) < self.parameters["DeltaPhiMax"]:
+            killing_prop = (self.fitness - herbivore.fitness) / self.parameters["DeltaPhiMax"]
+            if random.random() < killing_prop:
+                self.eaten_this_year += herbivore.weight
+                self.eat_increase_weight(herbivore.weight)
+                cell.herbivore_list.remove(herbivore)
+                Animals.instances.remove(herbivore)
+        else:
+            self.eaten_this_year += herbivore.weight
+            self.eat_increase_weight(herbivore.weight)
+            cell.herbivore_list.remove(herbivore)
+            Animals.instances.remove(herbivore)
+
+    def reset_amount_eaten_this_year(self):
+        self.eaten_this_year = 0
 
     def migration(self):
         """This function decides if, and to which cell, an animal shall move"""
@@ -131,6 +205,7 @@ class Carnivores(Animals):
 
 if __name__ == "__main__":
     animal = Herbivores()
-    animal.weight = 88
-    animal.age = 26
-    print(animal.fitness)
+    animal.weight = 80
+    animal.age = 50
+    cell = topo.Jungle()
+    animal.breed(cell,100)
