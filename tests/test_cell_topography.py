@@ -10,20 +10,20 @@ import src.biosim.Island as isle
 
 
 @pytest.fixture
-def basic_topography():
-    return topo.Topography()
+def basic_jungle():
+    return topo.Jungle()
 
 @pytest.mark.parametrize("fodder, requested, dec_amunt, fodder_result",
                          [(400, 200, 200, 200),
                           (100, 200, 100, 0),
                           (0, 200, 0, 0 )])
 
-def test_Topo_decrease_fodder_abundance(basic_topography, fodder, requested, dec_amunt, fodder_result):
+def test_Topo_decrease_fodder_abundance(basic_jungle, fodder, requested, dec_amunt, fodder_result):
     """Tests that the amount of fodder can be decreased"""
-    basic_topography.fodder = fodder
-    decrease_amount = basic_topography.allowed_fodder_to_consume(requested)
+    basic_jungle.fodder = fodder
+    decrease_amount = basic_jungle.allowed_fodder_to_consume(requested)
     assert decrease_amount == dec_amunt
-    assert basic_topography.current_fodder() == fodder_result
+    assert basic_jungle.current_fodder() == fodder_result
 
 
 def test_Topo_current_occupants_int():
@@ -54,12 +54,28 @@ def test_Topo_remove_herbivore():
     cell.remove_animal(testherbi)
     assert testherbi not in cell.herbivore_list
 
+def test_Topo_remove_carnivore():
+    """Tests that an emigranting animal can be removed from its old cells animal list"""
+    cell = topo.Topography()
+    testcarni = animals.Carnivores()
+    testlist = [animals.Carnivores() for _ in range(10)]
+    cell.herbivore_list = testlist
+    cell.add_animal(testcarni)
+    cell.remove_animal(testcarni)
+    assert testcarni not in cell.herbivore_list
+
 
 def test_Topo_add_herbviore():
     """Tests that an imigranting animal can be added to the new cells animal list"""
     instance = topo.Topography()
     instance.add_animal(animals.Herbivores())
     assert len(instance.herbivore_list) == 1
+
+def test_Topo_add_carnivore():
+    """Tests that an imigranting animal can be added to the new cells animal list"""
+    instance = topo.Topography()
+    instance.add_animal(animals.Carnivores())
+    assert len(instance.carnivore_list) == 1
 
 
 def test_desert_fodder():
@@ -116,9 +132,26 @@ def surrounding_ocean_cell():
            'pop': [{'species': 'Herbivore',
                'age': 10, 'weight': 12.5},
               {'species': 'Herbivore',
+               'age': 9, 'weight': 10.3},
+              {'species': 'Carnivore',
+               'age': 9, 'weight': 10.3},
+              {'species': 'Carnivore',
                'age': 9, 'weight': 10.3}]}]
     island.populate_island(occupants)
     return island
+
+def test_migrate_all_herbi_in_cell_new_location(surrounding_ocean_cell):
+    animals.Herbivores.parameters["mu"] = 1000
+    surrounding_ocean_cell.raster_model[(1, 19)].migrate_all_herbivores_in_cell(surrounding_ocean_cell, (1,19), {(1,18):2})
+    assert surrounding_ocean_cell.raster_model[(1, 19)].herbivore_list == []
+
+def test_migrate_all_carni_in_cell_new_location(surrounding_ocean_cell):
+    animals.Carnivores.parameters["mu"] = 1000
+    surrounding_ocean_cell.raster_model[(1, 19)].migrate_all_carnivores_in_cell(surrounding_ocean_cell, (1,19), {(1,18):2})
+    assert surrounding_ocean_cell.raster_model[(1, 19)].herbivore_list == []
+
+
+
 def test_natural_death_in_all_cells(low_fitness_animals):
     low_fitness_animals.natural_death_all_animals_in_cell()
     assert len(low_fitness_animals.herbivore_list) == 0
