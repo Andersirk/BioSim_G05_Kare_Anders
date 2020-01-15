@@ -7,6 +7,7 @@ from src.biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
 from src.biosim.animals import Herbivores, Carnivores, Animals
 import numpy as np
 import copy
+import random
 
 
 class Island:
@@ -74,7 +75,7 @@ class Island:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
 
     def migrate_all_cells(self):
-        carnivore_ek, herbivore_ek = island.generate_ek_for_board()
+        carnivore_ek, herbivore_ek = self.generate_ek_for_board()
         for location, cell in self.raster_model.items():
             if cell.is_accessible:
                 cell.migrate_all_animals_in_cell(self, location, carnivore_ek, herbivore_ek)
@@ -130,6 +131,7 @@ class Island:
 
 
 if __name__ == "__main__":
+    random.seed(1)
     geogr = """\
                 OOOOOOOOOOOOOOOOOOOOO
                 OOOOOOOOSMMMMJJJJJJJO
@@ -157,7 +159,7 @@ if __name__ == "__main__":
 
     island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': 80} for _ in range(100)]}])
 
-    for x in range(2000):
+    for x in range(50):
         island.annual_cycle()
         print("year", x)
         print("total ani", len(Animals.instances))
