@@ -144,8 +144,7 @@ class Herbivores(Animals):
     def __init__(self, age = 0, weight = None):
         super().__init__(age, weight)
 
-
-    def eat(self, cell):
+    def graze(self, cell):
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self.eat_increase_weight(allowed_amount)
 

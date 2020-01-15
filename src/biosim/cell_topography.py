@@ -128,7 +128,7 @@ class Topography:
         herbivore_fitness_sort = sorted(self.herbivore_list,
                                    key=lambda herbi: herbi.fitness)
         for herbivore in herbivore_fitness_sort:
-            herbivore.eat(self)
+            herbivore.graze(self)
             if self.fodder <= 0:
                 break
 
