@@ -87,6 +87,14 @@ def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     strong_vs_weak[1].reset_amount_eaten_this_year()
     assert strong_vs_weak[1].eaten_this_year == 0
     assert strong_vs_weak[1].weight == 15 + (amount*1*0.75)
+    # Test when carnivore.fitness - herbivore.fitness) >
+    # self.parameters["DeltaPhiMax"]
+    strong_vs_weak[1].weight = 10
+    strong_vs_weak[1].parameters["DeltaPhiMax"] = 0.0
+    strong_vs_weak[1].kills_herbivore(strong_vs_weak[0])
+    assert strong_vs_weak[1].weight == 10 + 0.75
+
+
 
 # Set parameters
 
@@ -116,6 +124,9 @@ def test_set_parameters(bad_parameters):
         carnivore.set_parameters(bad_parameters)
     with pytest.raises(ValueError):
         herbivore.set_parameters(bad_parameters)
+    carnivore.set_parameters({"w_birth": 6.0})
+    assert carnivore.parameters["w_birth"] == 6.0
+
 
 # Herbivore grazing
 
