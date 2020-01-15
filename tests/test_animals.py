@@ -68,9 +68,10 @@ def test_natural_death(strong_vs_weak):
 
 def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     """
-    Expected probability for a carnivore to kill a herbivore when
-    herbivore.fitness almost ≃ 0, and carnivore.fitness almost ≃ 0.95 are:
-    (0.95 - 0) / 10 = 0.095.
+    A carnivore can only kill a certain amount of herbivores per year,
+    limited by the parameter "F", which by defualt is 50. This means that the
+    carnivore only can kill 50 1 kg herbivores. It will then have gained
+    50(amount)*1 kg*0.75(beta) kg.
     """
     n = 1000
     kill_rate = [strong_vs_weak[1].kills_herbivore(strong_vs_weak[0]) for _ in range(n)]
@@ -78,6 +79,32 @@ def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     assert amount == 50
     assert strong_vs_weak[1].eaten_this_year == 50
     assert strong_vs_weak[1].weight == 15 + (amount*1*0.75)
+
+
+@pytest.mark.parametrize("bad_parameters", [{"w_birth": -6.0},
+    {"sigma_birth": -1.0},
+    {"beta": -0.75},
+    {"eta": 2},
+    {"a_half": -60.0},
+    {"phi_age": -0.3},
+    {"w_half": -4},
+    {"phi_weight": -0.4},
+    {"mu": -0.4},
+    {"lambda": -1.0},
+    {"gamma": -0.8},
+    {"zeta": -3.5},
+    {"xi": -1.1},
+    {"omega": -0.9},
+    {"F": -50},
+    {"DeltaPhiMax": 0},
+    {"not_a_para": 0.5}])
+def test_set_parameters(bad_parameters):
+    """Test if the non allowed parameters raises a value error. """
+    carnivore = ani.Carnivores()
+    herbivore = ani.Herbivores()
+    with pytest.raises(ValueError):
+        carnivore.set_parameters(bad_parameters)
+        herbivore.set_parameters(bad_parameters)
 
 
 
