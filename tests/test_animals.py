@@ -9,6 +9,7 @@ import pytest
 import src.biosim.cell_topography as topo
 
 
+
 # Birth weight
 
 
@@ -17,7 +18,9 @@ class AnimalsTest(unittest.TestCase):
         # Test that the birth weight is correct
         ani.Herbivores.parameters["w_birth"] = 10
         ani.Herbivores.parameters["sigma_birth"] = 0
-        self.assertAlmostEqual(ani.Herbivores.birth_weight(ani.Herbivores()), 10)
+        self.assertAlmostEqual(ani.Herbivores.birth_weight(ani.Herbivores()),
+                               10)
+
 
 # Fitness
 
@@ -34,6 +37,7 @@ def test_fitness_level_is_between_zero_and_one():
     herbivore.age = 0
     assert herbivore.fitness >= 0
     assert herbivore.fitness <= 1
+
 
 # Natural death
 
@@ -57,9 +61,11 @@ def test_natural_death(strong_vs_weak):
     0.4(1-0) ≃ 0.4. and a very fit carnivore natural death prop =
     0.9(1-0.95) ≃ 0.045
     """
-    die_rate_herbivore = [strong_vs_weak[0].will_die_natural_death() for _ in range(1000)]
+    die_rate_herbivore = [strong_vs_weak[0].will_die_natural_death() for _ in
+                          range(1000)]
     herbivore_amount = die_rate_herbivore.count(True)
-    die_rate_carnivore = [strong_vs_weak[1].will_die_natural_death() for _ in range(1000)]
+    die_rate_carnivore = [strong_vs_weak[1].will_die_natural_death() for _ in
+                          range(1000)]
     carnivore_amount = die_rate_carnivore.count(True)
     assert 350 < herbivore_amount < 450
     assert 30 < carnivore_amount < 60
@@ -77,37 +83,39 @@ def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     """
     assert strong_vs_weak[1].eaten_this_year == 0
     n = 1000
-    kill_rate = [strong_vs_weak[1].kills_herbivore(strong_vs_weak[0]) for _ in range(n)]
+    kill_rate = [strong_vs_weak[1].kills_herbivore(strong_vs_weak[0]) for _ in
+                 range(n)]
     amount = kill_rate.count(True)
     assert amount == 50
     assert strong_vs_weak[1].eaten_this_year == 50
-    assert strong_vs_weak[1].weight == 15 + (amount*1*0.75)
+    assert strong_vs_weak[1].weight == 15 + (amount * 1 * 0.75)
     # Resets the amount_eaten_this_year to 0, and check if the carnivore's
     # eaten_this_year == 0 and that the weight not are effected by this.
     strong_vs_weak[1].reset_amount_eaten_this_year()
     assert strong_vs_weak[1].eaten_this_year == 0
-    assert strong_vs_weak[1].weight == 15 + (amount*1*0.75)
+    assert strong_vs_weak[1].weight == 15 + (amount * 1 * 0.75)
+
 
 # Set parameters
 
 
 @pytest.mark.parametrize("bad_parameters", [{"w_birth": -6.0},
-    {"sigma_birth": -1.0},
-    {"beta": -0.75},
-    {"eta": 2},
-    {"a_half": -60.0},
-    {"phi_age": -0.3},
-    {"w_half": -4},
-    {"phi_weight": -0.4},
-    {"mu": -0.4},
-    {"lambda": -1.0},
-    {"gamma": -0.8},
-    {"zeta": -3.5},
-    {"xi": -1.1},
-    {"omega": -0.9},
-    {"F": -50},
-    {"DeltaPhiMax": 0},
-    {"not_a_para": 0.5}])
+                                            {"sigma_birth": -1.0},
+                                            {"beta": -0.75},
+                                            {"eta": 2},
+                                            {"a_half": -60.0},
+                                            {"phi_age": -0.3},
+                                            {"w_half": -4},
+                                            {"phi_weight": -0.4},
+                                            {"mu": -0.4},
+                                            {"lambda": -1.0},
+                                            {"gamma": -0.8},
+                                            {"zeta": -3.5},
+                                            {"xi": -1.1},
+                                            {"omega": -0.9},
+                                            {"F": -50},
+                                            {"DeltaPhiMax": 0},
+                                            {"not_a_para": 0.5}])
 def test_set_parameters(bad_parameters):
     """Test if the non allowed parameters raises a value error. """
     carnivore = ani.Carnivores()
@@ -116,6 +124,7 @@ def test_set_parameters(bad_parameters):
         carnivore.set_parameters(bad_parameters)
     with pytest.raises(ValueError):
         herbivore.set_parameters(bad_parameters)
+
 
 # Herbivore grazing
 
@@ -129,12 +138,13 @@ def test_herbivore_grazing():
     jungle_cell = topo.Jungle()
     herbivore.graze(jungle_cell)
     assert herbivore.weight == pre_eating_weight + (
-            herbivore.parameters["beta"]*herbivore.parameters["F"])
+            herbivore.parameters["beta"] * herbivore.parameters["F"])
     after_jungle_graze = herbivore.weight
     savanna_cell = topo.Savanna()
     herbivore.graze(savanna_cell)
     assert herbivore.weight == after_jungle_graze + (
-            herbivore.parameters["beta"]*herbivore.parameters["F"])
+            herbivore.parameters["beta"] * herbivore.parameters["F"])
+
 
 # Breeding
 
@@ -151,8 +161,8 @@ def test_breed_certain_probability():
 
 
 def test_breed_uncertain_probability():
-    #about 0.4 probabilty for birth
-    born=0
+    # about 0.4 probabilty for birth
+    born = 0
     for _ in range(1000):
         cell = topo.Jungle()
         herbivore = ani.Herbivores()
@@ -167,34 +177,53 @@ def test_breed_uncertain_probability():
 
 def test_breed_certain_probability_all_in_cell():
     cell = topo.Jungle()
-    herbivore = ani.Herbivores()
-    herbivore.weight, herbivore.age = 80, 30
     for _ in range(100):
         cell.add_animal(ani.Herbivores(age=10, weight=100))
     cell.breed_all_animals_in_cell()
     assert len(cell.herbivore_list) == 200
 
 
-#Migration
+def test_breed_low_weight():
+    herbivore = ani.Herbivores()
+    herbivore.weight = 1
+    cell = topo.Jungle()
+    cell.add_animal(herbivore)
+    herbivore.breed(cell, 100)
+    assert len(cell.herbivore_list) == 1
+
+
+def test_breed_certain_prob_overweight_newborn():
+    herbivore = ani.Herbivores(weight=50)
+    cell = topo.Jungle()
+    cell.add_animal(herbivore)
+    herbivore.parameters["xi"] = 100
+    herbivore.breed(cell, 1000)
+    assert len(cell.herbivore_list) == 1
+
+
+# Migration
 @pytest.fixture
 def certain_migration_prob_herb():
-    testanimal = ani.Herbivores(age=2,weight=40)
+    testanimal = ani.Herbivores(age=2, weight=40)
     testanimal.set_parameters({"mu": 4})
     return testanimal
+
 
 def test_will_migrate_certain_probability(certain_migration_prob_herb):
     assert certain_migration_prob_herb.will_migrate()
 
+
 def test_will_migrate_50_chance():
-    testanimal = ani.Herbivores(age=10,weight=10.0499)
+    testanimal = ani.Herbivores(age=10, weight=10.0499)
     testanimal.set_parameters({"mu": 1})
     testlist = [testanimal.will_migrate() for _ in range(1000)]
     would_migrate = testlist.count(True)
     assert 450 < would_migrate < 550
 
+
 @pytest.fixture
 def mock_ek():
-    herbivore_ek = {(11,10): 1}
+    herbivore_ek = {(11, 10): 1}
     return herbivore_ek
 
 
@@ -202,6 +231,25 @@ def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
     chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
                                                                       mock_ek)
     assert chosen_cell == (11, 10)
+    assert certain_migration_prob_herb.has_tried_migration_this_year
+    ani.Animals.reset_migration_attempt()
+    assert certain_migration_prob_herb.has_tried_migration_this_year == False
+
+
+def test_what_cell_no_options(certain_migration_prob_herb):
+    herbivore_ek = {}
+    chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
+                                                                herbivore_ek)
+    assert chosen_cell == (10,10)
+
+def test_what_cell_when_will_not_migrate(mock_ek):
+    testanimal = ani.Herbivores()
+    testanimal.parameters["mu"] = 0
+    chosen_cell = testanimal.what_cell_to_migrate_to((10,10), mock_ek)
+    assert chosen_cell == (10,10)
+
+
+
 
 # Annual weight decrease, age up
 
@@ -211,5 +259,6 @@ def test_annual_weight_decrease_age_up():
     pre_decrease_weight = herbivore.weight
     herbivore.annual_weight_decrease()
     herbivore.age_up()
-    assert herbivore.weight == pre_decrease_weight - (herbivore.parameters["eta"] * pre_decrease_weight)
+    assert herbivore.weight == pre_decrease_weight - (
+                herbivore.parameters["eta"] * pre_decrease_weight)
     assert herbivore.age == 1
