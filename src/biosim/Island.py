@@ -119,7 +119,7 @@ class Island:
         self.breed_in_all_cells()
         self.migrate_all_cells()
         Animals.age_up()
-        Animals.annual_weight_decrease()
+        Animals.annual_metabolism()
         self.annual_death_all_cells()
 
 

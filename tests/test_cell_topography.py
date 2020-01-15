@@ -6,6 +6,8 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 import src.biosim.cell_topography as topo
 import pytest
 import src.biosim.animals as animals
+from biosim.Island import Island
+
 
 @pytest.fixture
 def basic_topography():
@@ -82,22 +84,36 @@ def test_desert_fodder():
 def test_Mountain_fodder():
     """Tests that the mountains dont have any fooder"""
     instance = topo.Mountain()
-    assert instance.fodder == 0
+    assert instance.is_accessible == False
 
 
 def test_Ocean_fodder():
     """Tests that the oceans dont have any fooder"""
     instance = topo.Ocean()
-    assert instance.fodder == 0
+    assert instance.is_accessible == False
 
 
-def test_animal_with_fitnessleves_0_dies():
-    animal = animals.Herbivores()
-    instance = topo.Jungle()
-    instance.add_animal(animal)
-    instance.herbivore_list[0].weight = 0.5
-    instance.herbivore_list[0].age = 200
-    instance.natural_death()
-    assert len(instance.herbivore_list) == 0
+@pytest.fixture
+def low_fitness_animals():
+    jungle_cell = topo.Desert()
+    herbivore = animals.Herbivores()
+    carnivore = animals.Carnivores()
+    carnivore.weight, carnivore.age = 1, 1000
+    herbivore.weight, herbivore.age = 1, 1000
+    herbivore.parameters["omega"] = 1
+    carnivore.parameters["omega"] = 1
+    jungle_cell.add_animal(herbivore)
+    jungle_cell.add_animal(carnivore)
+    return jungle_cell
+
+
+def test_natural_death_in_all_cells(low_fitness_animals):
+    low_fitness_animals.natural_death_all_animals_in_cell()
+    assert len(low_fitness_animals.herbivore_list) == 0
+
+
+
+
+
 
 

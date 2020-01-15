@@ -267,7 +267,6 @@ class Mountain:
     """Construct the passive and non accessible class 'Mountain' """
     def __init__(self):
         self.is_accessible = False
-        self.fodder = 0.0
 
 
 class Ocean:
@@ -277,7 +276,6 @@ class Ocean:
     """
     def __init__(self):
         self.is_accessible = False
-        self.fodder = 0.0
 
 
 

@@ -220,7 +220,7 @@ def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
 def test_annual_weight_decrease_age_up():
     herbivore = ani.Herbivores()
     pre_decrease_weight = herbivore.weight
-    herbivore.annual_weight_decrease()
+    herbivore.annual_metabolism()
     herbivore.age_up()
     assert herbivore.weight == pre_decrease_weight - (herbivore.parameters["eta"] * pre_decrease_weight)
     assert herbivore.age == 1
