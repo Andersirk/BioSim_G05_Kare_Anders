@@ -5,11 +5,11 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import unittest
 import src.biosim.animals as ani
-import src.biosim.cell_topography as topo
 import pytest
 import src.biosim.cell_topography as topo
 
-import random
+
+# Birth weight
 
 
 class AnimalsTest(unittest.TestCase):
@@ -19,27 +19,24 @@ class AnimalsTest(unittest.TestCase):
         ani.Herbivores.parameters["sigma_birth"] = 0
         self.assertAlmostEqual(ani.Herbivores.birth_weight(ani.Herbivores()), 10)
 
-
-@pytest.fixture
-def herbivore_zero_weight():
-    instance = ani.Herbivores()
-    instance.weight = 0
-    return instance
+# Fitness
 
 
-def test_fitnesslevel_is_zero_when_weight_is_zero(herbivore_zero_weight):
-    assert herbivore_zero_weight.fitness == 0
+def test_fitness_level_is_zero_when_weight_is_zero():
+    herbivore = ani.Herbivores()
+    herbivore.weight = 0
+    assert herbivore.fitness == 0
 
-@pytest.fixture
-def herbivore_great_age_and_weight():
-    instance = ani.Herbivores()
-    instance.weight = 80
-    instance.age = 20
-    return instance
 
-def test_fitnesslevel_is_between_zero_and_one(herbivore_great_age_and_weight):
-    assert herbivore_great_age_and_weight.fitness >= 0
-    assert herbivore_great_age_and_weight.fitness <= 1
+def test_fitness_level_is_between_zero_and_one():
+    herbivore = ani.Herbivores()
+    herbivore.weight = 100
+    herbivore.age = 0
+    assert herbivore.fitness >= 0
+    assert herbivore.fitness <= 1
+
+# Natural death
+
 
 @pytest.fixture
 def strong_vs_weak():
@@ -51,6 +48,7 @@ def strong_vs_weak():
     cell.add_animal(herbivore)
     cell.add_animal(carnivore)
     return herbivore, carnivore, cell
+
 
 def test_natural_death(strong_vs_weak):
     """
@@ -66,6 +64,9 @@ def test_natural_death(strong_vs_weak):
     assert herbivore_amount > 350 and herbivore_amount < 450
     assert carnivore_amount > 30 and carnivore_amount < 60
 
+# carnivore kills herbivore
+
+
 def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     """
     A carnivore can only kill a certain amount of herbivores per year,
@@ -73,12 +74,20 @@ def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     carnivore only can kill 50 1 kg herbivores. It will then have gained
     50(amount)*1 kg*0.75(beta) kg.
     """
+    assert strong_vs_weak[1].eaten_this_year == 0
     n = 1000
     kill_rate = [strong_vs_weak[1].kills_herbivore(strong_vs_weak[0]) for _ in range(n)]
     amount = kill_rate.count(True)
     assert amount == 50
     assert strong_vs_weak[1].eaten_this_year == 50
     assert strong_vs_weak[1].weight == 15 + (amount*1*0.75)
+    # Resets the amount_eaten_this_year to 0, and check if the carnivore's
+    # eaten_this_year == 0 and that the weight not are effected by this.
+    strong_vs_weak[1].reset_amount_eaten_this_year()
+    assert strong_vs_weak[1].eaten_this_year == 0
+    assert strong_vs_weak[1].weight == 15 + (amount*1*0.75)
+
+# Set parameters
 
 
 @pytest.mark.parametrize("bad_parameters", [{"w_birth": -6.0},
@@ -104,20 +113,24 @@ def test_set_parameters(bad_parameters):
     herbivore = ani.Herbivores()
     with pytest.raises(ValueError):
         carnivore.set_parameters(bad_parameters)
+    with pytest.raises(ValueError):
         herbivore.set_parameters(bad_parameters)
 
+# Herbivore grazing
 
 
+def test_herbivore_grazing():
+    herbivore = ani.Herbivores()
+    pre_eating_weight = herbivore.weight
+    desert_cell = topo.Desert()
+    herbivore.graze(desert_cell)
+    assert herbivore.weight == pre_eating_weight
+    # jungle_cell = topo.Jungle()
+    # herbivore.eat(jungle_cell)
+    # assert
+    # savanna_cell = topo.Savanna()
 
-
-
-
-
-
-
-
-
-
+# Breeding
 
 
 def test_breed_certain_probability():
@@ -129,6 +142,7 @@ def test_breed_certain_probability():
     assert len(cell.herbivore_list) == 2
     assert isinstance(cell.herbivore_list[0], ani.Herbivores)
     assert isinstance(cell.herbivore_list[1], ani.Herbivores)
+
 
 def test_breed_uncertain_probability():
     #about 0.4 probabilty for birth
@@ -144,6 +158,7 @@ def test_breed_uncertain_probability():
     assert born > 350
     assert born < 450
 
+
 def test_breed_certain_probability_all_in_cell():
     cell = topo.Jungle()
     herbivore = ani.Herbivores()
@@ -152,11 +167,3 @@ def test_breed_certain_probability_all_in_cell():
         cell.add_animal(ani.Herbivores(age=10, weight=100))
     cell.breed_all_animals_in_cell()
     assert len(cell.herbivore_list) == 200
-
-
-
-
-
-
-
-
