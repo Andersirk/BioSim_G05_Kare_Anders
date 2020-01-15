@@ -62,7 +62,7 @@ class Animals:
 
 
     @classmethod
-    def annual_weight_decrease(cls):
+    def annual_metabolism(cls):
         """Decreases the animals weight based on the parameter 'eta'"""
         for instance in cls.instances:
             instance.weight -= instance.parameters["eta"] * instance.weight
