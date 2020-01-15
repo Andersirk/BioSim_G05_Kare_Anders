@@ -7,6 +7,7 @@ import random
 import src.biosim.animals as animals
 import copy
 import itertools
+import timeit
 
 class Topography:
     """
@@ -46,11 +47,18 @@ class Topography:
         in the cell.
         :param animal: An instance of an animal class.
         """
+        # if animal.__class__.__name__ == "Herbivores":
+        #     self.herbivore_list.remove(animal)
+        # elif animal.__class__.__name__ == "Carnivores":
+        #     self.carnivore_list.remove(animal)
+        # if animal.__class__.__name__ == "Herbivores":
+        #     self.herbivore_list = list(filter(lambda herbie: herbie != animal, self.herbivore_list))
+        # elif animal.__class__.__name__ == "Carnivores":
+        #     self.carnivore_list = list(filter(lambda carnie: carnie != animal, self.carnivore_list))
         if animal.__class__.__name__ == "Herbivores":
-            self.herbivore_list.remove(animal)
+            self.herbivore_list = [herbi for herbi in self.herbivore_list if herbi != animal]
         elif animal.__class__.__name__ == "Carnivores":
-            self.carnivore_list.remove(animal)
-
+            self.carnivore_list = [carni for carni in self.carnivore_list if carni != animal]
 
     def add_animal(self, animal):
         """
@@ -107,6 +115,7 @@ class Topography:
             if carnivore.will_die_natural_death():
                 self.remove_animal(carnivore)
                 animals.Animals.instances.remove(carnivore)
+                #animals.Animals.instances = [ani for ani in animals.Animals.instances if ani != carnivore]
 
     def natural_death_all_herbivores_in_cell(self):
         herbivores_reference_list = copy.copy(self.herbivore_list)
@@ -114,6 +123,7 @@ class Topography:
             if herbivore.will_die_natural_death():
                 self.remove_animal(herbivore)
                 animals.Animals.instances.remove(herbivore)
+                #animals.Animals.instances = [ani for ani in animals.Animals.instances if ani != herbivore]
 
 
 
@@ -274,10 +284,23 @@ class Ocean:
 
 
 
-# if __name__ == "__main__":
+#if __name__ == "__main__":
+#
+# mysetup = """
+# from cell_topography import Jungle
+# import animals
+# cell = Jungle()
+# for _ in range(100):
+#     cell.add_animal(animals.Herbivores())
+#     cell.add_animal(animals.Carnivores())
+# testani = animals.Herbivores()
+# cell.add_animal(testani)"""
 #
 #
-#     keke = [Savanna() for _ in range(5)]
-#     [print(kok.parameters) for kok in keke]
-#     Savanna.set_parameters({"f_max":2000, "alpha": 69})
-#     [print(kok.parameters) for kok in keke]
+# totest = "cell.remove_animal(testani); cell.add_animal(testani)"
+#
+# print(timeit.timeit(setup=mysetup, stmt=totest, number=100000))
+    # keke = [Savanna() for _ in range(5)]
+    # [print(kok.parameters) for kok in keke]
+    # Savanna.set_parameters({"f_max":2000, "alpha": 69})
+    # [print(kok.parameters) for kok in keke]
