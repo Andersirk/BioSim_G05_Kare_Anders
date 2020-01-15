@@ -21,6 +21,12 @@ class Animals:
         self.has_tried_migration_this_year = False
 
     def birth_weight(self):
+        """
+        Returns a weight drawn from a normal distribution with the
+        parameter 'w_birth' as the expectation and 'sigma_birth' as the
+        standard deviation
+        :return: float :weight of a newborn
+        """
         return random.normalvariate(
             self.parameters["w_birth"],
             self.parameters["sigma_birth"]
@@ -28,6 +34,13 @@ class Animals:
 
     @property
     def fitness(self):
+        """
+        Computes the fitness of an animal based on the weight and age of the
+        animal along with some species specific parameters. The animal has zero
+        fitness if is has zero weight.
+
+        :return: float: the fitness of the animal
+        """
         if self.weight <= 0:
             return 0
         else:
@@ -39,29 +52,24 @@ class Animals:
                         self.weight - self.parameters["w_half"]))) ** -1
 
 
-    def will_migrate(self):
-        """This function decides if, and to which cell, an animal shall move"""
-        probability_to_move = self.parameters["mu"] * self.fitness
-        if random.random() < probability_to_move:
-            return True
-        else:
-            return False
-
-
     @classmethod
     def age_up(cls):
+        """
+        Increases the age by one year of all animals alive.
+        """
         for instance in cls.instances:
             instance.age += 1
 
 
     @classmethod
     def annual_weight_decrease(cls):
-        """This function makes the animal lose weight"""
+        """Decreases the animals weight based on the parameter 'eta'"""
         for instance in cls.instances:
             instance.weight -= instance.parameters["eta"] * instance.weight
 
     def eat_increase_weight(self, food):
-        """This function makes the animal eat x amount of fodder"""
+        """This function makes the animal eat x amount of fodder and increases
+        it's weight based on the parameter 'beta'"""
         self.weight += self.parameters["beta"] * food
 
     def breed(self, cell, cell_population):
@@ -78,6 +86,14 @@ class Animals:
 
     def will_die_natural_death(self):
         if self.fitness == 0 or random.random() < self.parameters["omega"] * (1 - self.fitness):
+            return True
+        else:
+            return False
+
+    def will_migrate(self):
+        """This function decides if, and to which cell, an animal shall move"""
+        probability_to_move = self.parameters["mu"] * self.fitness
+        if random.random() < probability_to_move:
             return True
         else:
             return False
