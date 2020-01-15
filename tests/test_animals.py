@@ -185,6 +185,35 @@ def test_breed_certain_probability_all_in_cell():
     cell.breed_all_animals_in_cell()
     assert len(cell.herbivore_list) == 200
 
+
+#Migration
+@pytest.fixture
+def certain_migration_prob_herb():
+    testanimal = ani.Herbivores(age=2,weight=40)
+    testanimal.set_parameters({"mu": 4})
+    return testanimal
+
+def test_will_migrate_certain_probability(certain_migration_prob_herb):
+    assert certain_migration_prob_herb.will_migrate()
+
+def test_will_migrate_50_chance():
+    testanimal = ani.Herbivores(age=10,weight=10.0499)
+    testanimal.set_parameters({"mu": 1})
+    testlist = [testanimal.will_migrate() for _ in range(1000)]
+    would_migrate = testlist.count(True)
+    assert 450 < would_migrate < 550
+
+@pytest.fixture
+def mock_ek():
+    herbivore_ek = {(11,10): 1}
+    return herbivore_ek
+
+
+def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
+    chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
+                                                                      mock_ek)
+    assert chosen_cell == (11, 10)
+
 # Annual weight decrease, age up
 
 
