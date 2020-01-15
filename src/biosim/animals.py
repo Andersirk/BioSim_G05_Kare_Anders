@@ -21,7 +21,7 @@ class Animals:
         self.has_tried_migration_this_year = False
 
     def birth_weight(self):
-        return np.random.normal(
+        return random.normalvariate(
             self.parameters["w_birth"],
             self.parameters["sigma_birth"]
         )
