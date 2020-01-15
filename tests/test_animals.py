@@ -167,3 +167,17 @@ def test_breed_certain_probability_all_in_cell():
         cell.add_animal(ani.Herbivores(age=10, weight=100))
     cell.breed_all_animals_in_cell()
     assert len(cell.herbivore_list) == 200
+
+
+#Migration
+def test_will_migrate_certain_probability():
+    testanimal = ani.Herbivores(age=2,weight=40)
+    testanimal.set_parameters({"mu": 4})
+    assert testanimal.will_migrate()
+
+def test_will_migrate_50_chance():
+    testanimal = ani.Herbivores(age=10,weight=10.0499)
+    testanimal.set_parameters({"mu": 1})
+    testlist = [testanimal.will_migrate() for _ in range(1000)]
+    would_migrate = testlist.count(True)
+    assert 450 < would_migrate < 550
