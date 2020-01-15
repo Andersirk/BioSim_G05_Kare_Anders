@@ -98,7 +98,7 @@ def test_Ocean_fodder():
 
 @pytest.fixture
 def low_fitness_animals():
-    jungle_cell = topo.Desert()
+    jungle_cell = topo.Jungle()
     herbivore = animals.Herbivores()
     carnivore = animals.Carnivores()
     carnivore.weight, carnivore.age = 1, 1000
@@ -155,6 +155,23 @@ def test_migrate_all_carni_in_cell_new_location(surrounding_ocean_cell):
 def test_natural_death_in_all_cells(low_fitness_animals):
     low_fitness_animals.natural_death_all_animals_in_cell()
     assert len(low_fitness_animals.herbivore_list) == 0
+    assert len(low_fitness_animals.carnivore_list) == 0
+
+
+def test_feeding():
+    jungle_cell = topo.Jungle()
+    [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(250)]
+    [jungle_cell.add_animal(animals.Carnivores()) for carnivores in range(250)]
+    herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
+                                    key=lambda herbi: herbi.fitness, reverse=True)
+    testani = herbivore_fitness_sort[0]
+    least_fittest_weight = testani.weight
+    jungle_cell.feed_herbivores_in_cell()
+    assert least_fittest_weight == testani.weight
+
+#migration
 
 def test_migrate_all_herb_in_cell_mock_ek():
     pass
+
+
