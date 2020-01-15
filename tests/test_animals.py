@@ -61,8 +61,9 @@ def test_natural_death(strong_vs_weak):
     herbivore_amount = die_rate_herbivore.count(True)
     die_rate_carnivore = [strong_vs_weak[1].will_die_natural_death() for _ in range(1000)]
     carnivore_amount = die_rate_carnivore.count(True)
-    assert herbivore_amount > 350 and herbivore_amount < 450
-    assert carnivore_amount > 30 and carnivore_amount < 60
+    assert 350 < herbivore_amount < 450
+    assert 30 < carnivore_amount < 60
+
 
 # carnivore kills herbivore
 
@@ -70,7 +71,7 @@ def test_natural_death(strong_vs_weak):
 def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     """
     A carnivore can only kill a certain amount of herbivores per year,
-    limited by the parameter "F", which by defualt is 50. This means that the
+    limited by the parameter "F", which by default is 50. This means that the
     carnivore only can kill 50 1 kg herbivores. It will then have gained
     50(amount)*1 kg*0.75(beta) kg.
     """
@@ -125,10 +126,15 @@ def test_herbivore_grazing():
     desert_cell = topo.Desert()
     herbivore.graze(desert_cell)
     assert herbivore.weight == pre_eating_weight
-    # jungle_cell = topo.Jungle()
-    # herbivore.eat(jungle_cell)
-    # assert
-    # savanna_cell = topo.Savanna()
+    jungle_cell = topo.Jungle()
+    herbivore.graze(jungle_cell)
+    assert herbivore.weight == pre_eating_weight + (
+            herbivore.parameters["beta"]*herbivore.parameters["F"])
+    after_jungle_graze = herbivore.weight
+    savanna_cell = topo.Savanna()
+    herbivore.graze(savanna_cell)
+    assert herbivore.weight == after_jungle_graze + (
+            herbivore.parameters["beta"]*herbivore.parameters["F"])
 
 # Breeding
 
@@ -196,3 +202,14 @@ def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
     chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
                                                                       mock_ek)
     assert chosen_cell == (11, 10)
+
+# Annual weight decrease, age up
+
+
+def test_annual_weight_decrease_age_up():
+    herbivore = ani.Herbivores()
+    pre_decrease_weight = herbivore.weight
+    herbivore.annual_weight_decrease()
+    herbivore.age_up()
+    assert herbivore.weight == pre_decrease_weight - (herbivore.parameters["eta"] * pre_decrease_weight)
+    assert herbivore.age == 1
