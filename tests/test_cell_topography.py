@@ -227,17 +227,16 @@ def test_feeding_herbivores_in_a_cell():
     least fittest animal shall in not be able to eat, due to overgrazing,
     and therefore keep the same weight after the graze commando"""
     jungle_cell = topo.Jungle()
-    # jungle_cell.parameters["f_max"] = 800
-    jungle_cell.fodder = 100
+    animals.Herbivores.parameters["sigma_birth"] = 1.5
     [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(81)]
     herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
-                                    key=lambda herbi: herbi.fitness, reverse=True)
+                                    key=lambda herbi: herbi.fitness)
+    assert herbivore_fitness_sort[0].fitness < herbivore_fitness_sort[30].fitness
     least_fittest_herb = herbivore_fitness_sort[0]
     second_least_fittest_herb = herbivore_fitness_sort[1]
     least_fittest_weight = least_fittest_herb.weight
     second_least_fittest_weight = second_least_fittest_herb.weight
     jungle_cell.feed_herbivores_in_cell()
-
     assert least_fittest_weight == least_fittest_herb.weight
     assert second_least_fittest_weight != second_least_fittest_herb.weight
     # Test that the available fodder now are = 0, and that the increase_fodder
