@@ -192,16 +192,46 @@ def test_natural_death_in_all_cells(low_fitness_animals):
     assert len(low_fitness_animals.carnivore_list) == 0
 
 
-def test_feeding():
+def test_feeding_herbivores_in_a_cell():
+    """Testing the method "set parameters" for a jungle cell, before the
+    method "test_feeding_herbivores_in_a_cell" are tested: The least fittest
+    animal shall in not be able to eat, due to overgrazing, and therefore
+    keep the same weight after the graze commando"""
+    with pytest.raises(ValueError):
+        topo.Jungle.set_parameters({"fmax": 100})
+        topo.Jungle.set_parameters({"f_max": -100})
+    topo.Jungle.set_parameters({"f_max": 100})
+    assert topo.Jungle.parameters["f_max"] == 100
     jungle_cell = topo.Jungle()
-    [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(250)]
-    [jungle_cell.add_animal(animals.Carnivores()) for carnivores in range(250)]
+    [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(11)]
     herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
                                     key=lambda herbi: herbi.fitness, reverse=True)
-    testani = herbivore_fitness_sort[0]
-    least_fittest_weight = testani.weight
+    least_fittest_herb = herbivore_fitness_sort[0]
+    second_least_fittest_herb = herbivore_fitness_sort[1]
+    least_fittest_weight = least_fittest_herb.weight
+    second_least_fittest_weight = second_least_fittest_herb.weight
     jungle_cell.feed_herbivores_in_cell()
-    assert least_fittest_weight == testani.weight
+    assert least_fittest_weight == least_fittest_herb.weight
+    assert second_least_fittest_weight != second_least_fittest_herb.weight
+    """Test that the available fodder now are = 0, and that the increase_fodder
+    works, so the food level again = f_max"""
+    assert jungle_cell.fodder == 0
+    jungle_cell.increase_fodder()
+    assert jungle_cell.fodder == 100
+
+def test_feeding_herbivores_in_a_cell():
+    """Tests if the most fit herbivore kills the least fit herbivore etc"""
+    animals.Carnivores.set_parameters({"DeltaPhiMax": 0})
+    jungle_cell = topo.Jungle()
+    [jungle_cell.add_animal(animals.Herbivores()) for _ in range(10)]
+    [jungle_cell.add_animal(animals.Carnivores()) for _ in range(10)]
+    herbivore_fitness_sort = sorted(self.herbivore_list,
+                                    key=lambda herbi: herbi.fitness,
+                                    reverse=True)
+    carnivore_fitness_sort = sorted(self.carnivore_list,
+                                    key=lambda carni: carni.fitness)
+
+
 
 
 
