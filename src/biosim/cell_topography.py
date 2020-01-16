@@ -38,8 +38,7 @@ class Topography:
             remaining_fodder = self.fodder
             self.fodder = 0.0
             return remaining_fodder
-        elif self.fodder <= 0.0:
-            return 0.0
+
 
     def remove_animal(self, animal):
         """
