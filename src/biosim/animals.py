@@ -115,7 +115,7 @@ class Animals:
             for cell in neighbouring_cells:
                 cell_probability.append(ek_dict[cell] / sum_ek_neighbours)
             cumulative_probability = np.cumsum(cell_probability)
-            random_number = np.random.random()
+            random_number = random.random()
             n = 0
             while random_number >= cumulative_probability[n]:
                 n += 1
@@ -242,8 +242,3 @@ class Carnivores(Animals):
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
-if __name__ == "__main__":
-    animal = Carnivores()
-    animal.weight = 15
-    animal.age = 52
-    print(animal.fitness)
