@@ -109,10 +109,14 @@ def surrounding_ocean_cell_small():
     geogr = """\
                 OOOOO
                 OJMDO
+                OMMMO
+                OMDMO
                 OOOOO"""
     island = Island(geogr)
     island.populate_island([{'loc': (1, 1), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': 10} for _ in range(10)]}])
     island.populate_island([{'loc': (1, 3), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': 10} for _ in range(10)]}])
+    island.populate_island([{'loc': (3, 2), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(100)]}])
+    island.populate_island([{'loc': (3, 2), 'pop': [{'species': 'Herbivore', 'age': 100, 'weight': 1}]}])
     return island
 
 
@@ -125,7 +129,7 @@ def test_migration_cant_happen(surrounding_ocean_cell_small):
 
 
 def test_feed_all_animals(surrounding_ocean_cell_small):
-    """The animals on a jungle cell eats, the animals on a desert cell does not"""
+    """Test if the herbivores and the carnivores eat."""
     biomass_before_feeding_1_1 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 1)])
     biomass_before_feeding_1_3 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 3)])
     surrounding_ocean_cell_small.feed_all_animals()
@@ -133,6 +137,14 @@ def test_feed_all_animals(surrounding_ocean_cell_small):
     biomass_after_feeding_1_3 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 3)])
     assert biomass_before_feeding_1_1 != biomass_after_feeding_1_1
     assert biomass_before_feeding_1_3 == biomass_after_feeding_1_3
+    assert len(surrounding_ocean_cell_small.raster_model[(3, 2)].herbivore_list) == 0
+
+
+    surrounding_ocean_cell_small.increase_fodder_all_cells()
+    assert
+
+
+
 
 
 
