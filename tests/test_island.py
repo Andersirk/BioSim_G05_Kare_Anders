@@ -129,10 +129,10 @@ def surrounding_ocean_cell():
     island.populate_island(occupants)
     return island
 
-def test_one_option_migration(surrounding_ocean_cell):
-    surrounding_ocean_cell.migrate_all_cells()
-    assert len(surrounding_ocean_cell.raster_model[(1, 18)].herbivore_list) == 2
-    assert len(surrounding_ocean_cell.raster_model[(1, 19)].herbivore_list) == 0
+def test_one_option_migration(standard_map_ani_one_accesible):
+    standard_map_ani_one_accesible.migrate_all_cells()
+    assert len(standard_map_ani_one_accesible.raster_model[(1, 18)].herbivore_list) == 2
+    assert len(standard_map_ani_one_accesible.raster_model[(1, 19)].herbivore_list) == 0
 
 @pytest.fixture
 def surrounding_ocean_cell_small():
