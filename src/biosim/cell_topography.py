@@ -137,9 +137,10 @@ class Topography:
         herbivore_fitness_sort = sorted(self.herbivore_list,
                                    key=lambda herbi: herbi.fitness)
         for herbivore in herbivore_fitness_sort:
-            herbivore.graze(self)
             if self.fodder <= 0:
                 break
+            herbivore.graze(self)
+
 
     def feed_carnivores_in_cell(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
@@ -149,6 +150,7 @@ class Topography:
         for carnivore in carnivore_fitness_sort:
             for herbivore in herbivore_fitness_sort:
                 if carnivore.kills_herbivore(herbivore):
+                    herbivore_fitness_sort.remove(herbivore)
                     self.remove_animal(herbivore)
                     animals.Animals.instances.remove(herbivore)
             carnivore.reset_amount_eaten_this_year()
@@ -205,11 +207,10 @@ class Jungle(Topography):
         change preexisting parameters only.
         """
         for parameter, value in new_parameters.items():
-            if parameter == "f_max":
-                if value >= 0:
-                    cls.parameters["f_max"] = value
-                else:
-                    raise ValueError("f_max requires a positive value")
+            if parameter in cls.parameters.keys():
+                if value < 0:
+                    raise ValueError(f"{parameter} value must be positive")
+                cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
@@ -231,19 +232,13 @@ class Savanna(Topography):
         self.fodder = self.parameters["f_max"]
 
     @classmethod
-    def set_parameters(cls, parameters):
+    def set_parameters(cls, new_parameters):
         """ Sets the editable default parameters for this subclass"""
-        for parameter, value in parameters.items():
-            if parameter == "f_max":
-                if value >= 0:
-                    cls.parameters["f_max"] = value
-                else:
-                    raise ValueError("f_max requires a positive value")
-            elif parameter == "alpha":
-                if value >= 0:
-                    cls.parameters["alpha"] = value
-                else:
-                    raise ValueError("alpha requires a positive value")
+        for parameter, value in new_parameters.items():
+            if parameter in cls.parameters.keys():
+                if value < 0:
+                    raise ValueError(f"{parameter} value must be positive")
+                cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
@@ -260,6 +255,7 @@ class Desert(Topography):
     """
     def __init__(self):
         super().__init__()
+        self.fodder = 0
 
 
 class Mountain:
