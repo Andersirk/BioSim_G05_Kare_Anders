@@ -13,12 +13,12 @@ import src.biosim.Island as isle
 def basic_jungle():
     return topo.Jungle()
 
+
 @pytest.mark.parametrize("fodder, requested, dec_amunt, fodder_result",
                          [(400, 200, 200, 200),
                           (100, 200, 100, 0),
                           (0, 200, 0, 0 )])
-
-def test_Topo_decrease_fodder_abundance(basic_jungle, fodder, requested, dec_amunt, fodder_result):
+def test_topo_decrease_fodder_abundance(basic_jungle, fodder, requested, dec_amunt, fodder_result):
     """Tests that the amount of fodder can be decreased"""
     basic_jungle.fodder = fodder
     decrease_amount = basic_jungle.allowed_fodder_to_consume(requested)
@@ -26,25 +26,25 @@ def test_Topo_decrease_fodder_abundance(basic_jungle, fodder, requested, dec_amu
     assert basic_jungle.current_fodder() == fodder_result
 
 
-def test_Topo_current_occupants_int():
+def test_topo_current_occupants_int():
     """Test that the numbers of herbivore and carnivores occupants in a cell is an int"""
     instance = topo.Topography()
     assert type(instance.current_occupants()["Herbivores"]) == int and type(instance.current_occupants()["Carnivores"]) == int
 
 
-def test_Topo_current_occupants_positive():
+def test_topo_current_occupants_positive():
     """Test that the numbers of herbivore and carnivores occupants in a cell is either 0 or positive"""
     instance = topo.Topography()
     assert instance.current_occupants()["Herbivores"] >= 0 and instance.current_occupants()["Carnivores"] >= 0
 
 
-def test_Topo_current_fodder():
+def test_topo_current_fodder():
     """Test that the amount of fodder is a float and greater than 0"""
     instance = topo.Topography()
     assert type(instance.current_fodder()) == float and instance.current_fodder() >= 0
 
 
-def test_Topo_remove_herbivore():
+def test_topo_remove_herbivore():
     """Tests that an emigrating animal can be removed from its old cells animal list"""
     cell = topo.Topography()
     testherbi = animals.Herbivores()
@@ -54,7 +54,7 @@ def test_Topo_remove_herbivore():
     cell.remove_animal(testherbi)
     assert testherbi not in cell.herbivore_list
 
-def test_Topo_remove_carnivore():
+def test_topo_remove_carnivore():
     """Tests that an emigrating animal can be removed from its old cells animal list"""
     cell = topo.Topography()
     testcarni = animals.Carnivores()
@@ -65,13 +65,14 @@ def test_Topo_remove_carnivore():
     assert testcarni not in cell.herbivore_list
 
 
-def test_Topo_add_herbviore():
+def test_topo_add_herbviore():
     """Tests that an imigranting animal can be added to the new cells animal list"""
     instance = topo.Topography()
     instance.add_animal(animals.Herbivores())
     assert len(instance.herbivore_list) == 1
 
-def test_Topo_add_carnivore():
+
+def test_topo_add_carnivore():
     """Tests that an imigranting animal can be added to the new cells animal list"""
     instance = topo.Topography()
     instance.add_animal(animals.Carnivores())
@@ -84,16 +85,13 @@ def test_desert_fodder():
     assert instance.current_fodder() == 0
 
 
-def test_Mountain_fodder():
+def test_mountain_ocean_is_not_accessible():
     """Tests that the mountains dont have any fooder"""
-    instance = topo.Mountain()
-    assert instance.is_accessible == False
+    mountain = topo.Mountain()
+    ocean = topo.Ocean()
+    assert mountain.is_accessible == False
+    assert ocean.is_accessible == False
 
-
-def test_Ocean_fodder():
-    """Tests that the oceans dont have any fooder"""
-    instance = topo.Ocean()
-    assert instance.is_accessible == False
 
 
 @pytest.fixture
@@ -110,7 +108,7 @@ def low_fitness_animals():
     return jungle_cell
 
 
-#migration
+# migration
 @pytest.fixture
 def standard_map_ani_one_accesible():
     geogr = """\
@@ -169,7 +167,7 @@ def test_breed__certain_probability_all_in_cell():
     assert len(cell.herbivore_list) == 200
     assert len(cell.carnivore_list) == 200
 
-#cell ek
+# cell ek
 
 def test_ek_for_cell_9_herbs_carns_100_fodder(basic_jungle):
     basic_jungle.fodder = 100
@@ -181,32 +179,39 @@ def test_ek_for_cell_9_herbs_carns_100_fodder(basic_jungle):
     assert ek_herbivores == 1
     assert ek_carnivores == 0.18
 
+# natural death
 
 def test_natural_death_in_all_cells(low_fitness_animals):
     low_fitness_animals.natural_death_all_animals_in_cell()
     assert len(low_fitness_animals.herbivore_list) == 0
     assert len(low_fitness_animals.carnivore_list) == 0
 
+# set parameters
 
 def test_set_parameters_in_a_cell():
     """Testing the method "set parameters" for a jungle and savanna cell"""
     with pytest.raises(ValueError):
         topo.Jungle.set_parameters({"fmax": 100})
+    with pytest.raises(ValueError):
         topo.Jungle.set_parameters({"f_max": -100})
+    with pytest.raises(ValueError):
         topo.Savanna.set_parameters({"fmax": 100})
+    with pytest.raises(ValueError):
         topo.Savanna.set_parameters({"f_max": -100})
-    topo.Jungle.set_parameters({"f_max": 100})
-    topo.Savanna.set_parameters({"f_max": 100})
-    assert topo.Jungle.parameters["f_max"] == 100
-    assert topo.Savanna.parameters["f_max"] == 100
+    topo.Jungle.set_parameters({"f_max": 800})
+    topo.Savanna.set_parameters({"f_max": 300})
+    assert topo.Jungle.parameters["f_max"] == 800
+    assert topo.Savanna.parameters["f_max"] == 300
 
+# feeding in cell
 
 def test_feeding_herbivores_in_a_cell():
     """ Tests the method "test_feeding_herbivores_in_a_cell" where the
     least fittest animal shall in not be able to eat, due to overgrazing,
     and therefore keep the same weight after the graze commando"""
-    topo.Jungle.set_parameters({"f_max": 100})
     jungle_cell = topo.Jungle()
+    jungle_cell.parameters["f_max"] = 100
+    jungle_cell.fodder = 100
     [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(11)]
     herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
                                     key=lambda herbi: herbi.fitness, reverse=True)
@@ -217,26 +222,26 @@ def test_feeding_herbivores_in_a_cell():
     jungle_cell.feed_herbivores_in_cell()
     assert least_fittest_weight == least_fittest_herb.weight
     assert second_least_fittest_weight != second_least_fittest_herb.weight
-    """Test that the available fodder now are = 0, and that the increase_fodder
-    works, so the food level again = f_max"""
+    # Test that the available fodder now are = 0, and that the increase_fodder
+    # works, so the food level again = f_max
     assert jungle_cell.fodder == 0
     jungle_cell.increase_fodder()
     assert jungle_cell.fodder == 100
 
+def test_increase_fodder_savanna_fodder_is_max():
+    cell = topo.Savanna()
+    cell.increase_fodder()
+    assert cell.fodder == 300
 
 def test_feeding_carnivores_in_a_cell():
     """Tests if the most fit herbivore kills the least fit herbivore etc"""
-    pass
-    # animals.Carnivores.set_parameters({"DeltaPhiMax": 0})
-    # jungle_cell = topo.Jungle()
-    # [jungle_cell.add_animal(animals.Herbivores()) for _ in range(10)]
-    # [jungle_cell.add_animal(animals.Carnivores()) for _ in range(10)]
-    # herbivore_fitness_sort = sorted(self.herbivore_list,
-    #                                 key=lambda herbi: herbi.fitness,
-    #                                 reverse=True)
-    # carnivore_fitness_sort = sorted(self.carnivore_list,
-    #                                 key=lambda carni: carni.fitness)
-    #
+    animals.Carnivores.set_parameters({"DeltaPhiMax": 0.1})
+    jungle_cell = topo.Jungle()
+    [jungle_cell.add_animal(animals.Herbivores()) for _ in range(10)]
+    [jungle_cell.add_animal(animals.Carnivores(weight=80)) for _ in range(10)]
+    pre_feeding_herbi_biomass = jungle_cell.biomass_herbivores()
+    jungle_cell.feed_carnivores_in_cell()
+    assert pre_feeding_herbi_biomass > jungle_cell.biomass_herbivores()
 
 
 
