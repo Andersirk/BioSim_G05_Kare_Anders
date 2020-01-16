@@ -45,7 +45,7 @@ def test_Topo_current_fodder():
 
 
 def test_Topo_remove_herbivore():
-    """Tests that an emigranting animal can be removed from its old cells animal list"""
+    """Tests that an emigrating animal can be removed from its old cells animal list"""
     cell = topo.Topography()
     testherbi = animals.Herbivores()
     testlist = [animals.Herbivores() for _ in range(10)]
@@ -55,7 +55,7 @@ def test_Topo_remove_herbivore():
     assert testherbi not in cell.herbivore_list
 
 def test_Topo_remove_carnivore():
-    """Tests that an emigranting animal can be removed from its old cells animal list"""
+    """Tests that an emigrating animal can be removed from its old cells animal list"""
     cell = topo.Topography()
     testcarni = animals.Carnivores()
     testlist = [animals.Carnivores() for _ in range(10)]
@@ -112,7 +112,7 @@ def low_fitness_animals():
 
 #migration
 @pytest.fixture
-def surrounding_ocean_cell():
+def standard_map_ani_one_accesible():
     geogr = """\
                 OOOOOOOOOOOOOOOOOOOOO
                 OOOOOOOOSMMMMJJJJJJJO
@@ -130,25 +130,59 @@ def surrounding_ocean_cell():
     island = isle.Island(geogr)
     occupants = [{'loc': (1, 19),
            'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
+               'age': 9, 'weight': 10},
               {'species': 'Herbivore',
-               'age': 9, 'weight': 10.3},
+               'age': 9, 'weight': 10},
               {'species': 'Carnivore',
-               'age': 9, 'weight': 10.3},
+               'age': 9, 'weight': 10},
               {'species': 'Carnivore',
-               'age': 9, 'weight': 10.3}]}]
+               'age': 9, 'weight': 10}]}]
     island.populate_island(occupants)
     return island
 
-def test_migrate_all_herbi_in_cell_new_location(surrounding_ocean_cell):
-    animals.Herbivores.parameters["mu"] = 1000
-    surrounding_ocean_cell.raster_model[(1, 19)].migrate_all_herbivores_in_cell(surrounding_ocean_cell, (1,19), {(1,18):2})
-    assert surrounding_ocean_cell.raster_model[(1, 19)].herbivore_list == []
 
-def test_migrate_all_carni_in_cell_new_location(surrounding_ocean_cell):
+def test_migrate_all_herbi_in_cell_new_location(
+        standard_map_ani_one_accesible):
+    animals.Herbivores.parameters["mu"] = 1000
+    mock_ek = {(1,18):2}
+    standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_herbivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
+    assert standard_map_ani_one_accesible.raster_model[(1, 19)].herbivore_list == []
+    assert standard_map_ani_one_accesible.raster_model[(1, 18)].herbivore_list != []
+
+
+def test_migrate_all_carni_in_cell_new_location(
+        standard_map_ani_one_accesible):
     animals.Carnivores.parameters["mu"] = 1000
-    surrounding_ocean_cell.raster_model[(1, 19)].migrate_all_carnivores_in_cell(surrounding_ocean_cell, (1,19), {(1,18):2})
-    assert surrounding_ocean_cell.raster_model[(1, 19)].herbivore_list == []
+    mock_ek = {(1,18):2}
+    standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_carnivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
+    assert standard_map_ani_one_accesible.raster_model[(1, 19)].carnivore_list == []
+    assert standard_map_ani_one_accesible.raster_model[(1, 18)].carnivore_list != []
+
+# breeding
+
+def test_breed__certain_probability_all_in_cell():
+    cell = topo.Jungle()
+    for _ in range(100):
+        cell.add_animal(animals.Herbivores(age=10, weight=100))
+        cell.add_animal(animals.Carnivores(age=10, weight=100))
+    cell.breed_all_animals_in_cell()
+    assert len(cell.herbivore_list) == 200
+    assert len(cell.carnivore_list) == 200
+
+#cell ek
+
+def test_ek_for_cell_9_herbs_carns_100_fodder(basic_jungle):
+    basic_jungle.fodder = 100
+    for _ in range(9):
+        basic_jungle.add_animal(animals.Herbivores(weight=10))
+        basic_jungle.add_animal(animals.Carnivores())
+    ek_herbivores = basic_jungle.ek_for_cell("Herbivores")
+    ek_carnivores = basic_jungle.ek_for_cell("Carnivores")
+    assert ek_herbivores == 1
+    assert ek_carnivores == 0.18
+
+
+
 
 
 
@@ -169,9 +203,7 @@ def test_feeding():
     jungle_cell.feed_herbivores_in_cell()
     assert least_fittest_weight == testani.weight
 
-#migration
 
-def test_migrate_all_herb_in_cell_mock_ek():
-    pass
+
 
 
