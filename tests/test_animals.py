@@ -101,6 +101,7 @@ def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     strong_vs_weak[1].weight = 10
     strong_vs_weak[1].parameters["DeltaPhiMax"] = 0.0
     strong_vs_weak[1].kills_herbivore(strong_vs_weak[0])
+    strong_vs_weak[1].parameters["DeltaPhiMax"] = 10
     assert strong_vs_weak[1].weight == 10 + 0.75
 
 
@@ -200,6 +201,7 @@ def test_breed_certain_prob_overweight_newborn():
     cell.add_animal(herbivore)
     herbivore.parameters["xi"] = 100
     herbivore.breed(cell, 1000)
+    herbivore.parameters["xi"] = 1.2
     assert len(cell.herbivore_list) == 1
 
 

@@ -144,6 +144,7 @@ def test_migrate_all_herbi_in_cell_new_location(
     animals.Herbivores.parameters["mu"] = 1000
     mock_ek = {(1,18):2}
     standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_herbivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
+    animals.Herbivores.parameters["mu"] = 0.25
     assert standard_map_ani_one_accesible.raster_model[(1, 19)].herbivore_list == []
     assert standard_map_ani_one_accesible.raster_model[(1, 18)].herbivore_list != []
 
@@ -153,12 +154,13 @@ def test_migrate_all_carni_in_cell_new_location(
     animals.Carnivores.parameters["mu"] = 1000
     mock_ek = {(1,18):2}
     standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_carnivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
+    animals.Carnivores.parameters["mu"] = 0.24
     assert standard_map_ani_one_accesible.raster_model[(1, 19)].carnivore_list == []
     assert standard_map_ani_one_accesible.raster_model[(1, 18)].carnivore_list != []
 
 # breeding
 
-def test_breed__certain_probability_all_in_cell():
+def test_breed_certain_probability_all_in_cell():
     cell = topo.Jungle()
     for _ in range(100):
         cell.add_animal(animals.Herbivores(age=10, weight=100))
@@ -166,6 +168,21 @@ def test_breed__certain_probability_all_in_cell():
     cell.breed_all_animals_in_cell()
     assert len(cell.herbivore_list) == 200
     assert len(cell.carnivore_list) == 200
+
+def test_breed_carni_certain_probability_all_in_cell():
+    cell = topo.Jungle()
+    for _ in range(100):
+        cell.add_animal(animals.Carnivores(age=10, weight=100))
+    cell.breed_all_carnivores_in_cell()
+    assert len(cell.carnivore_list) == 200
+
+def test_breed_herbi_certain_probability_all_in_cell():
+    cell = topo.Jungle()
+    for _ in range(100):
+        cell.add_animal(animals.Herbivores(age=10, weight=100))
+    cell.breed_all_herbivores_in_cell()
+    assert len(cell.herbivore_list) == 200
+
 
 # cell ek
 
@@ -210,9 +227,9 @@ def test_feeding_herbivores_in_a_cell():
     least fittest animal shall in not be able to eat, due to overgrazing,
     and therefore keep the same weight after the graze commando"""
     jungle_cell = topo.Jungle()
-    jungle_cell.parameters["f_max"] = 100
+    # jungle_cell.parameters["f_max"] = 800
     jungle_cell.fodder = 100
-    [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(11)]
+    [jungle_cell.add_animal(animals.Herbivores()) for herbivores in range(81)]
     herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
                                     key=lambda herbi: herbi.fitness, reverse=True)
     least_fittest_herb = herbivore_fitness_sort[0]
@@ -220,13 +237,24 @@ def test_feeding_herbivores_in_a_cell():
     least_fittest_weight = least_fittest_herb.weight
     second_least_fittest_weight = second_least_fittest_herb.weight
     jungle_cell.feed_herbivores_in_cell()
+
     assert least_fittest_weight == least_fittest_herb.weight
     assert second_least_fittest_weight != second_least_fittest_herb.weight
     # Test that the available fodder now are = 0, and that the increase_fodder
     # works, so the food level again = f_max
     assert jungle_cell.fodder == 0
     jungle_cell.increase_fodder()
-    assert jungle_cell.fodder == 100
+    assert jungle_cell.fodder == 800
+
+# def test_feeding_herbs_in_a_cell():
+#     jungle_cell = topo.Jungle()
+#     jungle_cell.fodder = 100
+#     [jungle_cell.add_animal(animals.Herbivores()) for _ in range(11)]
+#     herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
+#                                     key=lambda herbi: herbi.fitness,
+#                                     reverse=True)
+#     jungle_cell.feed_herbivores_in_cell()
+
 
 def test_increase_fodder_savanna_fodder_is_max():
     cell = topo.Savanna()
