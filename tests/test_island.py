@@ -1,5 +1,6 @@
 from biosim.Island import Island
 import src.biosim.cell_topography as topo
+import src.biosim.animals as ani
 import pytest
 
 # Map generation
@@ -64,93 +65,78 @@ def test_populate_island_nonexistant_coordinates(standard_map):
 
 def test_empty_island():
     """Empty island can be created"""
-    Island(island_map="OO\nOO")
+    Island("OO\nOO")
 
 
 def test_minimal_island():
     """Island of single jungle cell"""
-    Island(island_map="OOO\nOJO\nOOO")
+    Island("OOO\nOJO\nOOO")
 
 
 def test_all_types():
     """All types of landscape can be created"""
-    Island(island_map="OOOO\nOJSO\nOMDO\nOOOO")
+    Island("OOOO\nOJSO\nOMDO\nOOOO")
 
 
 @pytest.mark.parametrize("bad_boundary", ["J", "S", "M", "D"])
 def test_invalid_boundary(bad_boundary):
     """Non-ocean boundary must raise error"""
     with pytest.raises(ValueError):
-        Island(island_map="{}OO\nOJO\nOOO".format(bad_boundary))
+        Island("{}OO\nOJO\nOOO".format(bad_boundary))
 
 
 def test_invalid_landscape():
     """Invalid landscape type must raise error"""
     with pytest.raises(ValueError):
-        Island(island_map="OOO\nORO\nOOO")
+        Island("OOO\nORO\nOOO")
 
 
 def test_inconsistent_length():
     """Inconsistent line length must raise error"""
     with pytest.raises(ValueError):
-        Island(island_map="OOO\nOJJO\nOOO")
+        Island("OOO\nOJJO\nOOO")
 
 
 def test_inconsistent_height():
     """Inconsistent line length must raise error"""
     with pytest.raises(ValueError):
-        Island(island_map="OOO\nOJO\nOOO\nOO")
+        Island("OOO\nOJO\nOOO\nOO")
 
-
-#Migration
-
-@pytest.fixture
-def surrounding_ocean_cell():
-    geogr = """\
-                OOOOOOOOOOOOOOOOOOOOO
-                OOOOOOOOSMMMMJJJJJJJO
-                OSSSSSJJJJMMJJJJJJJOO
-                OSSSSSSSSSMMJJJJJJOOO
-                OSSSSSJJJJJJJJJJJJOOO
-                OSSSSSJJJDDJJJSJJJOOO
-                OSSJJJJJDDDJJJSSSSOOO
-                OOSSSSJJJDDJJJSOOOOOO
-                OSSSJJJJJDDJJJJJJJOOO
-                OSSSSJJJJDDJJJJOOOOOO
-                OOSSSSJJJJJJJJOOOOOOO
-                OOOSSSSJJJJJJJOOOOOOO
-                OOOOOOOOOOOOOOOOOOOOO"""
-    island = Island(geogr)
-    occupants = [{'loc': (1, 19),
-           'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
-              {'species': 'Herbivore',
-               'age': 9, 'weight': 10.3}]}]
-    island.populate_island(occupants)
-    return island
-
-def test_one_option_migration(standard_map_ani_one_accesible):
-    standard_map_ani_one_accesible.migrate_all_cells()
-    assert len(standard_map_ani_one_accesible.raster_model[(1, 18)].herbivore_list) == 2
-    assert len(standard_map_ani_one_accesible.raster_model[(1, 19)].herbivore_list) == 0
+# Migration
 
 @pytest.fixture
 def surrounding_ocean_cell_small():
     geogr = """\
-                OOO
-                OSO
-                OOO"""
+                OOOOO
+                OJMDO
+                OOOOO"""
     island = Island(geogr)
-    occupants = [{'loc': (1, 1),
-           'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
-              {'species': 'Herbivore',
-               'age': 9, 'weight': 10.3}]}]
-    island.populate_island(occupants)
+    island.populate_island([{'loc': (1, 1), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': 10} for _ in range(10)]}])
+    island.populate_island([{'loc': (1, 3), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': 10} for _ in range(10)]}])
     return island
 
-def test_surrounded_by_occean(surrounding_ocean_cell_small):
+
+def test_migration_cant_happen(surrounding_ocean_cell_small):
+    """The test shows that the animals dont migrate when their cell is
+    surrounded by non-accessible cells"""
     surrounding_ocean_cell_small.migrate_all_cells()
-    assert len(surrounding_ocean_cell_small.raster_model[(1,1)].herbivore_list) == 2
+    assert len(surrounding_ocean_cell_small.raster_model[(1, 1)].herbivore_list) == 10
+    assert len(surrounding_ocean_cell_small.raster_model[(1, 3)].herbivore_list) == 10
+
+
+def test_feed_all_animals(surrounding_ocean_cell_small):
+    """The animals on a jungle cell eats, the animals on a desert cell does not"""
+    biomass_before_feeding_1_1 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 1)])
+    biomass_before_feeding_1_3 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 3)])
+    surrounding_ocean_cell_small.feed_all_animals()
+    biomass_after_feeding_1_1 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 1)])
+    biomass_after_feeding_1_3 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 3)])
+    assert biomass_before_feeding_1_1 != biomass_after_feeding_1_1
+    assert biomass_before_feeding_1_3 == biomass_after_feeding_1_3
+
+
+
+
+
 
 
