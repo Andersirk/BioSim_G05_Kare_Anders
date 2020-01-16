@@ -14,10 +14,12 @@ class Animals:
     instances = []
     """This is the overall class for the animals which lives on the island"""
 
-    def __init__(self, age, weight):
+    def __init__(self, age, weight, potential_newborn):
         self.age = age
         self.weight = self.birth_weight() if weight is None else weight
-        Animals.instances.append(self)
+        if not potential_newborn:
+            Animals.instances.append(self)
+            #newborns blir lagt til selvom de blir skrapa
         self.has_tried_migration_this_year = False
 
     def birth_weight(self):
@@ -78,11 +80,12 @@ class Animals:
             return
         if random.random() > breeding_probability:
             return
-        newborn = self.__class__()
-        if self.parameters["xi"]*newborn.weight > self.weight:
+        potential_newborn = self.__class__(potential_newborn=True)
+        if self.parameters["xi"]*potential_newborn.weight > self.weight:
             return
-        self.weight -= self.parameters["xi"]*newborn.weight
-        cell.add_animal(newborn)
+        self.weight -= self.parameters["xi"]*potential_newborn.weight
+        cell.add_animal(potential_newborn)
+        Animals.instances.append(potential_newborn)
 
     def will_die_natural_death(self):
         if self.fitness == 0 or random.random() < self.parameters["omega"] * (1 - self.fitness):
@@ -157,8 +160,8 @@ class Herbivores(Animals):
                   "DeltaPhiMax": None
                   }
 
-    def __init__(self, age = 0, weight = None):
-        super().__init__(age, weight)
+    def __init__(self, age=0, weight=None, potential_newborn=False):
+        super().__init__(age, weight, potential_newborn)
 
     def graze(self, cell):
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
@@ -203,8 +206,8 @@ class Carnivores(Animals):
                   "F": 50,
                   "DeltaPhiMax": 10}
 
-    def __init__(self, age=0, weight=None):
-        super().__init__(age, weight)
+    def __init__(self, age=0, weight=None, potential_newborn=False):
+        super().__init__(age, weight, potential_newborn)
         self.eaten_this_year = 0
 
     def kills_herbivore(self, herbivore):
