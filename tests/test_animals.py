@@ -8,6 +8,8 @@ import src.biosim.animals as ani
 import pytest
 import src.biosim.cell_topography as topo
 
+import random
+
 
 
 # Birth weight
@@ -183,14 +185,6 @@ def test_breed_uncertain_probability():
     assert born < 450
 
 
-def test_breed_certain_probability_all_in_cell():
-    cell = topo.Jungle()
-    for _ in range(100):
-        cell.add_animal(ani.Herbivores(age=10, weight=100))
-    cell.breed_all_animals_in_cell()
-    assert len(cell.herbivore_list) == 200
-
-
 def test_breed_low_weight():
     herbivore = ani.Herbivores()
     herbivore.weight = 1
@@ -256,8 +250,16 @@ def test_what_cell_when_will_not_migrate(mock_ek):
     chosen_cell = testanimal.what_cell_to_migrate_to((10,10), mock_ek)
     assert chosen_cell == (10,10)
 
-
-
+def test_what_cell_two_options_equal_probability():
+    testanimal = ani.Herbivores(age=0,weight=100)
+    testanimal.parameters["mu"] = 10
+    current_cell = (10, 10)
+    mock_ek = {(11,10):1, (10,11): 1}
+    random.seed(2)
+    decisionlist = [testanimal.what_cell_to_migrate_to(current_cell, mock_ek
+                                                       ) for _ in range(1000)]
+    times_11_10_chosen = decisionlist.count((11,10))
+    assert 490 < times_11_10_chosen < 510
 
 # Annual weight decrease, age up
 
