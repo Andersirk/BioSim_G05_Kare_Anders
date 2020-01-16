@@ -135,7 +135,7 @@ class Topography:
 
     def feed_herbivores_in_cell(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
-                                   key=lambda herbi: herbi.fitness)
+                                   key=lambda herbi: herbi.fitness, reverse=True)
         for herbivore in herbivore_fitness_sort:
             if self.fodder <= 0:
                 break
@@ -144,9 +144,9 @@ class Topography:
 
     def feed_carnivores_in_cell(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
-                                   key=lambda herbi: herbi.fitness, reverse=True)
+                                   key=lambda herbi: herbi.fitness)
         carnivore_fitness_sort = sorted(self.carnivore_list,
-                                   key=lambda carni: carni.fitness)
+                                   key=lambda carni: carni.fitness, reverse=True)
         for carnivore in carnivore_fitness_sort:
             for herbivore in herbivore_fitness_sort:
                 if carnivore.kills_herbivore(herbivore):

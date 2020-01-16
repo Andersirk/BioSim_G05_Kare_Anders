@@ -8,6 +8,7 @@ import numpy as np
 import random
 import biosim.cell_topography as topo
 import copy
+import functools
 
 
 class Animals:
@@ -35,6 +36,7 @@ class Animals:
         )
 
     @property
+    @functools.lru_cache(maxsize=256)
     def fitness(self):
         """
         Computes the fitness of an animal based on the weight and age of the
