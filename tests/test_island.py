@@ -63,6 +63,42 @@ def test_populate_island_nonexistant_coordinates(standard_map):
                    'age': 5, 'weight': 8.1}]}]
         standard_map.populate_island(population)
 
+def test_populate_island_float_age(standard_map):
+    with pytest.raises(ValueError):
+        population = [{'loc': (4, 7),
+          'pop': [{'species': 'Herbivore',
+                   'age': 10.5, 'weight': 12.5},
+                  {'species': 'Carnivore',
+                   'age': 5, 'weight': 8.1}]}]
+        standard_map.populate_island(population)
+
+def test_populate_island_negative_age(standard_map):
+    with pytest.raises(ValueError):
+        population = [{'loc': (4, 7),
+          'pop': [{'species': 'Herbivore',
+                   'age': 10, 'weight': 12.5},
+                  {'species': 'Carnivore',
+                   'age': -1, 'weight': 8.1}]}]
+        standard_map.populate_island(population)
+
+def test_populate_island_negative_weight(standard_map):
+    with pytest.raises(ValueError):
+        population = [{'loc': (4, 7),
+          'pop': [{'species': 'Herbivore',
+                   'age': 10, 'weight': 12.5},
+                  {'species': 'Carnivore',
+                   'age': 1, 'weight': -10.2}]}]
+        standard_map.populate_island(population)
+
+def test_populate_island_0_weight(standard_map):
+    with pytest.raises(ValueError):
+        population = [{'loc': (4, 7),
+          'pop': [{'species': 'Herbivore',
+                   'age': 10, 'weight': 12.5},
+                  {'species': 'Carnivore',
+                   'age': 1, 'weight': 0}]}]
+        standard_map.populate_island(population)
+
 def test_empty_island():
     """Empty island can be created"""
     Island("OO\nOO")
@@ -127,6 +163,7 @@ def test_migration_cant_happen(surrounding_ocean_cell_small):
     assert len(surrounding_ocean_cell_small.raster_model[(1, 1)].herbivore_list) == 10
     assert len(surrounding_ocean_cell_small.raster_model[(1, 3)].herbivore_list) == 10
 
+# feeding and fodder
 
 def test_feed_all_animals(surrounding_ocean_cell_small):
     """Test if the herbivores and the carnivores eat."""
@@ -139,13 +176,29 @@ def test_feed_all_animals(surrounding_ocean_cell_small):
     assert biomass_before_feeding_1_3 == biomass_after_feeding_1_3
     assert len(surrounding_ocean_cell_small.raster_model[(3, 2)].herbivore_list) == 0
 
+def test_increase_fodder_random_jungle_cells(standard_map):
+    standard_map.raster_model[(4, 7)].fodder = 0
+    standard_map.raster_model[(11, 8)].fodder = 45
+    standard_map.increase_fodder_all_cells()
+    assert standard_map.raster_model[(4, 7)].fodder == topo.Jungle.parameters["f_max"]
+    assert standard_map.raster_model[(11, 8)].fodder == topo.Jungle.parameters["f_max"]
 
-    surrounding_ocean_cell_small.increase_fodder_all_cells()
-    assert
+# annual death
 
+def test_annual_death_0_fitness_random_cells(standard_map):
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=100, weight=0))
+    standard_map.raster_model[(11, 8)].add_animal(ani.Carnivores(age=100, weight=0))
+    standard_map.annual_death_all_cells()
+    assert standard_map.raster_model[(3, 4)].herbivore_list == []
+    assert standard_map.raster_model[(11, 8)].carnivore_list == []
 
-
-
+def test_breed_all_cells_certain_prob_random_cell(standard_map):
+    for _ in range(100):
+        standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=0, weight=100))
+        standard_map.raster_model[(11, 8)].add_animal(ani.Carnivores(age=0, weight=100))
+    standard_map.breed_in_all_cells()
+    assert len(standard_map.raster_model[(3, 4)].herbivore_list) == 200
+    assert len(standard_map.raster_model[(11, 8)].carnivore_list) == 200
 
 
 
