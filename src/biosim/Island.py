@@ -8,11 +8,13 @@ from src.biosim.animals import Herbivores, Carnivores, Animals
 import numpy as np
 import copy
 import random
+import pandas as pd
 
 
 class Island:
     def __init__(self, island_map):
         self.raster_model = self.create_map(island_map)
+        self.current_year = 0
 
     def create_map(self, island_map):
         """ Creates a dictionary where the keys are coordinates and values
@@ -63,6 +65,7 @@ class Island:
 
     def populate_island(self, population_list):
         for dictionary in population_list:
+            self.check_new_population_age_and_weight(dictionary)
             if dictionary["loc"] not in self.raster_model.keys():
                 raise ValueError("These coordinates do not exist in this map's coordiante system.")
             if self.raster_model[dictionary["loc"]].is_accessible:
@@ -73,6 +76,14 @@ class Island:
                         self.raster_model[dictionary["loc"]].add_animal(Carnivores(age=population["age"], weight=population["weight"]))
             else:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
+
+    def check_new_population_age_and_weight(self, new_population_dict):
+        for animal in new_population_dict["pop"]:
+            if type(animal["age"]) != int or animal["age"] < 0:
+                raise ValueError("The animals age must be a non-negative integer")
+            if animal["weight"] is not None:
+                if animal["weight"] <= 0:
+                    raise ValueError("The animal must have a positive weight")
 
     def migrate_all_cells(self):
         carnivore_ek, herbivore_ek = self.generate_ek_for_board()
@@ -121,11 +132,29 @@ class Island:
         Animals.age_up()
         Animals.annual_metabolism()
         self.annual_death_all_cells()
+        self.current_year += 1
 
+    def per_cell_count_pandas_dataframe(self):
+        pdlist = []
+        for coordinate, cell in self.raster_model.items():
+            if cell.is_accessible:
+                herb_amount = len(cell.herbivore_list)
+                carn_amount = len(cell.carnivore_list)
+            else:
+                herb_amount = 0
+                carn_amount = 0
+            pdlist.append([coordinate[0], coordinate[1], herb_amount, carn_amount])
+        dataframe = pd.DataFrame(pdlist,columns=['Row','Col', 'Herbivore', 'Carnivore'])
+        return dataframe
 
-
-
-
+    def total_number_per_species(self):
+        total_herb = 0
+        total_carn = 0
+        for cell in self.raster_model.values():
+            if cell.is_accessible:
+                total_carn += len(cell.carnivore_list)
+                total_herb += len(cell.herbivore_list)
+        return {'Herbivore': total_herb, 'Carnivore': total_herb}
 
 
 
@@ -170,7 +199,7 @@ if __name__ == "__main__":
     island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(300)]}])
 
 
-    for x in range(100):
+    for x in range(20):
         island.annual_cycle()
         print("year", x)
         print("total ani", len(Animals.instances))
@@ -186,8 +215,4 @@ if __name__ == "__main__":
         print(island.raster_model[(1, 18)].biomass_herbivores())
         print("############")
 
-
-
-
-
-
+    island.pandas_dataframe()
