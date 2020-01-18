@@ -149,6 +149,16 @@ class Island:
         dataframe = pd.DataFrame(pdlist,columns=['Row','Col', 'Herbivore', 'Carnivore'])
         return dataframe
 
+    def arrays_for_heatmap(self):
+        maxcord = max(self.raster_model.keys())
+        herb_array = np.zeros(maxcord)
+        carn_array = np.zeros(maxcord)
+        for (row, col), instance in self.raster_model.items():
+            if instance.is_accessible:
+                herb_array[row][col] = len(instance.herbivore_list)
+                carn_array[row][col] = len(instance.carnivore_list)
+        return herb_array, carn_array
+
     def total_number_per_species(self):
         total_herb = 0
         total_carn = 0
@@ -183,8 +193,11 @@ class Island:
                         carnivore_10_15 += 1
                     elif carnivore.age <= 15:
                         carnivore_15plus += 1
-        age_list = [[carnivore_0_5, -herbivore_0_5],[carnivore_5_10, -herbivore_5_10], [carnivore_10_15, -herbivore_10_15], [carnivore_15plus, -herbivore_15plus]]
-        return age_list
+        # age_list = [[carnivore_0_5, -herbivore_0_5],[carnivore_5_10, -herbivore_5_10], [carnivore_10_15, -herbivore_10_15], [carnivore_15plus, -herbivore_15plus]]
+        # return age_list
+        herb_list = np.array([herbivore_0_5,herbivore_5_10,herbivore_10_15,herbivore_15plus])
+        carn_list = np.array([carnivore_0_5,carnivore_5_10,carnivore_10_15,carnivore_15plus])
+        return herb_list, carn_list
 
     def biomass_food_chain(self):
         biomass_fodder = 0
@@ -201,41 +214,40 @@ class Island:
         return biomass_list
 
     # def population_pyramid(self, age_list):
-        # df = pd.DataFrame(age_list, columns = ["Herbivores","Carnivores"], index =["0-5", "5-10", "10-5", "15+"])
-        # df = df.rename_axis('Age').reset_index()
-        # fig, ax = plt.subplots()
-        # sns.barplot(x="Herbivores", y="Age", color="seagreen",
-        #                    data=df,order=["15+", "10-5","5-10", "0-5"])
-        # sns.barplot(x="Carnivores", y="Age", color="plum",
-        #                    data=df, order=["15+", "10-5","5-10", "0-5"])
-        #
-        # plt.xlabel('Amount')
-        # plt.xticks(np.arange(-800,801, step=200),(800,600, 400, 200, 0, 200, 400, 600, 800))
-        # plt.text(0.2, -0.15, 'Carnivores', color='plum', transform= ax.transAxes)
-        # plt.text(0.7, -0.15, 'Herbivores', color='seagreen', transform= ax.transAxes)
-        # plt.title("Population Pyramid for Rossumøya")
-        # ax.text(0.05, 0.95, "Year xxx", transform=ax.transAxes, fontsize=14,
-        #         verticalalignment='top')
-        # plt.show()
-
-    # def stacked_area(self, biomass_list)
-    #     df = pd.DataFrame(biomass_list)
-    #     fig, ax = plt.subplots(1, 1, figsize=(16, 9), dpi=80)
-    #     columns = df.columns[0:]
-    #     x = [0,1] #year the simulation last
-    #     y0 = df[columns[0]].values.tolist()
-    #     y1 = df[columns[1]].values.tolist()
-    #     y2 = df[columns[2]].values.tolist()
-    #     y = np.vstack([y0, y1, y2])
-    #     labs = columns.values.tolist()
-    #     ax = plt.gca()
-    #     ax.stackplot(x, y, labels=labs, colors=['tab:green', 'tab:purple', 'tab:red'])
-    #     ax.set(ylim=[0, 100000])
-    #     ax.legend(fontsize=10, ncol=4)
-    #     plt.xticks(x[::5], fontsize=10, horizontalalignment='center')
-    #     plt.yticks(np.arange(10000, 100000, 20000), fontsize=10)
-    #     plt.xlim(x[0], x[-1])
+    #     df = pd.DataFrame(age_list, columns = ["Herbivores","Carnivores"], index =["0-5", "5-10", "10-5", "15+"])
+    #     df = df.rename_axis('Age').reset_index()
+    #     fig, ax = plt.subplots()
+    #     sns.barplot(x="Herbivores", y="Age", color="seagreen",
+    #                        data=df,order=["15+", "10-5","5-10", "0-5"])
+    #     sns.barplot(x="Carnivores", y="Age", color="plum",
+    #                        data=df, order=["15+", "10-5","5-10", "0-5"])
+    #     plt.xlabel('Amount')
+    #     plt.xticks(np.arange(-800,801, step=200),(800,600, 400, 200, 0, 200, 400, 600, 800))
+    #     plt.text(0.2, -0.15, 'Carnivores', color='plum', transform= ax.transAxes)
+    #     plt.text(0.7, -0.15, 'Herbivores', color='seagreen', transform= ax.transAxes)
+    #     plt.title("Population Pyramid for Rossumøya")
+    #     ax.text(0.05, 0.95, "Year xxx", transform=ax.transAxes, fontsize=14,
+    #             verticalalignment='top')
     #     plt.show()
+
+    def stacked_area(self, biomass_list):
+        df = pd.DataFrame(biomass_list)
+        fig, ax = plt.subplots(1, 1, figsize=(16, 9), dpi=80)
+        columns = df.columns[0:]
+        x = [0,1] #year the simulation last
+        y0 = df[columns[0]].values.tolist()
+        y1 = df[columns[1]].values.tolist()
+        y2 = df[columns[2]].values.tolist()
+        y = np.vstack([y0, y1, y2])
+        labs = columns.values.tolist()
+        ax = plt.gca()
+        ax.stackplot(x, y, labels=labs, colors=['tab:green', 'tab:purple', 'tab:red'])
+        ax.set(ylim=[0, 100000])
+        ax.legend(fontsize=10, ncol=4)
+        plt.xticks(x[::5], fontsize=10, horizontalalignment='center')
+        plt.yticks(np.arange(10000, 100000, 20000), fontsize=10)
+        plt.xlim(x[0], x[-1])
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -294,6 +306,8 @@ if __name__ == "__main__":
         print(island.raster_model[(1, 18)].biomass_herbivores())
         print("############")
 
+
+    print(island.array_for_heatmap())
     # island.pandas_dataframe()
     print(island.population_age_grups())
     # island.population_pyramid()
