@@ -5,10 +5,12 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 from src.biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
 from src.biosim.animals import Herbivores, Carnivores, Animals
-import numpy as np
 import copy
 import random
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class Island:
@@ -157,6 +159,52 @@ class Island:
         return {'Herbivore': total_herb, 'Carnivore': total_herb}
 
 
+    def population_age_grups(self):
+        herbivore_0_5, carnivore_0_5 = 0, 0
+        herbivore_5_10, carnivore_5_10 = 0, 0
+        herbivore_10_15, carnivore_10_15 = 0, 0
+        herbivore_15plus, carnivore_15plus = 0, 0
+        for cell in self.raster_model.values():
+            if cell.is_accessible:
+                for herbivore, carnivore in zip(cell.herbivore_list, cell.carnivore_list):
+                    if 0 <= herbivore.age < 5:
+                        herbivore_0_5 += 1
+                    elif 5 <= herbivore.age < 10:
+                        herbivore_5_10 += 1
+                    elif 10 <= herbivore.age < 15:
+                        herbivore_10_15 += 1
+                    elif herbivore.age <= 15:
+                        herbivore_15plus += 1
+                    if 0 <= carnivore.age < 5:
+                        carnivore_0_5 += 1
+                    elif 5 <= carnivore.age < 10:
+                        carnivore_5_10 += 1
+                    elif 10 <= carnivore.age < 15:
+                        carnivore_10_15 += 1
+                    elif carnivore.age <= 15:
+                        carnivore_15plus += 1
+        age_list = [[carnivore_0_5, -herbivore_0_5],[carnivore_5_10, -herbivore_5_10], [carnivore_10_15, -herbivore_10_15], [carnivore_15plus, -herbivore_15plus]]
+        return age_list
+
+    def population_pyramid(self, age_list):
+        pass
+        # df = pd.DataFrame(age_list, columns = ["Herbivores","Carnivores"], index =["0-5", "5-10", "10-5", "15+"])
+        # df = df.rename_axis('Age').reset_index()
+        # fig, ax = plt.subplots()
+        # sns.barplot(x="Herbivores", y="Age", color="seagreen",
+        #                    data=df,order=["15+", "10-5","5-10", "0-5"])
+        # sns.barplot(x="Carnivores", y="Age", color="plum",
+        #                    data=df, order=["15+", "10-5","5-10", "0-5"])
+        #
+        # plt.xlabel('Amount')
+        # plt.xticks(np.arange(-800,801, step=200),(800,600, 400, 200, 0, 200, 400, 600, 800))
+        # plt.text(0.2, -0.15, 'Carnivores', color='plum', transform= ax.transAxes)
+        # plt.text(0.7, -0.15, 'Herbivores', color='seagreen', transform= ax.transAxes)
+        # plt.title("Population Pyramid of Rossumøya")
+        # ax.text(0.05, 0.95, "Year xxx", transform=ax.transAxes, fontsize=14,
+        #         verticalalignment='top')
+        # plt.show()
+
 
 
 if __name__ == "__main__":
@@ -188,7 +236,7 @@ if __name__ == "__main__":
 
     island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': None} for _ in range(100)]}])
 
-    for x in range(20):
+    for x in range(30):
         island.annual_cycle()
         print("year", x)
         print("total ani", len(Animals.instances))
@@ -196,10 +244,10 @@ if __name__ == "__main__":
         print(island.raster_model[(1,18)].biomass_herbivores())
         print("############")
 
-    island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(300)]}])
+    island.populate_island([{'loc': (1, 17), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(300)]}])
 
 
-    for x in range(20):
+    for x in range(10):
         island.annual_cycle()
         print("year", x)
         print("total ani", len(Animals.instances))
@@ -215,4 +263,8 @@ if __name__ == "__main__":
         print(island.raster_model[(1, 18)].biomass_herbivores())
         print("############")
 
-    island.pandas_dataframe()
+    # island.pandas_dataframe()
+    print(island.population_age_grups())
+    island.population_pyramid()
+
+
