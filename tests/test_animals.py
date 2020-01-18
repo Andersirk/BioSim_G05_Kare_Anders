@@ -11,33 +11,38 @@ import src.biosim.cell_topography as topo
 import random
 
 
-
 # Birth weight
 
 
-class AnimalsTest(unittest.TestCase):
-    def test_birthweight_sd0(self):
-        # Test that the birth weight is correct
-        ani.Herbivores.parameters["w_birth"] = 10
-        ani.Herbivores.parameters["sigma_birth"] = 0
-        self.assertAlmostEqual(ani.Herbivores.birth_weight(ani.Herbivores()),
-                               10)
+def test_birth_weight_sd0():
+    """
+    Tests that the birth weight = herbivores.parameters["w_birth"],
+    when sigma_birth is set to 0
+    """
+    ani.Herbivores.parameters["w_birth"] = 10
+    ani.Herbivores.parameters["sigma_birth"] = 0
+    assert ani.Herbivores.birth_weight(ani.Herbivores()) == 10
 
 
 # Fitness
 
 
 def test_fitness_level_is_zero_when_weight_is_zero():
+    """Tests that the fitness level is zero, when the weight is zero"""
     herbivore = ani.Herbivores()
+    carnivore = ani.Carnivores()
     herbivore.weight = 0
+    carnivore.weight = 0
     assert herbivore.fitness == 0
+    assert carnivore.fitness == 0
+
 
 
 def test_fitness_level_is_between_zero_and_one():
+    """Test that the fitness level cannot be greater then 1"""
     herbivore = ani.Herbivores()
-    herbivore.weight = 100
+    herbivore.weight = 10000
     herbivore.age = 0
-    assert herbivore.fitness >= 0
     assert herbivore.fitness <= 1
 
 
@@ -59,9 +64,8 @@ def strong_vs_weak():
 def test_natural_death(strong_vs_weak):
     """
     Expected probability for natural_death = omega(1-fitness).
-    This test tests that an very unfit herbivore natural death prop =
-    0.4(1-0) ≃ 0.4. and a very fit carnivore natural death prop =
-    0.9(1-0.95) ≃ 0.045
+    Tests that an very unfit herbivore's natural death prop = 0.4(1-0) ≃ 0.4,
+    and that a very fit carnivore's natural death prop = 0.9(1-0.95) ≃ 0.045
     """
     die_rate_herbivore = [strong_vs_weak[0].will_die_natural_death() for _ in
                           range(1000)]
@@ -78,10 +82,10 @@ def test_natural_death(strong_vs_weak):
 
 def test_fit_carnivore_kills_unfit_herbivore(strong_vs_weak):
     """
-    A carnivore can only kill a certain amount of herbivores per year,
-    limited by the parameter "F", which by default is 50. This means that the
-    carnivore only can kill 50 1 kg herbivores. It will then have gained
-    50(amount)*1 kg*0.75(beta) kg.
+    Test that a carnivore can only kill a certain amount of herbivores per
+    year, gains the expected amount of weight, can reset its eaten_this_year-
+    variable and checks that the carnivore always eat when the 'DeltaPhiMax'-
+    parameter is set to 0
     """
     assert strong_vs_weak[1].eaten_this_year == 0
     n = 1000
@@ -141,6 +145,8 @@ def test_set_parameters(bad_parameters):
 
 
 def test_herbivore_grazing():
+    """Test that the herbivore cannot gain weight when grazing in a desert,
+    but gains weight when grazing in the jungle and savanna"""
     herbivore = ani.Herbivores()
     pre_eating_weight = herbivore.weight
     desert_cell = topo.Desert()
@@ -161,6 +167,8 @@ def test_herbivore_grazing():
 
 
 def test_breed_certain_probability():
+    """Test that a fit herbivore will give birth to another herbivore when the
+    breeding probability = 1"""
     cell = topo.Jungle()
     herbivore = ani.Herbivores()
     herbivore.weight, herbivore.age = 80, 30
@@ -172,7 +180,8 @@ def test_breed_certain_probability():
 
 
 def test_breed_uncertain_probability():
-    # about 0.4 probabilty for birth
+    """Test a herbivore will give birth to around 400 kids, when it trys 1000
+    times, when the probability for birth is around 0.4"""
     born = 0
     for _ in range(1000):
         cell = topo.Jungle()
@@ -187,6 +196,7 @@ def test_breed_uncertain_probability():
 
 
 def test_breed_low_weight():
+    """Test that a herbivore with a low weight cannot breed"""
     herbivore = ani.Herbivores()
     herbivore.weight = 1
     cell = topo.Jungle()
@@ -196,6 +206,8 @@ def test_breed_low_weight():
 
 
 def test_breed_certain_prob_overweight_newborn():
+    """Tests that a herbivore cannot give birth to a child with
+    greater weight """
     herbivore = ani.Herbivores(weight=50)
     cell = topo.Jungle()
     cell.add_animal(herbivore)
@@ -214,10 +226,13 @@ def certain_migration_prob_herb():
 
 
 def test_will_migrate_certain_probability(certain_migration_prob_herb):
+    """Test if an herbivore will migrate when the probability = 1"""
     assert certain_migration_prob_herb.will_migrate()
 
 
 def test_will_migrate_50_chance():
+    """Test that a herbivore will migrate around half the times when the
+    probability = 0.5 """
     testanimal = ani.Herbivores(age=10, weight=10.0499)
     testanimal.set_parameters({"mu": 1})
     testlist = [testanimal.will_migrate() for _ in range(1000)]
@@ -232,6 +247,8 @@ def mock_ek():
 
 
 def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
+    """Tests that a herbivore will migrate to a certain cell, when this cell
+    is the only posible cell to migrate to, and this cell has an ek = 1 """
     chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
                                                                       mock_ek)
     assert chosen_cell == (11, 10)
@@ -241,19 +258,23 @@ def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
 
 
 def test_what_cell_no_options(certain_migration_prob_herb):
+    """Test that a herbivore never migrates when its have no options"""
     herbivore_ek = {}
     chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
                                                                 herbivore_ek)
     assert chosen_cell == (10,10)
 
 def test_what_cell_when_will_not_migrate(mock_ek):
+    """Test that a herbivore never migrates when the mu-parameter = 0"""
     testanimal = ani.Herbivores()
     testanimal.parameters["mu"] = 0
     chosen_cell = testanimal.what_cell_to_migrate_to((10,10), mock_ek)
     assert chosen_cell == (10,10)
 
 def test_what_cell_two_options_equal_probability():
-    testanimal = ani.Herbivores(age=0,weight=100)
+    """Test that a carnivores chances to migrate to two cells with equal ek
+    are 50-50"""
+    testanimal = ani.Carnivores(age=0,weight=100)
     testanimal.parameters["mu"] = 10
     current_cell = (10, 10)
     mock_ek = {(11,10):1, (10,11): 1}
@@ -267,6 +288,8 @@ def test_what_cell_two_options_equal_probability():
 
 
 def test_annual_weight_decrease_age_up():
+    """Tests that a herbivore loses weight and age up, when these commandos
+    are run"""
     herbivore = ani.Herbivores()
     pre_decrease_weight = herbivore.weight
     herbivore.annual_metabolism()

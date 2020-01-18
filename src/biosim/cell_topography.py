@@ -133,6 +133,13 @@ class Topography:
             weight_sum += herbivore.weight
         return weight_sum
 
+
+    def biomass_carnivores(self):
+        weight_sum = 0
+        for carnivore in self.carnivore_list:
+            weight_sum += carnivore.weight
+        return weight_sum
+
     def feed_herbivores_in_cell(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
                                    key=lambda herbi: herbi.fitness, reverse=True)
