@@ -50,37 +50,65 @@ class BioSim:
         self.island = Island(island_map)
         random.seed(seed)
         self.island.populate_island(ini_pop)
-
+        self.rgbmap = self.create_color_map(island_map)
         self._current_year = 0
-        self._final_year = None
+        plt.ion()
 
-        self._sim_window = None
-        self._static_map_fig = None
-        self._img_axis = None
-        self._pop_plot = None
+
+        self._final_year = None
+        self._sim_window_fig = None
+        self._static_map_sub = None
+        self._static_map_ax = None
+        self._pop_plot_sub = None
         self._carn_line = None
         self._herb_line = None
+        self._heat_herb_sub = None
+        self._heat_herb_im_ax = None
+        self._heat_carn_sub = None
+        self._heat_carn_im_ax = None
+        self._pop_pyram_sub = None
+        self._pop_pyram_ax = None
+        self._stack_area_sub = None
+        self._stack_area_ax = None
 
 
     def setup_sim_window(self):
         # setup main window
-        if self._sim_window is None:
-            self._sim_window = plt.figure()
+        if self._sim_window_fig is None:
+            self._sim_window_fig = plt.figure()
 
         # setup static
-        if self._static_map_fig is None:
-            self._static_map_fig = self._sim_window.add_subplot(2, 2, 1)
-            self._img_axis = None
+        if self._static_map_sub is None:
+            self._static_map_sub = self._sim_window_fig.add_subplot(2, 3, 1)
+            self._static_map_ax = self._static_map_sub.imshow(self.rgbmap)
         # setup populationplot
-        if self._pop_plot is None:
-            self._pop_plot = self._sim_window.add_subplot(2, 2, 2)
-            self._pop_plot.set_ylim(0, 20000)
+        if self._pop_plot_sub is None:
+            self._pop_plot_sub = self._sim_window_fig.add_subplot(2, 3, 4)
+            self._pop_plot_sub.set_ylim(0, 200)
+        self._pop_plot_sub.set_xlim(0, self._final_year + 1)
 
-        self._pop_plot.set_xlim(0, self._final_year + 1)
+        self._instantiate_herb_line()
+        self._instantiate_carn_line()
 
+        if self._heat_herb_sub is None:
+            self._heat_herb_sub = self._sim_window_fig.add_subplot(2, 3, 3)
+
+        if self._heat_herb_sub is None:
+            self._heat_herb_sub = self._sim_window_fig.add_subplot(2, 3, 6)
+
+        if self._pop_pyram_sub is None:
+            self._pop_pyram_sub = self._sim_window_fig.add_subplot(2, 3, 2)
+
+        if self._stack_area_sub is None:
+            self._stack_area_sub = self._sim_window_fig.add_subplot(2, 3, 5)
+
+        self._sim_window_fig.tight_layout()
+
+    def _instantiate_herb_line(self):
         if self._herb_line is None:
-            herb_plot = self._pop_plot.plot(np.arange(0, self._final_year),
-                                           np.full(self._final_year, np.nan))
+            herb_plot = self._pop_plot_sub.plot(np.arange(0, self._final_year),
+                                                np.full(self._final_year,
+                                                        np.nan))
             self._herb_line = herb_plot[0]
         else:
             xdata, ydata = self._herb_line.get_data()
@@ -90,9 +118,9 @@ class BioSim:
                 self._herb_line.set_data(np.hstack((xdata, xnew)),
                                          np.hstack((ydata, ynew)))
 
-
+    def _instantiate_carn_line(self):
         if self._carn_line is None:
-            carn_plot = self._pop_plot.plot(np.arange(0, self._final_year),
+            carn_plot = self._pop_plot_sub.plot(np.arange(0, self._final_year),
                                            np.full(self._final_year, np.nan))
             self._carn_line = carn_plot[0]
         else:
@@ -103,19 +131,8 @@ class BioSim:
                 self._carn_line.set_data(np.hstack((xdata, xnew)),
                                          np.hstack((ydata, ynew)))
 
-
-    def _update_system_map(self, sys_map):
-        '''Update the 2D-view of the system.'''
-        self._img_axis =
-        # if self._img_axis is not None:
-        #     self._img_axis.set_data(sys_map)
-        # else:
-        #     self._img_axis = self._map_ax.imshow(sys_map,
-        #                                          interpolation='nearest',
-        #                                          vmin=0, vmax=1)
-        #     plt.colorbar(self._img_axis, ax=self._map_ax,
-        #                  orientation='horizontal')
-
+    def __instantiate_pop_pyram(self):
+        pass
 
     def _update_herb_graph(self, herb_count):
         ydata = self._herb_line.get_ydata()
@@ -133,6 +150,7 @@ class BioSim:
         plt.pause(1e-6)
 
     def create_color_map(self, island_map):
+        island_map = island_map.replace(" ", "")
         rgb_value = {'O': (0.0, 0.0, 1.0),  # blue
                      'M': (0.5, 0.5, 0.5),  # grey
                      'J': (0.0, 0.6, 0.0),  # dark green
@@ -141,10 +159,8 @@ class BioSim:
 
         kart_rgb = [[rgb_value[column] for column in row]
                     for row in island_map.splitlines()]
+        return kart_rgb
 
-        fig = plt.figure()
-        axim = fig.add_axes([0.1, 0.1, 0.7, 0.8])  # llx, lly, w, h
-        fig.imshow(kart_rgb)
 
 
 
@@ -178,13 +194,12 @@ class BioSim:
             img_years = num_years
         self._final_year = self._current_year + num_years
         self.setup_sim_window()
-        while self._current_year > self._final_year:
+        while self._current_year < self._final_year:
             self.island.annual_cycle()
             if self._current_year % vis_years == 0:
                 self._update_sim_window()
-
+            self._sim_window_fig.canvas.draw()
             self._current_year += 1
-        plt.draw()
 
 
 
@@ -234,6 +249,11 @@ if __name__ == "__main__":
 
     ini_pop = [{'loc': (1, 18), 'pop': [
         {'species': 'Herbivore', 'age': 0, 'weight': None} for _ in
-        range(100)]}]
+        range(100)]},
+               {'loc': (11, 8), 'pop': [
+                   {'species': 'Carnivore', 'age': 0, 'weight': None} for _ in
+                   range(100)]}
+               ]
     simmert = BioSim(island_map, ini_pop, 1)
-    simmert.simulate(20)
+    simmert.simulate(50)
+
