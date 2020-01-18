@@ -186,8 +186,21 @@ class Island:
         age_list = [[carnivore_0_5, -herbivore_0_5],[carnivore_5_10, -herbivore_5_10], [carnivore_10_15, -herbivore_10_15], [carnivore_15plus, -herbivore_15plus]]
         return age_list
 
-    def population_pyramid(self, age_list):
-        pass
+    def biomass_food_chain(self):
+        biomass_fodder = 0
+        biomass_herbs = 0
+        biomass_carnivores = 0
+        for cell in self.raster_model.values():
+            if cell.is_accessible:
+                biomass_fodder += cell.fodder
+                biomass_herbs += cell.biomass_herbivores()
+                biomass_carnivores += cell.biomass_carnivores()
+        biomass_list = {"biomass_fodder":biomass_fodder,
+                        "biomass_herbs":biomass_herbs,
+                        "biomass_carnivores": biomass_carnivores}
+        return biomass_list
+
+    # def population_pyramid(self, age_list):
         # df = pd.DataFrame(age_list, columns = ["Herbivores","Carnivores"], index =["0-5", "5-10", "10-5", "15+"])
         # df = df.rename_axis('Age').reset_index()
         # fig, ax = plt.subplots()
@@ -200,11 +213,29 @@ class Island:
         # plt.xticks(np.arange(-800,801, step=200),(800,600, 400, 200, 0, 200, 400, 600, 800))
         # plt.text(0.2, -0.15, 'Carnivores', color='plum', transform= ax.transAxes)
         # plt.text(0.7, -0.15, 'Herbivores', color='seagreen', transform= ax.transAxes)
-        # plt.title("Population Pyramid of Rossumøya")
+        # plt.title("Population Pyramid for Rossumøya")
         # ax.text(0.05, 0.95, "Year xxx", transform=ax.transAxes, fontsize=14,
         #         verticalalignment='top')
         # plt.show()
 
+    # def stacked_area(self, biomass_list)
+    #     df = pd.DataFrame(biomass_list)
+    #     fig, ax = plt.subplots(1, 1, figsize=(16, 9), dpi=80)
+    #     columns = df.columns[0:]
+    #     x = [0,1] #year the simulation last
+    #     y0 = df[columns[0]].values.tolist()
+    #     y1 = df[columns[1]].values.tolist()
+    #     y2 = df[columns[2]].values.tolist()
+    #     y = np.vstack([y0, y1, y2])
+    #     labs = columns.values.tolist()
+    #     ax = plt.gca()
+    #     ax.stackplot(x, y, labels=labs, colors=['tab:green', 'tab:purple', 'tab:red'])
+    #     ax.set(ylim=[0, 100000])
+    #     ax.legend(fontsize=10, ncol=4)
+    #     plt.xticks(x[::5], fontsize=10, horizontalalignment='center')
+    #     plt.yticks(np.arange(10000, 100000, 20000), fontsize=10)
+    #     plt.xlim(x[0], x[-1])
+    #     plt.show()
 
 
 if __name__ == "__main__":
@@ -265,6 +296,7 @@ if __name__ == "__main__":
 
     # island.pandas_dataframe()
     print(island.population_age_grups())
-    island.population_pyramid()
+    # island.population_pyramid()
+    print(island.biomass_food_chain())
 
 
