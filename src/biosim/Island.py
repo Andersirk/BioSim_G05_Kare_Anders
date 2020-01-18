@@ -3,8 +3,8 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
-from src.biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
-from src.biosim.animals import Herbivores, Carnivores, Animals
+from biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
+from biosim.animals import Herbivores, Carnivores, Animals
 import copy
 import random
 import pandas as pd
@@ -156,7 +156,7 @@ class Island:
             if cell.is_accessible:
                 total_carn += len(cell.carnivore_list)
                 total_herb += len(cell.herbivore_list)
-        return {'Herbivore': total_herb, 'Carnivore': total_herb}
+        return {'Herbivore': total_herb, 'Carnivore': total_carn}
 
 
     def population_age_grups(self):
