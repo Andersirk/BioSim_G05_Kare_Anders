@@ -24,24 +24,26 @@ def standard_map():
     return island
 
 def test_populate_island_acceptable_cells(standard_map):
+    """Test that animals can be placed on every accessible cell"""
     population = [{'loc': (1, 14),
       'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
-              {'species': 'Herbivore',
-               'age': 9, 'weight': 10.3},
-              {'species': 'Carnivore',
-               'age': 5, 'weight': 8.1}]},
-     {'loc': (4, 4),
+               'age': 10, 'weight': 12.5}]},
+     {'loc': (1, 8),
       'pop': [{'species': 'Herbivore',
-               'age': 10, 'weight': 12.5},
-              {'species': 'Carnivore',
-               'age': 3, 'weight': 7.3},
-              {'species': 'Carnivore',
-               'age': 5, 'weight': 8.1}]}]
+               'age': 10, 'weight': 12.5}]},
+     {'loc': (5, 10),
+     'pop': [{'species': 'Carnivore',
+                'age': 10, 'weight': 12.5}]}]
     standard_map.populate_island(population)
-    assert len(standard_map.raster_model[(1,14)].herbivore_list) == 2
+    assert len(standard_map.raster_model[(1, 14)].herbivore_list) == 1
+    assert len(standard_map.raster_model[(1, 8)].herbivore_list) == 1
+    assert len(standard_map.raster_model[(5, 10)].carnivore_list) == 1
+
+
 
 def test_populate_island_ocean_cell_raises_valueerror(standard_map):
+    """Test that a value error raises if an animal are placed on a non-
+    accessible cell"""
     with pytest.raises(ValueError):
         population = [{'loc': (1, 3),
           'pop': [{'species': 'Herbivore',
@@ -53,6 +55,8 @@ def test_populate_island_ocean_cell_raises_valueerror(standard_map):
         standard_map.populate_island(population)
 
 def test_populate_island_nonexistant_coordinates(standard_map):
+    """Test that a value error raises if an animal are placed on a non-
+    existing coordinate"""
     with pytest.raises(ValueError):
         population = [{'loc': (-1, 3),
           'pop': [{'species': 'Herbivore',
@@ -64,6 +68,8 @@ def test_populate_island_nonexistant_coordinates(standard_map):
         standard_map.populate_island(population)
 
 def test_populate_island_float_age(standard_map):
+    """Test that a value error raises if an animal are created with a float
+    number as age"""
     with pytest.raises(ValueError):
         population = [{'loc': (4, 7),
           'pop': [{'species': 'Herbivore',
@@ -73,6 +79,8 @@ def test_populate_island_float_age(standard_map):
         standard_map.populate_island(population)
 
 def test_populate_island_negative_age(standard_map):
+    """Test if a value error raises if an animal are created with a
+    negative age"""
     with pytest.raises(ValueError):
         population = [{'loc': (4, 7),
           'pop': [{'species': 'Herbivore',
@@ -82,6 +90,8 @@ def test_populate_island_negative_age(standard_map):
         standard_map.populate_island(population)
 
 def test_populate_island_negative_weight(standard_map):
+    """Test if a value error raises if an animal are created with a
+    negative weight"""
     with pytest.raises(ValueError):
         population = [{'loc': (4, 7),
           'pop': [{'species': 'Herbivore',
@@ -91,6 +101,7 @@ def test_populate_island_negative_weight(standard_map):
         standard_map.populate_island(population)
 
 def test_populate_island_0_weight(standard_map):
+    """Test if a value error raises if an animal are created with weight = 0"""
     with pytest.raises(ValueError):
         population = [{'loc': (4, 7),
           'pop': [{'species': 'Herbivore',
@@ -177,6 +188,7 @@ def test_feed_all_animals(surrounding_ocean_cell_small):
     assert len(surrounding_ocean_cell_small.raster_model[(3, 2)].herbivore_list) == 0
 
 def test_increase_fodder_random_jungle_cells(standard_map):
+    """Test that the method 'increase_fodder' works in a jungle cell"""
     standard_map.raster_model[(4, 7)].fodder = 0
     standard_map.raster_model[(11, 8)].fodder = 45
     standard_map.increase_fodder_all_cells()
@@ -186,6 +198,7 @@ def test_increase_fodder_random_jungle_cells(standard_map):
 # annual death
 
 def test_annual_death_0_fitness_random_cells(standard_map):
+    """Test that the method 'annual_death' works in a random accessible cell"""
     standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=100, weight=0))
     standard_map.raster_model[(11, 8)].add_animal(ani.Carnivores(age=100, weight=0))
     standard_map.annual_death_all_cells()
@@ -193,6 +206,8 @@ def test_annual_death_0_fitness_random_cells(standard_map):
     assert standard_map.raster_model[(11, 8)].carnivore_list == []
 
 def test_breed_all_cells_certain_prob_random_cell(standard_map):
+    """Test that the method 'breed_all_cell' works in a random accessible
+     cell"""
     for _ in range(100):
         standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=0, weight=100))
         standard_map.raster_model[(11, 8)].add_animal(ani.Carnivores(age=0, weight=100))

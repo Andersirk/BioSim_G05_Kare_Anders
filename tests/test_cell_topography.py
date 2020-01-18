@@ -141,6 +141,8 @@ def standard_map_ani_one_accesible():
 
 def test_migrate_all_herbi_in_cell_new_location(
         standard_map_ani_one_accesible):
+    """Tests that all herbivores in one cell moves to another cell when the
+    migration-prop = 1"""
     animals.Herbivores.parameters["mu"] = 1000
     mock_ek = {(1,18):2}
     standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_herbivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
@@ -151,6 +153,8 @@ def test_migrate_all_herbi_in_cell_new_location(
 
 def test_migrate_all_carni_in_cell_new_location(
         standard_map_ani_one_accesible):
+    """Tests that all carnivores in one cell moves to another cell when the
+    migration-probability = 1"""
     animals.Carnivores.parameters["mu"] = 1000
     mock_ek = {(1,18):2}
     standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_carnivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
@@ -161,6 +165,7 @@ def test_migrate_all_carni_in_cell_new_location(
 # breeding
 
 def test_breed_certain_probability_all_in_cell():
+    """Tests that all animals breed, when the breeding-probability = 1"""
     cell = topo.Jungle()
     for _ in range(100):
         cell.add_animal(animals.Herbivores(age=10, weight=100))
@@ -169,24 +174,11 @@ def test_breed_certain_probability_all_in_cell():
     assert len(cell.herbivore_list) == 200
     assert len(cell.carnivore_list) == 200
 
-def test_breed_carni_certain_probability_all_in_cell():
-    cell = topo.Jungle()
-    for _ in range(100):
-        cell.add_animal(animals.Carnivores(age=10, weight=100))
-    cell.breed_all_carnivores_in_cell()
-    assert len(cell.carnivore_list) == 200
-
-def test_breed_herbi_certain_probability_all_in_cell():
-    cell = topo.Jungle()
-    for _ in range(100):
-        cell.add_animal(animals.Herbivores(age=10, weight=100))
-    cell.breed_all_herbivores_in_cell()
-    assert len(cell.herbivore_list) == 200
-
 
 # cell ek
 
 def test_ek_for_cell_9_herbs_carns_100_fodder(basic_jungle):
+    """Tests that the ek formula for herbivores and carnivores are correct"""
     basic_jungle.fodder = 100
     for _ in range(9):
         basic_jungle.add_animal(animals.Herbivores(weight=10))
@@ -198,12 +190,16 @@ def test_ek_for_cell_9_herbs_carns_100_fodder(basic_jungle):
 
 # natural death
 
+
 def test_natural_death_in_all_cells(low_fitness_animals):
+    """Test that animals with death probability: omega(1 - fitness) = 1 dies"""
     low_fitness_animals.natural_death_all_animals_in_cell()
     assert len(low_fitness_animals.herbivore_list) == 0
     assert len(low_fitness_animals.carnivore_list) == 0
 
+
 # set parameters
+
 
 def test_set_parameters_in_a_cell():
     """Testing the method "set parameters" for a jungle and savanna cell"""
@@ -256,6 +252,7 @@ def test_feeding_herbivores_in_a_cell():
 
 
 def test_increase_fodder_savanna_fodder_is_max():
+    """Test that the 'increase_fodder' method works at a savanna cell"""
     cell = topo.Savanna()
     cell.increase_fodder()
     assert cell.fodder == 300
