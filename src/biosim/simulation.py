@@ -78,7 +78,7 @@ class BioSim:
     def setup_sim_window(self):
         # setup main window
         if self._sim_window_fig is None:
-            self._sim_window_fig = plt.figure()
+            self._sim_window_fig = plt.figure(figsize=(10,5.63), dpi=150, facecolor="#ccd9ff")
 
         # setup static
         if self._static_map_sub is None:
@@ -103,6 +103,9 @@ class BioSim:
         #setup population pyramid
         if self._pop_pyram_sub is None:
             self._pop_pyram_sub = self._sim_window_fig.add_subplot(2, 3, 2)
+            self.update_pop_pyram()
+            #self._pop_pyram_sub.legend(fontsize= 'small', borderpad=0.1, loc=2)
+
 
         #setup stack area
         if self._stack_area_sub is None:
@@ -142,7 +145,13 @@ class BioSim:
         if self._stack_area_ax is None:
             nanstack = np.full(self._final_year, np.nan)
             self.y = np.vstack([nanstack, nanstack, nanstack])
-            self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y, colors=['tab:green', 'tab:purple', 'tab:red'])
+            self._stack_area_ax = self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y, colors=['tab:green', 'tab:purple', 'tab:red'], labels=["Fodder", "Herbivores","Carnivores"])
+            self._stack_area_sub.legend(fontsize= 'small', borderpad=0.1, loc=2)
+        else:
+            nanstack= np.full(self._final_year-self._current_year, np.nan)
+            new_empty_values = np.vstack([nanstack, nanstack, nanstack])
+            self.y = np.append(self.y, new_empty_values, axis= 1)
+
 
 
     def _update_stacked_area(self, biomass_list):
@@ -156,25 +165,30 @@ class BioSim:
     def _update_heatmap_herb(self, array):
         if self._heat_herb_im_ax is None:
             self._heat_herb_im_ax = self._heat_herb_sub.imshow(array, interpolation='nearest', vmax=400, cmap='inferno')
-            #self._sim_window_fig.colorbar(self._heat_herb_im_ax, ax=self._heat_herb_sub)
+            self._sim_window_fig.colorbar(self._heat_herb_im_ax, ax=self._heat_herb_sub, shrink=0.5)
         else:
             self._heat_herb_im_ax.set_data(array)
 
     def _update_heatmap_carn(self, array):
         if self._heat_carn_im_ax is None:
             self._heat_carn_im_ax = self._heat_carn_sub.imshow(array, interpolation='nearest', vmax=100, cmap='inferno')
-            #self._sim_window_fig.colorbar(self._heat_carn_im_ax, ax=self._heat_carn_sub)
+            self._sim_window_fig.colorbar(self._heat_carn_im_ax, ax=self._heat_carn_sub, shrink=0.5)
         else:
             self._heat_carn_im_ax.set_data(array)
+
+    def instansiate_pop_pyram(self):
+        if self._pop_pyram_ax is None:
+            pass
+
+
 
     def update_pop_pyram(self):
         herb_list, carn_list = self.island.population_age_grups()
         #df = pd.DataFrame(age_list, columns = ["Herbivores","Carnivores"], index =["0-5", "5-10", "10-5", "15+"])
         #df = df.rename_axis('Age').reset_index()
         age = ["0-5", "5-10", "10-15", "15+"]
-        sns.barplot(x=herb_list, y=age, color="seagreen",
-                           order=["15+", "10-5","15-10", "0-5"], ax=self._pop_pyram_sub)
-        sns.barplot(x=-carn_list, y=age, color="plum", order=["15+", "10-5","15-10", "0-5"],ax=self._pop_pyram_sub)
+        sns.barplot(x=herb_list, y=age, color="seagreen",order=["15+", "10-15", "5-10", "0-5"], ax=self._pop_pyram_sub)
+        sns.barplot(x=-carn_list, y=age, color="plum", order=["15+", "10-15", "5-10", "0-5"],ax=self._pop_pyram_sub)
 
 
     def _update_herb_graph(self, herb_count):
