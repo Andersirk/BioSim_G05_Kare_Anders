@@ -75,6 +75,7 @@ class BioSim:
         self._pop_pyram_ax = None
         self._stack_area_sub = None
         self._stack_area_ax = None
+        self._year_ax = None
 
         self.rgbmap = self.create_color_map(island_map)
         self.y_stack = None
@@ -106,19 +107,31 @@ class BioSim:
 
         if self._heat_carn_sub is None:
             self._heat_carn_sub = self._sim_window_fig.add_subplot(2, 3, 6)
-            self._heat_herb_sub.tick_params(axis='both', which='major',
+            self._heat_carn_sub.tick_params(axis='both', which='major',
                                             labelsize=8)
 
         #setup population pyramid
         if self._pop_pyram_sub is None:
             self._pop_pyram_sub = self._sim_window_fig.add_subplot(2, 3, 2)
+            self._pop_pyram_ax = self._pop_pyram_sub.twiny()
+            self._pop_pyram_sub.set_xlabel('Population size', fontsize=9)
+            self._pop_pyram_ax.set_xlabel('Average weight', fontsize=9)
+            self._pop_pyram_sub.tick_params(axis='both', which='major',
+                         labelsize=8, labelrotation=30)
+            self._pop_pyram_ax.tick_params(axis='both', which='major',
+                         labelsize=8)
             #self._pop_pyram_sub.legend(fontsize= 'small', borderpad=0.1, loc=2)
 
 
         #setup stack area
         if self._stack_area_sub is None:
             self._stack_area_sub = self._sim_window_fig.add_subplot(2, 3, 5)
+            self._stack_area_sub.tick_params(axis='both', which='major',
+                                            labelsize=8)
         self._instantiate_stacked_area()
+
+        if self._year_ax is None:
+            self._year_ax = self._sim_window_fig.text(0.04, 0.925, f'Year {self._current_year}', fontsize=20)
 
         self._sim_window_fig.tight_layout()
 
@@ -136,14 +149,15 @@ class BioSim:
         carn_count, herb_count = self.island.total_number_per_species().values()
         self.carn_y.append(carn_count)
         self.herb_y.append(herb_count)
-        self._pop_plot_sub.plot(range(0,self._current_year+1), self.herb_y, 'r', self.carn_y, 'g')
+        self._pop_plot_sub.plot(range(0,self._current_year+1), self.herb_y, 'red', self.carn_y, 'lawngreen')
 
 
     def _instantiate_stacked_area(self):
         if self._stack_area_ax is None:
             nanstack = np.full(self._final_year, np.nan)
             self.y_stack = np.vstack([nanstack, nanstack, nanstack])
-            self._stack_area_ax = self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack, colors=['tab:green', 'tab:purple', 'tab:red'], labels=["Fodder", "Herbivores", "Carnivores"])
+            self._stack_area_ax = self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack, colors=['green', 'lawngreen',
+                                               'red'], labels=["Fodder", "Herbivores", "Carnivores"])
             self._stack_area_sub.legend(fontsize= 'small', borderpad=0.1, loc=2)
         else:
             nanstack= np.full(self._final_year-self._current_year, np.nan)
@@ -155,8 +169,8 @@ class BioSim:
         self.y_stack[1][self._current_year] = biomass_list["biomass_herbs"]
         self.y_stack[2][self._current_year] = biomass_list["biomass_carnivores"]
         self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack,
-                                       colors=['tab:green', 'tab:purple',
-                                               'tab:red'])
+                                       colors=['green', 'lawngreen',
+                                               'red'])
 
 
     def _update_heatmap_herb(self, array):
@@ -175,11 +189,24 @@ class BioSim:
 
 
     def update_pop_pyram(self):
-        herb_list, carn_list = self.island.population_age_grups()
+        herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = self.island.population_age_grups()
         age = ["0-5", "5-10", "10-15", "15+"]
-        sns.barplot(x=herb_list, y=age, color="seagreen",order=["15+", "10-15", "5-10", "0-5"], ax=self._pop_pyram_sub)
-        sns.barplot(x=-carn_list, y=age, color="plum", order=["15+", "10-15", "5-10", "0-5"],ax=self._pop_pyram_sub)
-
+        [p.remove() for p in reversed(self._pop_pyram_ax.patches)]
+        self._pop_pyram_sub.barh(age, herb_list, color='lawngreen')
+        self._pop_pyram_sub.barh(age, carn_list, color='red')
+        rek1 = self._pop_pyram_ax.barh(age, herb_mean_w_list, color='black')
+        rek2 = self._pop_pyram_ax.barh(age, carn_mean_w_list, color='black')
+        #maxticks= max(max(herb_list),abs(min(carn_list)))
+        #self._pop_pyram_sub.set_xticks(np.arange(-maxticks, maxticks, step=(maxticks/100)))
+        self._pop_pyram_sub.set_xticks(
+            np.arange(-2000, 2001, step=500), )
+        self._pop_pyram_ax.set_xticks(np.arange(-40, 41, step=20))
+        for rektangle in rek1:
+            rektangle.set_x(rektangle.get_width() - 1)
+            rektangle.set_width(0.3)
+        for rektangle in rek2:
+            rektangle.set_x(rektangle.get_width() + 1)
+            rektangle.set_width(0.3)
 
     def _update_sim_window(self):
         herb_array, carn_array = self.island.arrays_for_heatmap()
@@ -190,6 +217,7 @@ class BioSim:
         if self.ymax_animals is None:
             self._pop_plot_sub.set_ylim(0, max(max(self.herb_y), max(self.carn_y)) + 500)
         self._update_stacked_area(self.island.biomass_food_chain())
+        self._year_ax.set_text(f'Year {self._current_year}')
         plt.pause(1e-6)
 
     def create_color_map(self, island_map):
@@ -334,7 +362,7 @@ if __name__ == "__main__":
     simmert = BioSim(island_map, ini_pop, 1, img_base='C:/Users/ander/OneDrive/Pictures/simtest/testimg')
     #img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
     simmert.simulate(1)
-    simmert.simulate(30)
+    simmert.simulate(15)
     ini_pop2 = [{'loc': (1, 17), 'pop': [
         {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
         range(100)]},
@@ -342,7 +370,7 @@ if __name__ == "__main__":
                    {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
                    range(100)]}
                ]
-    #simmert.add_population(ini_pop2)
-    #simmert.simulate(20)
+    simmert.add_population(ini_pop2)
+    simmert.simulate(10)
     #simmert.make_movie()
 
