@@ -14,7 +14,6 @@ import functools
 class Animals:
     instances = []
     """This is the overall class for the animals which lives on the island"""
-
     def __init__(self, age, weight, potential_newborn):
         self.age = age
         self.weight = self.birth_weight() if weight is None else weight
@@ -60,6 +59,7 @@ class Animals:
     def age_up(cls):
         """
         Increases the age by one year of all animals alive.
+        :return: None
         """
         for instance in cls.instances:
             instance.age += 1
@@ -67,18 +67,35 @@ class Animals:
 
     @classmethod
     def annual_metabolism(cls):
-        """Decreases the animals weight based on the parameter 'eta'"""
+        """
+        Decreases the animals weight based on the parameter 'eta'
+        :return: None
+        """
         for instance in cls.instances:
             instance.weight -= instance.parameters["eta"] * instance.weight
 
     def eat_increase_weight(self, food):
-        """This function makes the animal eat x amount of fodder and increases
-        it's weight based on the parameter 'beta'"""
+        """
+        Makes the animal eat x amount of food and increases its weight based on
+        the parameter 'beta
+        :param food: float: amount of food eaten
+        :return: None
+        """
         self.weight += self.parameters["beta"] * food
 
     def breed(self, cell, cell_population):
-        breeding_probability = min(1, self.parameters["gamma"] * self.fitness * (cell_population - 1))
-        if self.weight < self.parameters["zeta"]*(self.parameters["w_birth"]+(self.parameters["sigma_birth"])):
+        """
+        Makes an animal try to breed
+        :param cell: The animals location cell at the start of the year
+        :param cell_population: The amount of animals in the respective
+        population
+        :return: None
+        """
+        breeding_probability = min(1, self.parameters["gamma"] *
+                                   self.fitness * (cell_population - 1))
+        if self.weight < self.parameters["zeta"] * \
+                (self.parameters["w_birth"] +
+                 (self.parameters["sigma_birth"])):
             return
         if random.random() > breeding_probability:
             return
@@ -90,13 +107,21 @@ class Animals:
         Animals.instances.append(potential_newborn)
 
     def will_die_natural_death(self):
-        if self.fitness == 0 or random.random() < self.parameters["omega"] * (1 - self.fitness):
+        """
+        Decides if an animal will die a 'natural' death
+        :return: True or False
+        """
+        if self.fitness == 0 or random.random() <\
+                self.parameters["omega"] * (1 - self.fitness):
             return True
         else:
             return False
 
     def will_migrate(self):
-        """This function decides if, and to which cell, an animal shall move"""
+        """
+        Decides if an animal shall try to migrate
+        :return:True (shall try to migrate) or False (Shall not try to migrate)
+        """
         probability_to_move = self.parameters["mu"] * self.fitness
         if random.random() < probability_to_move:
             return True
@@ -104,6 +129,7 @@ class Animals:
             return False
 
     def what_cell_to_migrate_to(self, current_cell, ek_dict):
+
         self.has_tried_migration_this_year = True
         if self.will_migrate():
             sum_ek_neighbours = 0
@@ -128,6 +154,11 @@ class Animals:
         return current_cell
 
     def find_neighbouring_cells(self, coordinates):
+        """
+        Finds an animals neighbouring cell coordinates
+        :param coordinates: list
+        :return: a list with an animals neighbouring cell coordinates
+        """
         neighbouring_cells = [(coordinates[0]+1, coordinates[1]),
                               (coordinates[0]-1, coordinates[1]),
                               (coordinates[0], coordinates[1]+1),
@@ -166,6 +197,7 @@ class Herbivores(Animals):
         super().__init__(age, weight, potential_newborn)
 
     def graze(self, cell):
+        """A method which makes the herbivore"""
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self.eat_increase_weight(allowed_amount)
 
