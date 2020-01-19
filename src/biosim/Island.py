@@ -170,34 +170,45 @@ class Island:
 
 
     def population_age_grups(self):
-        herbivore_0_5, carnivore_0_5 = 0, 0
-        herbivore_5_10, carnivore_5_10 = 0, 0
-        herbivore_10_15, carnivore_10_15 = 0, 0
-        herbivore_15plus, carnivore_15plus = 0, 0
+        herbivore_age_numbers = [0,0,0,0]
+        carnivore_age_numbers = [0,0,0,0]
+        herbivore_biomass = [0,0,0,0]
+        carnivore_biomass = [0,0,0,0]
         for cell in self.raster_model.values():
             if cell.is_accessible:
-                for herbivore, carnivore in zip(cell.herbivore_list, cell.carnivore_list):
+                for herbivore, carnivore in zip(cell.herbivore_list,
+                                                cell.carnivore_list):
                     if 0 <= herbivore.age < 5:
-                        herbivore_0_5 += 1
+                        herbivore_age_numbers[0] += 1
+                        herbivore_biomass[0] += herbivore.weight
                     elif 5 <= herbivore.age < 10:
-                        herbivore_5_10 += 1
+                        herbivore_age_numbers[1] += 1
+                        herbivore_biomass[1] += herbivore.weight
                     elif 10 <= herbivore.age < 15:
-                        herbivore_10_15 += 1
+                        herbivore_age_numbers[2] += 1
+                        herbivore_biomass[2] += herbivore.weight
                     elif herbivore.age <= 15:
-                        herbivore_15plus += 1
+                        herbivore_age_numbers[3] += 1
+                        herbivore_biomass[3] += herbivore.weight
                     if 0 <= carnivore.age < 5:
-                        carnivore_0_5 += 1
+                        carnivore_age_numbers[0] -= 1
+                        carnivore_biomass[0] += herbivore.weight
                     elif 5 <= carnivore.age < 10:
-                        carnivore_5_10 += 1
+                        carnivore_age_numbers[1] -= 1
+                        carnivore_biomass[1] += herbivore.weight
                     elif 10 <= carnivore.age < 15:
-                        carnivore_10_15 += 1
+                        carnivore_age_numbers[2] -= 1
+                        carnivore_biomass[2] += herbivore.weight
                     elif carnivore.age <= 15:
-                        carnivore_15plus += 1
-        # age_list = [[carnivore_0_5, -herbivore_0_5],[carnivore_5_10, -herbivore_5_10], [carnivore_10_15, -herbivore_10_15], [carnivore_15plus, -herbivore_15plus]]
-        # return age_list
-        herb_list = np.array([herbivore_0_5,herbivore_5_10,herbivore_10_15,herbivore_15plus])
-        carn_list = np.array([carnivore_0_5,carnivore_5_10,carnivore_10_15,carnivore_15plus])
-        return herb_list, carn_list
+                        carnivore_age_numbers[3] -= 1
+                        carnivore_biomass[3] += herbivore.weight
+        herb_list = np.array(herbivore_age_numbers)
+        carn_list = np.array(carnivore_age_numbers)
+        herb_mean_w_list = [biomass/age for biomass, age in
+                            zip(herbivore_biomass,herbivore_age_numbers)]
+        carn_mean_w_list = [biomass/age for biomass, age in
+                            zip(herbivore_biomass,herbivore_age_numbers)]
+        return herb_list, carn_list, herb_mean_w_list, carn_mean_w_list
 
     def biomass_food_chain(self):
         biomass_fodder = 0
@@ -212,23 +223,52 @@ class Island:
                         "biomass_herbs":biomass_herbs,
                         "biomass_carnivores": biomass_carnivores}
         return biomass_list
+        df = pd.DataFrame(biomass_list)
+        # fig, ax = plt.subplots(1, 1, figsize=(16, 9), dpi=80)
+        # columns = df.columns[0:]
+        # x = [0, 1]  # year the simulation last
+        # y0 = df[columns[0]].values.tolist()
+        # y1 = df[columns[1]].values.tolist()
+        # y2 = df[columns[2]].values.tolist()
+        # y = np.vstack([y0, y1, y2])
+        # labs = columns.values.tolist()
+        # ax = plt.gca()
+        # ax.stackplot(x, y, labels=labs,
+        #              colors=['tab:green', 'tab:purple', 'tab:red'])
+        # ax.set(ylim=[0, 100000])
+        # ax.legend(fontsize=10, ncol=4)
+        # plt.xticks(x[::5], fontsize=10, horizontalalignment='center')
+        # plt.yticks(np.arange(10000, 100000, 20000), fontsize=10)
+        # plt.xlim(x[0], x[-1])
+        # plt.show()
 
-    # def population_pyramid(self, age_list):
-    #     df = pd.DataFrame(age_list, columns = ["Herbivores","Carnivores"], index =["0-5", "5-10", "10-5", "15+"])
-    #     df = df.rename_axis('Age').reset_index()
-    #     fig, ax = plt.subplots()
-    #     sns.barplot(x="Herbivores", y="Age", color="seagreen",
-    #                        data=df,order=["15+", "10-5","5-10", "0-5"])
-    #     sns.barplot(x="Carnivores", y="Age", color="plum",
-    #                        data=df, order=["15+", "10-5","5-10", "0-5"])
-    #     plt.xlabel('Amount')
-    #     plt.xticks(np.arange(-800,801, step=200),(800,600, 400, 200, 0, 200, 400, 600, 800))
-    #     plt.text(0.2, -0.15, 'Carnivores', color='plum', transform= ax.transAxes)
-    #     plt.text(0.7, -0.15, 'Herbivores', color='seagreen', transform= ax.transAxes)
-    #     plt.title("Population Pyramid for Rossumøya")
-    #     ax.text(0.05, 0.95, "Year xxx", transform=ax.transAxes, fontsize=14,
-    #             verticalalignment='top')
-    #     plt.show()
+
+    def population_pyramid(herbivore_list, carnivore_list,herb_mean_w_list,
+                           carn_mean_w_list):
+        age = ["5", "5-10", "10-15", "15+"]
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+        ax2 = ax1.twiny()
+        ax1.barh(age, herbivore_list, color='seagreen')
+        ax1.barh(age, carnivore_list, color='plum' )
+        ax1.set_xlabel('Population size')
+        rek1 = ax2.barh(age, herb_mean_w_list, color='black')
+        rek2 = ax2.barh(age, carn_mean_w_list, color='black')
+        ax2.set_xlabel('Average weight')
+        for rektangle in rek1:
+            print(rektangle.get_xy())
+            print(rektangle.get_width())
+            rektangle.set_x(rektangle.get_width()-1)
+            rektangle.set_width(0.3)
+        for rektangle in rek2:
+            print(rektangle.get_xy())
+            print(rektangle.get_width())
+            rektangle.set_x(rektangle.get_width()+1)
+            rektangle.set_width(0.4)
+
+
+
+>>>>>>> Stashed changes
 
     def stacked_area(self, biomass_list):
         df = pd.DataFrame(biomass_list)
@@ -306,10 +346,14 @@ if __name__ == "__main__":
         print(island.raster_model[(1, 18)].biomass_herbivores())
         print("############")
 
+<<<<<<< Updated upstream
 
     print(island.array_for_heatmap())
     # island.pandas_dataframe()
     print(island.population_age_grups())
+=======
+    # print(island.population_age_grups())
+>>>>>>> Stashed changes
     # island.population_pyramid()
     print(island.biomass_food_chain())
 
