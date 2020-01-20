@@ -54,7 +54,6 @@ class Animals:
                 -self.parameters["phi_weight"] *(
                         self.weight - self.parameters["w_half"]))) ** -1
 
-
     @classmethod
     def age_up(cls):
         """
@@ -63,7 +62,6 @@ class Animals:
         """
         for instance in cls.instances:
             instance.age += 1
-
 
     @classmethod
     def annual_metabolism(cls):
@@ -129,7 +127,13 @@ class Animals:
             return False
 
     def what_cell_to_migrate_to(self, current_cell, ek_dict):
-
+        """
+        Decides which of the neighbouring cell an animal shall to migrate to.
+        :param current_cell: The animals location cell at the start of the year
+        :param ek_dict: Dictionary with the neighbouring cells
+        coordinates (key) and the respective cells relevant ek.
+        :return: The chosen target for the migration and the current cell
+        """
         self.has_tried_migration_this_year = True
         if self.will_migrate():
             sum_ek_neighbours = 0
@@ -170,6 +174,7 @@ class Animals:
         for instance in cls.instances:
             instance.has_tried_migration_this_year = False
 
+
 class Herbivores(Animals):
     """
     This is the class for the plant eating herbivores which lives on
@@ -197,25 +202,38 @@ class Herbivores(Animals):
         super().__init__(age, weight, potential_newborn)
 
     def graze(self, cell):
-        """A method which makes the herbivore"""
+        """
+        A method which makes the herbivore graze
+        :param cell: The animals location cell at the start of the year
+        :return: None
+        """
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self.eat_increase_weight(allowed_amount)
 
     @classmethod
     def set_parameters(cls, new_parameters):
+        """
+        Sets the parameters of all herbivore instances to the provided
+        new_parameters.
+        :param new_parameters: A dictionary with keys as the parameter to
+        be changed and values as the new parameter value. It is possible to
+        change preexisting parameters only.
+        :return: None
+        """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():
                 if value < 0:
-                    raise ValueError(f"{parameter} value must be positive")
+                    raise ValueError(
+                        f"{parameter} value must be positive")
                 if parameter == "DeltaPhiMax" and value <= 0:
-                    raise ValueError(f"{parameter} value must be strictly positive")
+                    raise ValueError(
+                        f"{parameter} value must be strictly positive")
                 if parameter == "eta" and value > 1:
-                    raise ValueError(f"{parameter} value must be 0, 1 or in between")
+                    raise ValueError(
+                        f"{parameter} value must be 0, 1 or in between")
                 cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
-
-
 
 
 class Carnivores(Animals):
@@ -245,12 +263,18 @@ class Carnivores(Animals):
         self.eaten_this_year = 0
 
     def kills_herbivore(self, herbivore):
-        """This function makes the carnivores try to eat """
+        """
+        This function makes the carnivores try to kill and eat a herbivore
+        :param herbivore: instance in the herbivore subclass
+        :return: True (if the killing was successful) or False if it failed
+        """
         if self.fitness < herbivore.fitness or self.eaten_this_year >= \
                 self.parameters["F"]:
             return False
-        elif (self.fitness - herbivore.fitness) < self.parameters["DeltaPhiMax"]:
-            killing_prop = (self.fitness - herbivore.fitness) / self.parameters["DeltaPhiMax"]
+        elif (self.fitness - herbivore.fitness) <\
+                self.parameters["DeltaPhiMax"]:
+            killing_prop = (self.fitness - herbivore.fitness) / \
+                           self.parameters["DeltaPhiMax"]
             if random.random() < killing_prop:
                 self.eaten_this_year += herbivore.weight
                 self.eat_increase_weight(herbivore.weight)
@@ -263,18 +287,32 @@ class Carnivores(Animals):
             return True
 
     def reset_amount_eaten_this_year(self):
+        """
+        Resets the amount of food a carnivore has eaten for one year
+        :return:None
+        """
         self.eaten_this_year = 0
 
     @classmethod
     def set_parameters(cls, new_parameters):
+        """
+        Sets the parameters of all carnivore instances to the provided
+        new_parameters.
+        :param new_parameters: A dictionary with keys as the parameter to
+        be changed and values as the new parameter value. It is possible to
+        change preexisting parameters only.
+        :return: None
+        """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():
                 if value < 0:
                     raise ValueError(f"{parameter} value must be positive")
                 if parameter == "DeltaPhiMax" and value <= 0:
-                    raise ValueError(f"{parameter} value must be strictly positive")
+                    raise ValueError(
+                        f"{parameter} value must be strictly positive")
                 if parameter == "eta" and value > 1:
-                    raise ValueError(f"{parameter} value must be 0, 1 or in between")
+                    raise ValueError(
+                        "{parameter} value must be 0, 1 or in between")
                 cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
