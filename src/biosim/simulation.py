@@ -156,8 +156,7 @@ class BioSim:
         if self._stack_area_ax is None:
             nanstack = np.full(self._final_year, np.nan)
             self.y_stack = np.vstack([nanstack, nanstack, nanstack])
-            self._stack_area_ax = self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack, colors=['green', 'lawngreen',
-                                               'red'], labels=["Fodder", "Herbivores", "Carnivores"])
+            self._stack_area_ax = self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack, colors=['red', 'lawngreen','green'], labels=["Carnivores", "Herbivores","Fodder"])
             self._stack_area_sub.legend(fontsize= 'small', borderpad=0.1, loc=2)
         else:
             nanstack= np.full(self._final_year-self._current_year, np.nan)
@@ -165,17 +164,18 @@ class BioSim:
             self.y_stack = np.append(self.y_stack, new_empty_values, axis= 1)
 
     def _update_stacked_area(self, biomass_list):
-        self.y_stack[0][self._current_year] = biomass_list["biomass_fodder"]
+        self.y_stack[0][self._current_year] = biomass_list["biomass_carnivores"]
         self.y_stack[1][self._current_year] = biomass_list["biomass_herbs"]
-        self.y_stack[2][self._current_year] = biomass_list["biomass_carnivores"]
+        self.y_stack[2][self._current_year] = biomass_list["biomass_fodder"]
         self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack,
-                                       colors=['green', 'lawngreen',
-                                               'red'])
+                                       colors=['red', 'lawngreen','green'])
 
 
     def _update_heatmap_herb(self, array):
         if self._heat_herb_im_ax is None:
             self._heat_herb_im_ax = self._heat_herb_sub.imshow(array, interpolation='nearest', vmax=400, cmap='inferno')
+            self._heat_herb_im_ax.axes.get_xaxis().set_visible(False)
+            self._heat_herb_im_ax.axes.get_yaxis().set_visible(False)
             self._sim_window_fig.colorbar(self._heat_herb_im_ax, ax=self._heat_herb_sub, shrink=0.5)
         else:
             self._heat_herb_im_ax.set_data(array)
@@ -190,7 +190,7 @@ class BioSim:
 
     def update_pop_pyram(self):
         herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = self.island.population_age_grups()
-        age = ["0-5", "5-10", "10-15", "15+"]
+        age = ["0-1","2-5", "5-10", "10-15", "15+"]
         [p.remove() for p in reversed(self._pop_pyram_ax.patches)]
         self._pop_pyram_sub.barh(age, herb_list, color='lawngreen')
         self._pop_pyram_sub.barh(age, carn_list, color='red')
@@ -200,13 +200,13 @@ class BioSim:
         #self._pop_pyram_sub.set_xticks(np.arange(-maxticks, maxticks, step=(maxticks/100)))
         self._pop_pyram_sub.set_xticks(
             np.arange(-2000, 2001, step=500), )
-        self._pop_pyram_ax.set_xticks(np.arange(-40, 41, step=20))
+        self._pop_pyram_ax.set_xticks(np.arange(-100, 101, step=20))
         for rektangle in rek1:
             rektangle.set_x(rektangle.get_width() - 1)
-            rektangle.set_width(0.3)
+            rektangle.set_width(1)
         for rektangle in rek2:
             rektangle.set_x(rektangle.get_width() + 1)
-            rektangle.set_width(0.3)
+            rektangle.set_width(1)
 
     def _update_sim_window(self):
         herb_array, carn_array = self.island.arrays_for_heatmap()
@@ -359,10 +359,9 @@ if __name__ == "__main__":
                    {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
                    range(100)]}
                ]
-    simmert = BioSim(island_map, ini_pop, 1, img_base='C:/Users/ander/OneDrive/Pictures/simtest/testimg')
+    simmert = BioSim(island_map, ini_pop, 1, img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg')
     #img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
-    simmert.simulate(1)
-    simmert.simulate(15)
+    simmert.simulate(20)
     ini_pop2 = [{'loc': (1, 17), 'pop': [
         {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
         range(100)]},
@@ -371,6 +370,6 @@ if __name__ == "__main__":
                    range(100)]}
                ]
     simmert.add_population(ini_pop2)
-    simmert.simulate(10)
+    simmert.simulate(15)
     #simmert.make_movie()
 
