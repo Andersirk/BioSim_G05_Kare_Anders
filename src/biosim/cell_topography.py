@@ -331,15 +331,14 @@ class Savanna(Topography):
         self.fodder = self.parameters["f_max"]
 
     @classmethod
-    """
-    Sets the parameters of all savanna instances to the provided
-    new_parameters.
-    :param new_parameters: A dictionary with keys as the parameter to
-    be changed and values as the new parameter value. It is possible to
-    change preexisting parameters only.
-    """
     def set_parameters(cls, new_parameters):
-        """ Sets the editable default parameters for this subclass"""
+        """
+        Sets the parameters of all savanna instances to the provided
+        new_parameters.
+        :param new_parameters: A dictionary with keys as the parameter to
+        be changed and values as the new parameter value. It is possible to
+        change preexisting parameters only.
+        """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():
                 if value < 0:
