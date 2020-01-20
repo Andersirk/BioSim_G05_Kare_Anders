@@ -134,7 +134,7 @@ class Island:
         Animals.age_up()
         Animals.annual_metabolism()
         self.annual_death_all_cells()
-        self.current_year += 1
+        #self.current_year += 1
 
     def per_cell_count_pandas_dataframe(self):
         pdlist = []
@@ -170,38 +170,44 @@ class Island:
 
 
     def population_age_grups(self):
-        herbivore_age_numbers = [0,0,0,0]
-        carnivore_age_numbers = [0,0,0,0]
-        herbivore_biomass = [0,0,0,0]
-        carnivore_biomass = [0,0,0,0]
+        herbivore_age_numbers = [0,0,0,0,0]
+        carnivore_age_numbers = [0,0,0,0,0]
+        herbivore_biomass = [0,0,0,0,0]
+        carnivore_biomass = [0,0,0,0,0]
         for cell in self.raster_model.values():
             if cell.is_accessible:
-                for herbivore, carnivore in zip(cell.herbivore_list,
-                                                cell.carnivore_list):
-                    if 0 <= herbivore.age < 5:
+                for herbivore in cell.herbivore_list:
+                    if herbivore.age <= 1:
                         herbivore_age_numbers[0] += 1
                         herbivore_biomass[0] += herbivore.weight
-                    elif 5 <= herbivore.age < 10:
+                    elif 1 < herbivore.age < 5:
                         herbivore_age_numbers[1] += 1
                         herbivore_biomass[1] += herbivore.weight
-                    elif 10 <= herbivore.age < 15:
+                    elif 5 <= herbivore.age < 10:
                         herbivore_age_numbers[2] += 1
                         herbivore_biomass[2] += herbivore.weight
-                    elif herbivore.age <= 15:
+                    elif 10 <= herbivore.age < 15:
                         herbivore_age_numbers[3] += 1
                         herbivore_biomass[3] += herbivore.weight
-                    if 0 <= carnivore.age < 5:
+                    elif herbivore.age <= 15:
+                        herbivore_age_numbers[4] += 1
+                        herbivore_biomass[4] += herbivore.weight
+                for carnivore in cell.carnivore_list:
+                    if carnivore.age <= 1:
                         carnivore_age_numbers[0] -= 1
-                        carnivore_biomass[0] += herbivore.weight
-                    elif 5 <= carnivore.age < 10:
+                        carnivore_biomass[0] += carnivore.weight
+                    elif 1 < carnivore.age < 5:
                         carnivore_age_numbers[1] -= 1
-                        carnivore_biomass[1] += herbivore.weight
-                    elif 10 <= carnivore.age < 15:
+                        carnivore_biomass[1] += carnivore.weight
+                    elif 5 <= carnivore.age < 10:
                         carnivore_age_numbers[2] -= 1
-                        carnivore_biomass[2] += herbivore.weight
-                    elif carnivore.age <= 15:
+                        carnivore_biomass[2] += carnivore.weight
+                    elif 10 <= carnivore.age < 15:
                         carnivore_age_numbers[3] -= 1
-                        carnivore_biomass[3] += herbivore.weight
+                        carnivore_biomass[3] += carnivore.weight
+                    elif carnivore.age <= 15:
+                        carnivore_age_numbers[4] -= 1
+                        carnivore_biomass[4] += carnivore.weight
         herb_list = np.array(herbivore_age_numbers)
         carn_list = np.array(carnivore_age_numbers)
         herb_mean_w_list = []
@@ -216,10 +222,6 @@ class Island:
                 carn_mean_w_list.append(biomass/age)
             else:
                 carn_mean_w_list.append(0)
-        # herb_mean_w_list = [biomass/age for biomass, age in
-        #                     zip(herbivore_biomass,herbivore_age_numbers)]
-        # carn_mean_w_list = [biomass/age for biomass, age in
-        #                     zip(herbivore_biomass,herbivore_age_numbers)]
         return herb_list, carn_list, herb_mean_w_list, carn_mean_w_list
 
     def biomass_food_chain(self):
@@ -280,8 +282,68 @@ class Island:
 
 
 if __name__ == "__main__":
-    random.seed(1)
-    geogr = """\
+    # random.seed(1)
+    # geogr = """\
+    #             OOOOOOOOOOOOOOOOOOOOO
+    #             OOOOOOOOSMMMMJJJJJJJO
+    #             OSSSSSJJJJMMJJJJJJJOO
+    #             OSSSSSSSSSMMJJJJJJOOO
+    #             OSSSSSJJJJJJJJJJJJOOO
+    #             OSSSSSJJJDDJJJSJJJOOO
+    #             OSSJJJJJDDDJJJSSSSOOO
+    #             OOSSSSJJJDDJJJSOOOOOO
+    #             OSSSJJJJJDDJJJJJJJOOO
+    #             OSSSSJJJJDDJJJJOOOOOO
+    #             OOSSSSJJJJJJJJOOOOOOO
+    #             OOOSSSSJJJJJJJOOOOOOO
+    #             OOOOOOOOOOOOOOOOOOOOO"""
+    # island = Island(geogr)
+    # island.populate_island([{'loc': (1, 18),
+    #        'pop': [{'species': 'Herbivore',
+    #            'age': 0, 'weight': 80},
+    #           {'species': 'Herbivore',
+    #            'age': 0, 'weight': 80.3},
+    #                {'species': 'Herbivore',
+    #                 'age': 0, 'weight': 80.5},
+    #                {'species': 'Herbivore',
+    #                 'age': 0, 'weight': 10.5}]}])
+    #
+    # island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': None} for _ in range(100)]}])
+    #
+    # for x in range(30):
+    #     island.annual_cycle()
+    #     print("year", x)
+    #     print("total ani", len(Animals.instances))
+    #     print(len(island.raster_model[(1,18)].herbivore_list))
+    #     print(island.raster_model[(1,18)].biomass_herbivores())
+    #     print("############")
+    #
+    # island.populate_island([{'loc': (1, 17), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(300)]}])
+    #
+    #
+    # for x in range(10):
+    #     island.annual_cycle()
+    #     print("year", x)
+    #     print("total ani", len(Animals.instances))
+    #     total_herb = 0
+    #     total_carn = 0
+    #     for cell in island.raster_model.values():
+    #         if cell.is_accessible:
+    #             total_carn += len(cell.carnivore_list)
+    #             total_herb += len(cell.herbivore_list)
+    #     print("total herbs:", total_herb)
+    #     print("total carns:", total_carn)
+    #     print(len(island.raster_model[(1, 18)].herbivore_list))
+    #     print(island.raster_model[(1, 18)].biomass_herbivores())
+    #     print("############")
+    #
+    #
+    # print(island.array_for_heatmap())
+    # # island.pandas_dataframe()
+    # print(island.population_age_grups())
+    # # island.population_pyramid()
+    # print(island.biomass_food_chain())
+    island_map = """\
                 OOOOOOOOOOOOOOOOOOOOO
                 OOOOOOOOSMMMMJJJJJJJO
                 OSSSSSJJJJMMJJJJJJJOO
@@ -295,51 +357,27 @@ if __name__ == "__main__":
                 OOSSSSJJJJJJJJOOOOOOO
                 OOOSSSSJJJJJJJOOOOOOO
                 OOOOOOOOOOOOOOOOOOOOO"""
-    island = Island(geogr)
-    island.populate_island([{'loc': (1, 18),
-           'pop': [{'species': 'Herbivore',
-               'age': 0, 'weight': 80},
-              {'species': 'Herbivore',
-               'age': 0, 'weight': 80.3},
-                   {'species': 'Herbivore',
-                    'age': 0, 'weight': 80.5},
-                   {'species': 'Herbivore',
-                    'age': 0, 'weight': 10.5}]}])
 
-    island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': None} for _ in range(100)]}])
-
-    for x in range(30):
+    ini_pop = [{'loc': (1, 18), 'pop': [
+        {'species': 'Herbivore', 'age': 0, 'weight': 80} for _ in
+        range(100)]},
+               {'loc': (11, 8), 'pop': [
+                   {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
+                   range(100)]}
+               ]
+    island = Island(island_map)
+    island.populate_island(ini_pop)
+    for _ in range (15):
         island.annual_cycle()
-        print("year", x)
-        print("total ani", len(Animals.instances))
-        print(len(island.raster_model[(1,18)].herbivore_list))
-        print(island.raster_model[(1,18)].biomass_herbivores())
-        print("############")
-
-    island.populate_island([{'loc': (1, 17), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(300)]}])
-
-
-    for x in range(10):
+        print(island.population_age_grups())
+    ini_pop2 = [{'loc': (1, 17), 'pop': [
+        {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
+        range(100)]},
+               {'loc': (1, 18), 'pop': [
+                   {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
+                   range(100)]}
+               ]
+    island.populate_island(ini_pop2)
+    for _ in range (15):
         island.annual_cycle()
-        print("year", x)
-        print("total ani", len(Animals.instances))
-        total_herb = 0
-        total_carn = 0
-        for cell in island.raster_model.values():
-            if cell.is_accessible:
-                total_carn += len(cell.carnivore_list)
-                total_herb += len(cell.herbivore_list)
-        print("total herbs:", total_herb)
-        print("total carns:", total_carn)
-        print(len(island.raster_model[(1, 18)].herbivore_list))
-        print(island.raster_model[(1, 18)].biomass_herbivores())
-        print("############")
-
-
-    print(island.array_for_heatmap())
-    # island.pandas_dataframe()
-    print(island.population_age_grups())
-    # island.population_pyramid()
-    print(island.biomass_food_chain())
-
-
+        print(island.population_age_grups())
