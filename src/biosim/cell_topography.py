@@ -258,11 +258,3 @@ class Ocean:
     def __init__(self):
         self.is_accessible = False
 
-if __name__ == "__main__":
-    animal = animals.Herbivores(age=200, weight=1)
-    cell = Jungle()
-    cell.add_animal(animal)
-    animals.Herbivores.parameters["omega"] = 1
-    cell.natural_death_all_animals_in_cell()
-    animals.Herbivores.parameters["omega"] = 0.4
-    assert len(cell.herbivore_list) == 0

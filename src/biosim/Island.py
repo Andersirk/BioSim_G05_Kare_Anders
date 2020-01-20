@@ -304,10 +304,10 @@ class Island:
                 biomass_fodder += cell.fodder
                 biomass_herbs += cell.biomass_herbivores()
                 biomass_carnivores += cell.biomass_carnivores()
-        biomass_list = {"biomass_fodder":biomass_fodder,
+        biomass_dict = {"biomass_fodder":biomass_fodder,
                         "biomass_herbs":biomass_herbs,
                         "biomass_carnivores": biomass_carnivores}
-        return biomass_list
+        return biomass_dict
 
 if __name__ == "__main__":
     # random.seed(1)

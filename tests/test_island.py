@@ -241,10 +241,10 @@ def test_biomass_food_chain(standard_map):
     for cell in standard_map.raster_model.values():
         if cell.is_accessible:
             cell.fodder = 0
-    biomass_list = standard_map.biomass_food_chain()
-    assert biomass_list.get('biomass_fodder') == 0
-    assert biomass_list.get('biomass_herbs') == 10
-    assert biomass_list.get('biomass_carnivores') == 100
+    biomass_dict = standard_map.biomass_food_chain()
+    assert biomass_dict.get('biomass_fodder') == 0
+    assert biomass_dict.get('biomass_herbs') == 10
+    assert biomass_dict.get('biomass_carnivores') == 100
 
 
 
