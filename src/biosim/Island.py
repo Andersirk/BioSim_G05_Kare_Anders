@@ -255,7 +255,7 @@ class Island:
                     elif 10 <= herbivore.age < 15:
                         herbivore_age_numbers[3] += 1
                         herbivore_biomass[3] += herbivore.weight
-                    elif herbivore.age <= 15:
+                    elif herbivore.age >= 15:
                         herbivore_age_numbers[4] += 1
                         herbivore_biomass[4] += herbivore.weight
                 for carnivore in cell.carnivore_list:
@@ -271,7 +271,7 @@ class Island:
                     elif 10 <= carnivore.age < 15:
                         carnivore_age_numbers[3] -= 1
                         carnivore_biomass[3] += carnivore.weight
-                    elif carnivore.age <= 15:
+                    elif carnivore.age >= 15:
                         carnivore_age_numbers[4] -= 1
                         carnivore_biomass[4] += carnivore.weight
         herb_list = np.array(herbivore_age_numbers)

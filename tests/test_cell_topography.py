@@ -294,6 +294,7 @@ def test_feeding_carnivores_in_a_cell():
     jungle_cell = topo.Jungle()
     [jungle_cell.add_animal(animals.Herbivores()) for _ in range(10)]
     [jungle_cell.add_animal(animals.Carnivores(weight=80)) for _ in range(10)]
+    assert jungle_cell.biomass_carnivores() == 800
     pre_feeding_herbi_biomass = jungle_cell.biomass_herbivores()
     jungle_cell.feed_carnivores_in_cell()
     assert pre_feeding_herbi_biomass > jungle_cell.biomass_herbivores()

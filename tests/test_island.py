@@ -2,6 +2,7 @@ from biosim.Island import Island
 import biosim.cell_topography as topo
 import biosim.animals as ani
 import pytest
+import numpy as np
 
 # Map generation
 @pytest.fixture
@@ -215,6 +216,35 @@ def test_breed_all_cells_certain_prob_random_cell(standard_map):
     assert len(standard_map.raster_model[(3, 4)].herbivore_list) == 200
     assert len(standard_map.raster_model[(11, 8)].carnivore_list) == 200
 
+
+def test_population_age_grups(standard_map):
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=1, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=4, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=9, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=14, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=100, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=1, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=4, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=9, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=14, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=100, weight=10))
+    herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = standard_map.population_age_grups()
+    np.testing.assert_array_equal(herb_list, np.array([1, 1, 1, 1, 1]))
+    np.testing.assert_array_equal(carn_list, np.array([-1, -1, -1, -1, -1]))
+    assert herb_mean_w_list == [10, 10, 10, 10, 10]
+    assert carn_mean_w_list == [-10, -10, -10, -10, -10]
+
+
+def test_biomass_food_chain(standard_map):
+    standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=100, weight=10))
+    standard_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=1, weight=100))
+    for cell in standard_map.raster_model.values():
+        if cell.is_accessible:
+            cell.fodder = 0
+    biomass_list = standard_map.biomass_food_chain()
+    assert biomass_list.get('biomass_fodder') == 0
+    assert biomass_list.get('biomass_herbs') == 10
+    assert biomass_list.get('biomass_carnivores') == 100
 
 
 
