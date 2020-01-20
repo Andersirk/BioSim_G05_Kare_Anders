@@ -5,12 +5,8 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 from biosim.cell_topography import Jungle, Ocean, Savanna, Mountain, Desert
 from biosim.animals import Herbivores, Carnivores, Animals
-import copy
-import random
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 class Island:
@@ -81,7 +77,7 @@ class Island:
         :return: None
         """
         for dictionary in population_list:
-            self.check_new_population_age_and_weight(dictionary)
+            self._check_new_population_age_and_weight(dictionary)
             if dictionary["loc"] not in self.raster_model.keys():
                 raise ValueError("These coordinates do not exist in this map's"
                                  " coordinate system.")
@@ -98,7 +94,7 @@ class Island:
             else:
                 raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
 
-    def check_new_population_age_and_weight(self, new_population_dict):
+    def _check_new_population_age_and_weight(self, new_population_dict):
         """
         Controls that the variables in the the new population are allowed.
         :param new_population_dict: [{cell-coordinates,
@@ -112,18 +108,18 @@ class Island:
                 if animal["weight"] <= 0:
                     raise ValueError("The animal must have a positive weight")
 
-    def migrate_all_cells(self):
+    def _migrate_all_cells(self):
         """
         Makes all instances in all cell on the island try to migrate.
         :return: None
         """
-        carnivore_ek, herbivore_ek = self.generate_ek_for_board()
+        carnivore_ek, herbivore_ek = self._generate_ek_for_board()
         for location, cell in self.raster_model.items():
             if cell.is_accessible:
                 cell.migrate_all_animals_in_cell(self, location, carnivore_ek, herbivore_ek)
         Animals.reset_migration_attempt()
 
-    def generate_ek_for_board(self):
+    def _generate_ek_for_board(self):
         """
         Generates carnivore and herbivore ek for all accessible cells on the
         island
@@ -137,7 +133,7 @@ class Island:
                 herbivore_ek[location] = cell.ek_for_cell("Herbivores")
         return carnivore_ek, herbivore_ek
 
-    def feed_all_animals(self):
+    def _feed_all_animals(self):
         """
         Makes all animals in all accessible cells try to eat
         :return: None
@@ -149,7 +145,7 @@ class Island:
             if cell.is_accessible:
                 cell.feed_carnivores_in_cell()
 
-    def increase_fodder_all_cells(self):
+    def _increase_fodder_all_cells(self):
         """
         Increase fodder in all primary producing cells
         :return: None
@@ -158,7 +154,7 @@ class Island:
             if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
                 cell.increase_fodder()
 
-    def annual_death_all_cells(self):
+    def _annual_death_all_cells(self):
         """
         Runs the annual_death method for all animals in all accessible cells
         :return: None
@@ -167,7 +163,7 @@ class Island:
             if cell.is_accessible:
                 cell.natural_death_all_animals_in_cell()
 
-    def breed_in_all_cells(self):
+    def _breed_in_all_cells(self):
         """
         Runs the breeding method for all animals in all accessible cells
         :return: None
@@ -181,13 +177,13 @@ class Island:
         Runs all the components of the annual cycle in the correct order
         :return: None
         """
-        self.increase_fodder_all_cells()
-        self.feed_all_animals()
-        self.breed_in_all_cells()
-        self.migrate_all_cells()
+        self._increase_fodder_all_cells()
+        self._feed_all_animals()
+        self._breed_in_all_cells()
+        self._migrate_all_cells()
         Animals.age_up()
         Animals.annual_metabolism()
-        self.annual_death_all_cells()
+        self._annual_death_all_cells()
 
     def per_cell_count_pandas_dataframe(self):
         """
@@ -312,49 +308,6 @@ class Island:
                         "biomass_herbs":biomass_herbs,
                         "biomass_carnivores": biomass_carnivores}
         return biomass_list
-
-    def population_pyramid(self,herbivore_list, carnivore_list, herb_mean_w_list,
-                           carn_mean_w_list):
-        age = ["5", "5-10", "10-15", "15+"]
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111)
-        ax2 = ax1.twiny()
-        ax1.barh(age, herbivore_list, color='seagreen')
-        ax1.barh(age, carnivore_list, color='plum')
-        ax1.set_xlabel('Population size')
-        rek1 = ax2.barh(age, herb_mean_w_list, color='black')
-        rek2 = ax2.barh(age, carn_mean_w_list, color='black')
-        ax2.set_xlabel('Average weight')
-        for rektangle in rek1:
-            print(rektangle.get_xy())
-            print(rektangle.get_width())
-            rektangle.set_x(rektangle.get_width() - 1)
-            rektangle.set_width(0.3)
-        for rektangle in rek2:
-            print(rektangle.get_xy())
-            print(rektangle.get_width())
-            rektangle.set_x(rektangle.get_width() + 1)
-            rektangle.set_width(0.4)
-
-    def stacked_area(self, biomass_list):
-        df = pd.DataFrame(biomass_list)
-        fig, ax = plt.subplots(1, 1, figsize=(16, 9), dpi=80)
-        columns = df.columns[0:]
-        x = [0,1] #year the simulation last
-        y0 = df[columns[0]].values.tolist()
-        y1 = df[columns[1]].values.tolist()
-        y2 = df[columns[2]].values.tolist()
-        y = np.vstack([y0, y1, y2])
-        labs = columns.values.tolist()
-        ax = plt.gca()
-        ax.stackplot(x, y, labels=labs, colors=['tab:green', 'tab:purple', 'tab:red'])
-        ax.set(ylim=[0, 100000])
-        ax.legend(fontsize=10, ncol=4)
-        plt.xticks(x[::5], fontsize=10, horizontalalignment='center')
-        plt.yticks(np.arange(10000, 100000, 20000), fontsize=10)
-        plt.xlim(x[0], x[-1])
-        plt.show()
-
 
 if __name__ == "__main__":
     # random.seed(1)
