@@ -4,9 +4,10 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import random
-import src.biosim.animals as animals
+import biosim.animals as animals
 import copy
 import itertools
+import timeit
 
 class Topography:
     """
@@ -18,12 +19,11 @@ class Topography:
         Topography superclass constructor
         """
         self.is_accessible = True
-        self.animals = []
         self.herbivore_list = []
         self.carnivore_list = []
         self.fodder = 0.0
 
-    def decrease_fodder(self, decrease_amount):
+    def allowed_fodder_to_consume(self, decrease_amount):
         """
         Takes a request for how much fodder the animal would like to consume
         and returns the amount it is allowed to consume and decreases the
@@ -38,8 +38,7 @@ class Topography:
             remaining_fodder = self.fodder
             self.fodder = 0.0
             return remaining_fodder
-        elif self.fodder <= 0.0:
-            return 0.0
+
 
     def remove_animal(self, animal):
         """
@@ -47,11 +46,18 @@ class Topography:
         in the cell.
         :param animal: An instance of an animal class.
         """
+        # if animal.__class__.__name__ == "Herbivores":
+        #     self.herbivore_list.remove(animal)
+        # elif animal.__class__.__name__ == "Carnivores":
+        #     self.carnivore_list.remove(animal)
+        # if animal.__class__.__name__ == "Herbivores":
+        #     self.herbivore_list = list(filter(lambda herbie: herbie != animal, self.herbivore_list))
+        # elif animal.__class__.__name__ == "Carnivores":
+        #     self.carnivore_list = list(filter(lambda carnie: carnie != animal, self.carnivore_list))
         if animal.__class__.__name__ == "Herbivores":
-            self.herbivore_list.remove(animal)
+            self.herbivore_list = [herbi for herbi in self.herbivore_list if herbi != animal]
         elif animal.__class__.__name__ == "Carnivores":
-            self.carnivore_list.remove(animal)
-
+            self.carnivore_list = [carni for carni in self.carnivore_list if carni != animal]
 
     def add_animal(self, animal):
         """
@@ -81,83 +87,111 @@ class Topography:
                 "Carnivores": len(self.carnivore_list),
                 "Total": len(self.carnivore_list) + len(self.herbivore_list)}
 
-    def breeding_herbivore(self):
-        breedable_herbivores = len(self.herbivore_list)
-        for herbivore in self.herbivore_list:
-            breeding_prop = min(1, herbivore.parameters["gamma"] * herbivore.fitness * (breedable_herbivores - 1))
-            if herbivore.weight < herbivore.parameters["zeta"]*(herbivore.parameters["w_birth"]+(herbivore.parameters["sigma_birth"])):
-                continue
-            if random.random() > breeding_prop:
-                continue
-            new_kid = animals.Herbivores()
-            if herbivore.parameters["xi"]*new_kid.weight > herbivore.weight:
-                continue
-            herbivore.weight -= herbivore.parameters["xi"]*new_kid.weight
-            self.add_animal(new_kid)
+    def breed_all_animals_in_cell(self):
+        self.breed_all_herbivores_in_cell()
+        self.breed_all_carnivores_in_cell()
 
-    def breeding_carnivore(self):
-        breedable_carnivores = len(self.carnivore_list)
-        for carnivore in self.carnivore_list:
-            breeding_prop = min(1, carnivore.parameters["gamma"] * carnivore.fitness * (breedable_carnivores - 1))
-            if carnivore.weight < carnivore.parameters["zeta"]*(carnivore.parameters["w_birth"]+(carnivore.parameters["sigma_birth"])):
-                continue
-            if random.random() > breeding_prop:
-                continue
-            new_kid = animals.Carnivore()
-            if carnivore.parameters["xi"]*new_kid.weight > carnivore.weight:
-                continue
-            carnivore.weight -= carnivore.parameters["xi"]*new_kid.weight
-            self.add_animal(new_kid)
 
-    def natural_death(self):
-        animal_list = [animal for animal in itertools.chain(self.herbivore_list, self.carnivore_list)]
-        for animal in animal_list:
-            if animal.fitness == 0:
-                self.remove_animal(animal)
-                animals.Animals.instances.remove(animal)
-            elif random.random() < animal.parameters["omega"]*(1 - animal.fitness):
-                self.remove_animal(animal)
-                animals.Animals.instances.remove(animal)
-            else:
-                continue
+    def breed_all_herbivores_in_cell(self):
+        number_of_herbivores = len(self.herbivore_list)
+        herbivore_reference_list = copy.copy(self.herbivore_list)
+        for herbivore in herbivore_reference_list:
+            herbivore.breed(self, number_of_herbivores)
 
-    def weight_of_all_herbivores(self):
+    def breed_all_carnivores_in_cell(self):
+        number_of_carnivores = len(self.carnivore_list)
+        carnivore_reference_list = copy.copy(self.carnivore_list)
+        for carnivore in carnivore_reference_list:
+            carnivore.breed(self, number_of_carnivores)
+
+    def natural_death_all_animals_in_cell(self):
+        self.natural_death_all_herbivores_in_cell()
+        self.natural_death_all_carnivores_in_cell()
+
+    def natural_death_all_carnivores_in_cell(self):
+        carnivores_reference_list = copy.copy(self.carnivore_list)
+        for carnivore in carnivores_reference_list:
+            if carnivore.will_die_natural_death():
+                self.remove_animal(carnivore)
+                animals.Animals.instances.remove(carnivore)
+                #animals.Animals.instances = [ani for ani in animals.Animals.instances if ani != carnivore]
+
+    def natural_death_all_herbivores_in_cell(self):
+        herbivores_reference_list = copy.copy(self.herbivore_list)
+        for herbivore in herbivores_reference_list:
+            if herbivore.will_die_natural_death():
+                self.remove_animal(herbivore)
+                animals.Animals.instances.remove(herbivore)
+                #animals.Animals.instances = [ani for ani in animals.Animals.instances if ani != herbivore]
+
+
+
+
+    def biomass_herbivores(self):
         weight_sum = 0
         for herbivore in self.herbivore_list:
             weight_sum += herbivore.weight
         return weight_sum
 
 
-    def feeding_herbivores(self):
-        herbivore_fitness_sort = sorted(self.herbivore_list,
-                                   key=lambda herbi: herbi.fitness)
-        for herbivore in herbivore_fitness_sort:
-            allowed_amount = self.decrease_fodder(herbivore.parameters["F"])
-            herbivore.eat_increase_weight(allowed_amount)
-            if self.fodder <= 0:
-                break
+    def biomass_carnivores(self):
+        weight_sum = 0
+        for carnivore in self.carnivore_list:
+            weight_sum += carnivore.weight
+        return weight_sum
 
-    def feeding_carnivores(self):
+    def feed_herbivores_in_cell(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
                                    key=lambda herbi: herbi.fitness, reverse=True)
+        for herbivore in herbivore_fitness_sort:
+            if self.fodder <= 0:
+                break
+            herbivore.graze(self)
+
+
+    def feed_carnivores_in_cell(self):
+        herbivore_fitness_sort = sorted(self.herbivore_list,
+                                   key=lambda herbi: herbi.fitness)
         carnivore_fitness_sort = sorted(self.carnivore_list,
-                                   key=lambda carni: carni.fitness)
+                                   key=lambda carni: carni.fitness, reverse=True)
         for carnivore in carnivore_fitness_sort:
-            carnivore_eaten_this_year = 0
             for herbivore in herbivore_fitness_sort:
-                if carnivore.fitness < herbivore.fitness or carnivore_eaten_this_year > carnivore.parameters["DeltaPhiMax"]:
-                    break
-                elif (carnivore.fitness - herbivore.fitness)\
-                        < carnivore.parameters["DeltaPhiMax"]:
-                    killing_prop = (carnivore.fitness - herbivore.fitness) / carnivore.parameters["DeltaPhiMax"]
-                    if random.random() < killing_prop:
-                        carnivore_eaten_this_year += herbivore.weight
-                        carnivore.eat_increase_weight(herbivore.weight)
-                        self.herbivore_list.remove(herbivore)
-                else:
-                    carnivore_eaten_this_year += herbivore.weight
-                    carnivore.eat_increase_weight(herbivore.weight)
-                    self.herbivore_list.remove(herbivore)
+                if carnivore.kills_herbivore(herbivore):
+                    herbivore_fitness_sort.remove(herbivore)
+                    self.remove_animal(herbivore)
+                    animals.Animals.instances.remove(herbivore)
+            carnivore.reset_amount_eaten_this_year()
+
+    def ek_for_cell(self, species):
+        if species == "Carnivores":
+            return self.biomass_herbivores() / (
+                        (len(self.carnivore_list) + 1
+                         ) * animals.Carnivores.parameters["F"])
+        elif species == "Herbivores":
+            return self.current_fodder() / (
+                        (len(self.herbivore_list) + 1
+                         ) * animals.Herbivores.parameters["F"])
+
+    def migrate_all_herbivores_in_cell(self, island, current_cell, herbivore_ek):
+        for herbivore in self.herbivore_list:
+            if not herbivore.has_tried_migration_this_year:
+                new_location = herbivore.what_cell_to_migrate_to(current_cell, herbivore_ek)
+                if new_location != current_cell:
+                    self.remove_animal(herbivore)
+                    island.raster_model[new_location].add_animal(herbivore)
+
+    def migrate_all_carnivores_in_cell(self, island, current_cell, carnivore_ek):
+        for carnivore in self.carnivore_list:
+            if not carnivore.has_tried_migration_this_year:
+                new_location = carnivore.what_cell_to_migrate_to(current_cell, carnivore_ek)
+                if new_location != current_cell:
+                    self.remove_animal(carnivore)
+                    island.raster_model[new_location].add_animal(carnivore)
+
+    def migrate_all_animals_in_cell(self, island, current_cell, carnivore_ek, herbivore_ek):
+        self.migrate_all_herbivores_in_cell(island, current_cell, herbivore_ek)
+        self.migrate_all_carnivores_in_cell(island, current_cell, carnivore_ek)
+
 
 
 class Jungle(Topography):
@@ -180,11 +214,10 @@ class Jungle(Topography):
         change preexisting parameters only.
         """
         for parameter, value in new_parameters.items():
-            if parameter == "f_max":
-                if value >= 0:
-                    cls.parameters["f_max"] = value
-                else:
-                    raise ValueError("f_max requires a positive value")
+            if parameter in cls.parameters.keys():
+                if value < 0:
+                    raise ValueError(f"{parameter} value must be positive")
+                cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
@@ -206,19 +239,13 @@ class Savanna(Topography):
         self.fodder = self.parameters["f_max"]
 
     @classmethod
-    def set_parameters(cls, parameters):
+    def set_parameters(cls, new_parameters):
         """ Sets the editable default parameters for this subclass"""
-        for parameter, value in parameters.items():
-            if parameter == "f_max":
-                if value >= 0:
-                    cls.parameters["f_max"] = value
-                else:
-                    raise ValueError("f_max requires a positive value")
-            elif parameter == "alpha":
-                if value >= 0:
-                    cls.parameters["alpha"] = value
-                else:
-                    raise ValueError("alpha requires a positive value")
+        for parameter, value in new_parameters.items():
+            if parameter in cls.parameters.keys():
+                if value < 0:
+                    raise ValueError(f"{parameter} value must be positive")
+                cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
 
@@ -235,13 +262,13 @@ class Desert(Topography):
     """
     def __init__(self):
         super().__init__()
+        self.fodder = 0
 
 
 class Mountain:
     """Construct the passive and non accessible class 'Mountain' """
     def __init__(self):
         self.is_accessible = False
-        self.fodder = 0.0
 
 
 class Ocean:
@@ -251,17 +278,29 @@ class Ocean:
     """
     def __init__(self):
         self.is_accessible = False
-        self.fodder = 0.0
 
 
 
 
 
 
-# if __name__ == "__main__":
+#if __name__ == "__main__":
+#
+# mysetup = """
+# from cell_topography import Jungle
+# import animals
+# cell = Jungle()
+# for _ in range(100):
+#     cell.add_animal(animals.Herbivores())
+#     cell.add_animal(animals.Carnivores())
+# testani = animals.Herbivores()
+# cell.add_animal(testani)"""
 #
 #
-#     keke = [Savanna() for _ in range(5)]
-#     [print(kok.parameters) for kok in keke]
-#     Savanna.set_parameters({"f_max":2000, "alpha": 69})
-#     [print(kok.parameters) for kok in keke]
+# totest = "cell.remove_animal(testani); cell.add_animal(testani)"
+#
+# print(timeit.timeit(setup=mysetup, stmt=totest, number=100000))
+    # keke = [Savanna() for _ in range(5)]
+    # [print(kok.parameters) for kok in keke]
+    # Savanna.set_parameters({"f_max":2000, "alpha": 69})
+    # [print(kok.parameters) for kok in keke]
