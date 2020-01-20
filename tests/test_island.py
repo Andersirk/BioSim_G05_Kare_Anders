@@ -1,6 +1,6 @@
 from biosim.Island import Island
-import src.biosim.cell_topography as topo
-import src.biosim.animals as ani
+import biosim.cell_topography as topo
+import biosim.animals as ani
 import pytest
 
 # Map generation
@@ -170,7 +170,7 @@ def surrounding_ocean_cell_small():
 def test_migration_cant_happen(surrounding_ocean_cell_small):
     """The test shows that the animals dont migrate when their cell is
     surrounded by non-accessible cells"""
-    surrounding_ocean_cell_small.migrate_all_cells()
+    surrounding_ocean_cell_small._migrate_all_cells()
     assert len(surrounding_ocean_cell_small.raster_model[(1, 1)].herbivore_list) == 10
     assert len(surrounding_ocean_cell_small.raster_model[(1, 3)].herbivore_list) == 10
 
@@ -180,7 +180,7 @@ def test_feed_all_animals(surrounding_ocean_cell_small):
     """Test if the herbivores and the carnivores eat."""
     biomass_before_feeding_1_1 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 1)])
     biomass_before_feeding_1_3 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 3)])
-    surrounding_ocean_cell_small.feed_all_animals()
+    surrounding_ocean_cell_small._feed_all_animals()
     biomass_after_feeding_1_1 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 1)])
     biomass_after_feeding_1_3 = topo.Topography.biomass_herbivores(surrounding_ocean_cell_small.raster_model[(1, 3)])
     assert biomass_before_feeding_1_1 != biomass_after_feeding_1_1
@@ -191,7 +191,7 @@ def test_increase_fodder_random_jungle_cells(standard_map):
     """Test that the method 'increase_fodder' works in a jungle cell"""
     standard_map.raster_model[(4, 7)].fodder = 0
     standard_map.raster_model[(11, 8)].fodder = 45
-    standard_map.increase_fodder_all_cells()
+    standard_map._increase_fodder_all_cells()
     assert standard_map.raster_model[(4, 7)].fodder == topo.Jungle.parameters["f_max"]
     assert standard_map.raster_model[(11, 8)].fodder == topo.Jungle.parameters["f_max"]
 
@@ -201,7 +201,7 @@ def test_annual_death_0_fitness_random_cells(standard_map):
     """Test that the method 'annual_death' works in a random accessible cell"""
     standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=100, weight=0))
     standard_map.raster_model[(11, 8)].add_animal(ani.Carnivores(age=100, weight=0))
-    standard_map.annual_death_all_cells()
+    standard_map._annual_death_all_cells()
     assert standard_map.raster_model[(3, 4)].herbivore_list == []
     assert standard_map.raster_model[(11, 8)].carnivore_list == []
 
@@ -211,7 +211,7 @@ def test_breed_all_cells_certain_prob_random_cell(standard_map):
     for _ in range(100):
         standard_map.raster_model[(3, 4)].add_animal(ani.Herbivores(age=0, weight=100))
         standard_map.raster_model[(11, 8)].add_animal(ani.Carnivores(age=0, weight=100))
-    standard_map.breed_in_all_cells()
+    standard_map._breed_in_all_cells()
     assert len(standard_map.raster_model[(3, 4)].herbivore_list) == 200
     assert len(standard_map.raster_model[(11, 8)].carnivore_list) == 200
 

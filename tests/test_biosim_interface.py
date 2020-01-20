@@ -210,7 +210,7 @@ def test_get_animal_distribution(plain_sim):
                 ],
             },
             {
-                "loc": (1, 1),
+                "loc": (1, 2),
                 "pop": [
                     {"species": "Herbivore", "age": 1, "weight": 10.0},
                     {"species": "Herbivore", "age": 1, "weight": 10.0},

@@ -4,10 +4,9 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import unittest
-import src.biosim.animals as ani
+import biosim.animals as ani
 import pytest
-import src.biosim.cell_topography as topo
-
+import biosim.cell_topography as topo
 import random
 
 
@@ -21,7 +20,7 @@ def test_birth_weight_sd0():
     """
     ani.Herbivores.parameters["w_birth"] = 10
     ani.Herbivores.parameters["sigma_birth"] = 0
-    assert ani.Herbivores.birth_weight(ani.Herbivores()) == 10
+    assert ani.Herbivores._birth_weight(ani.Herbivores()) == 10
 
 
 # Fitness
@@ -227,7 +226,7 @@ def certain_migration_prob_herb():
 
 def test_will_migrate_certain_probability(certain_migration_prob_herb):
     """Test if an herbivore will migrate when the probability = 1"""
-    assert certain_migration_prob_herb.will_migrate()
+    assert certain_migration_prob_herb._will_migrate()
 
 
 def test_will_migrate_50_chance():
@@ -235,7 +234,7 @@ def test_will_migrate_50_chance():
     probability = 0.5 """
     testanimal = ani.Herbivores(age=10, weight=10.0499)
     testanimal.set_parameters({"mu": 1})
-    testlist = [testanimal.will_migrate() for _ in range(1000)]
+    testlist = [testanimal._will_migrate() for _ in range(1000)]
     would_migrate = testlist.count(True)
     assert 450 < would_migrate < 550
 

@@ -3,10 +3,10 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
-import src.biosim.cell_topography as topo
+import biosim.cell_topography as topo
 import pytest
-import src.biosim.animals as animals
-import src.biosim.Island as isle
+import biosim.animals as animals
+import biosim.Island as isle
 
 
 @pytest.fixture
@@ -106,17 +106,18 @@ def low_fitness_animals():
     jungle_cell.add_animal(herbivore)
     jungle_cell.add_animal(carnivore)
     return jungle_cell
+    #herbivore.parameters["omega"] = 0.4
+    #carnivore.parameters["omega"] = 0.9
 
-@
 
-def test_animal_with_fitnessleves_0_dies():
-    animal = animals.Herbivores()
-    instance = topo.Jungle()
-    instance.add_animal(animal)
-    instance.herbivore_list[0].weight = 1
-    instance.herbivore_list[0].age = 100
-    instance.natural_death()
-    assert len(instance.herbivore_list) == 0
+def test_animal_with_fitnesslevel_0_dies():
+    animal = animals.Herbivores(age=200, weight=1)
+    cell = topo.Jungle()
+    cell.add_animal(animal)
+    animals.Herbivores.parameters["omega"] = 1
+    cell.natural_death_all_animals_in_cell()
+    animals.Herbivores.parameters["omega"] = 0.4
+    assert len(cell.herbivore_list) == 0
 
 # migration
 @pytest.fixture
@@ -147,6 +148,7 @@ def standard_map_ani_one_accesible():
                'age': 9, 'weight': 10}]}]
     island.populate_island(occupants)
     return island
+
 def test_breeding_animals():
     animal = animals.Herbivores()
     instance = topo.Jungle()
@@ -159,7 +161,7 @@ def test_migrate_all_herbi_in_cell_new_location(
     migration-prop = 1"""
     animals.Herbivores.parameters["mu"] = 1000
     mock_ek = {(1,18):2}
-    standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_herbivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
+    standard_map_ani_one_accesible.raster_model[(1, 19)]._migrate_all_herbivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
     animals.Herbivores.parameters["mu"] = 0.25
     assert standard_map_ani_one_accesible.raster_model[(1, 19)].herbivore_list == []
     assert standard_map_ani_one_accesible.raster_model[(1, 18)].herbivore_list != []
@@ -171,7 +173,7 @@ def test_migrate_all_carni_in_cell_new_location(
     migration-probability = 1"""
     animals.Carnivores.parameters["mu"] = 1000
     mock_ek = {(1,18):2}
-    standard_map_ani_one_accesible.raster_model[(1, 19)].migrate_all_carnivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
+    standard_map_ani_one_accesible.raster_model[(1, 19)]._migrate_all_carnivores_in_cell(standard_map_ani_one_accesible, (1, 19), mock_ek)
     animals.Carnivores.parameters["mu"] = 0.24
     assert standard_map_ani_one_accesible.raster_model[(1, 19)].carnivore_list == []
     assert standard_map_ani_one_accesible.raster_model[(1, 18)].carnivore_list != []
@@ -197,6 +199,7 @@ def test_ek_for_cell_9_herbs_carns_100_fodder(basic_jungle):
     for _ in range(9):
         basic_jungle.add_animal(animals.Herbivores(weight=10))
         basic_jungle.add_animal(animals.Carnivores())
+    animals.Carnivores.parameters["F"] = 50
     ek_herbivores = basic_jungle.ek_for_cell("Herbivores")
     ek_carnivores = basic_jungle.ek_for_cell("Carnivores")
     assert ek_herbivores == 1
@@ -231,6 +234,29 @@ def test_set_parameters_in_a_cell():
     assert topo.Savanna.parameters["f_max"] == 300
 
 # feeding in cell
+def test_remove_herbivore():
+    cell = topo.Jungle()
+    testanimal = animals.Herbivores()
+    cell.add_animal(testanimal)
+    assert testanimal in cell.herbivore_list
+    assert testanimal in animals.Animals.instances
+    cell.remove_animal(testanimal)
+    assert testanimal not in cell.herbivore_list
+    assert testanimal in animals.Animals.instances
+    animals.Animals.instances.remove(testanimal)
+    assert testanimal not in animals.Animals.instances
+
+def test_remove_carnivore():
+    cell = topo.Jungle()
+    testanimal = animals.Carnivores()
+    cell.add_animal(testanimal)
+    assert testanimal in cell.carnivore_list
+    assert testanimal in animals.Animals.instances
+    cell.remove_animal(testanimal)
+    assert testanimal not in cell.carnivore_list
+    assert testanimal in animals.Animals.instances
+    animals.Animals.instances.remove(testanimal)
+    assert testanimal not in animals.Animals.instances
 
 def test_feeding_herbivores_in_a_cell():
     """ Tests the method "test_feeding_herbivores_in_a_cell" where the
@@ -254,15 +280,6 @@ def test_feeding_herbivores_in_a_cell():
     assert jungle_cell.fodder == 0
     jungle_cell.increase_fodder()
     assert jungle_cell.fodder == 800
-
-# def test_feeding_herbs_in_a_cell():
-#     jungle_cell = topo.Jungle()
-#     jungle_cell.fodder = 100
-#     [jungle_cell.add_animal(animals.Herbivores()) for _ in range(11)]
-#     herbivore_fitness_sort = sorted(jungle_cell.herbivore_list,
-#                                     key=lambda herbi: herbi.fitness,
-#                                     reverse=True)
-#     jungle_cell.feed_herbivores_in_cell()
 
 
 def test_increase_fodder_savanna_fodder_is_max():
