@@ -3,11 +3,9 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
-import random
 import biosim.animals as animals
 import copy
-import itertools
-import timeit
+
 
 class Topography:
     """
@@ -39,25 +37,16 @@ class Topography:
             self.fodder = 0.0
             return remaining_fodder
 
-
     def remove_animal(self, animal):
         """
         Removes the instance of an animal from the list of animal instances
         in the cell.
         :param animal: An instance of an animal class.
         """
-        # if animal.__class__.__name__ == "Herbivores":
-        #     self.herbivore_list.remove(animal)
-        # elif animal.__class__.__name__ == "Carnivores":
-        #     self.carnivore_list.remove(animal)
-        # if animal.__class__.__name__ == "Herbivores":
-        #     self.herbivore_list = list(filter(lambda herbie: herbie != animal, self.herbivore_list))
-        # elif animal.__class__.__name__ == "Carnivores":
-        #     self.carnivore_list = list(filter(lambda carnie: carnie != animal, self.carnivore_list))
         if animal.__class__.__name__ == "Herbivores":
-            self.herbivore_list = [herbi for herbi in self.herbivore_list if herbi != animal]
+            self.herbivore_list = [herbi for herbi in self.herbivore_list if animal != herbi]
         elif animal.__class__.__name__ == "Carnivores":
-            self.carnivore_list = [carni for carni in self.carnivore_list if carni != animal]
+            self.carnivore_list = [carni for carni in self.carnivore_list if animal != carni]
 
     def add_animal(self, animal):
         """
@@ -69,7 +58,6 @@ class Topography:
             self.herbivore_list.append(animal)
         elif animal.__class__.__name__ == "Carnivores":
             self.carnivore_list.append(animal)
-
 
     def current_fodder(self):
         """Returns the amount of fodder in the cell. """
@@ -90,7 +78,6 @@ class Topography:
     def breed_all_animals_in_cell(self):
         self.breed_all_herbivores_in_cell()
         self.breed_all_carnivores_in_cell()
-
 
     def breed_all_herbivores_in_cell(self):
         number_of_herbivores = len(self.herbivore_list)
@@ -114,7 +101,6 @@ class Topography:
             if carnivore.will_die_natural_death():
                 self.remove_animal(carnivore)
                 animals.Animals.instances.remove(carnivore)
-                #animals.Animals.instances = [ani for ani in animals.Animals.instances if ani != carnivore]
 
     def natural_death_all_herbivores_in_cell(self):
         herbivores_reference_list = copy.copy(self.herbivore_list)
@@ -122,17 +108,12 @@ class Topography:
             if herbivore.will_die_natural_death():
                 self.remove_animal(herbivore)
                 animals.Animals.instances.remove(herbivore)
-                #animals.Animals.instances = [ani for ani in animals.Animals.instances if ani != herbivore]
-
-
-
 
     def biomass_herbivores(self):
         weight_sum = 0
         for herbivore in self.herbivore_list:
             weight_sum += herbivore.weight
         return weight_sum
-
 
     def biomass_carnivores(self):
         weight_sum = 0
@@ -147,7 +128,6 @@ class Topography:
             if self.fodder <= 0:
                 break
             herbivore.graze(self)
-
 
     def feed_carnivores_in_cell(self):
         herbivore_fitness_sort = sorted(self.herbivore_list,
@@ -172,7 +152,7 @@ class Topography:
                         (len(self.herbivore_list) + 1
                          ) * animals.Herbivores.parameters["F"])
 
-    def migrate_all_herbivores_in_cell(self, island, current_cell, herbivore_ek):
+    def _migrate_all_herbivores_in_cell(self, island, current_cell, herbivore_ek):
         for herbivore in self.herbivore_list:
             if not herbivore.has_tried_migration_this_year:
                 new_location = herbivore.what_cell_to_migrate_to(current_cell, herbivore_ek)
@@ -180,7 +160,7 @@ class Topography:
                     self.remove_animal(herbivore)
                     island.raster_model[new_location].add_animal(herbivore)
 
-    def migrate_all_carnivores_in_cell(self, island, current_cell, carnivore_ek):
+    def _migrate_all_carnivores_in_cell(self, island, current_cell, carnivore_ek):
         for carnivore in self.carnivore_list:
             if not carnivore.has_tried_migration_this_year:
                 new_location = carnivore.what_cell_to_migrate_to(current_cell, carnivore_ek)
@@ -189,9 +169,8 @@ class Topography:
                     island.raster_model[new_location].add_animal(carnivore)
 
     def migrate_all_animals_in_cell(self, island, current_cell, carnivore_ek, herbivore_ek):
-        self.migrate_all_herbivores_in_cell(island, current_cell, herbivore_ek)
-        self.migrate_all_carnivores_in_cell(island, current_cell, carnivore_ek)
-
+        self._migrate_all_herbivores_in_cell(island, current_cell, herbivore_ek)
+        self._migrate_all_carnivores_in_cell(island, current_cell, carnivore_ek)
 
 
 class Jungle(Topography):
@@ -279,28 +258,11 @@ class Ocean:
     def __init__(self):
         self.is_accessible = False
 
-
-
-
-
-
-#if __name__ == "__main__":
-#
-# mysetup = """
-# from cell_topography import Jungle
-# import animals
-# cell = Jungle()
-# for _ in range(100):
-#     cell.add_animal(animals.Herbivores())
-#     cell.add_animal(animals.Carnivores())
-# testani = animals.Herbivores()
-# cell.add_animal(testani)"""
-#
-#
-# totest = "cell.remove_animal(testani); cell.add_animal(testani)"
-#
-# print(timeit.timeit(setup=mysetup, stmt=totest, number=100000))
-    # keke = [Savanna() for _ in range(5)]
-    # [print(kok.parameters) for kok in keke]
-    # Savanna.set_parameters({"f_max":2000, "alpha": 69})
-    # [print(kok.parameters) for kok in keke]
+if __name__ == "__main__":
+    animal = animals.Herbivores(age=200, weight=1)
+    cell = Jungle()
+    cell.add_animal(animal)
+    animals.Herbivores.parameters["omega"] = 1
+    cell.natural_death_all_animals_in_cell()
+    animals.Herbivores.parameters["omega"] = 0.4
+    assert len(cell.herbivore_list) == 0

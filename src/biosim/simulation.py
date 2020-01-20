@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from biosim.Island import Island
 from biosim.animals import Herbivores, Carnivores
 from biosim.cell_topography import Jungle, Savanna
-import seaborn as sns
 import numpy as np
 import random
 import subprocess
@@ -315,7 +314,7 @@ class BioSim:
     @property
     def animal_distribution(self):
         """Pandas DataFrame with animal count per species for each cell on island."""
-        self.island.per_cell_count_pandas_dataframe()
+        return self.island.per_cell_count_pandas_dataframe()
 
     def make_movie(self):
         """Create MPEG4 movie from visualization images saved."""

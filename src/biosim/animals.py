@@ -6,7 +6,6 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 from math import exp
 import numpy as np
 import random
-import biosim.cell_topography as topo
 import copy
 import functools
 
@@ -16,13 +15,12 @@ class Animals:
     """This is the overall class for the animals which lives on the island"""
     def __init__(self, age, weight, potential_newborn):
         self.age = age
-        self.weight = self.birth_weight() if weight is None else weight
+        self.weight = self._birth_weight() if weight is None else weight
         if not potential_newborn:
             Animals.instances.append(self)
-            #newborns blir lagt til selvom de blir skrapa
         self.has_tried_migration_this_year = False
 
-    def birth_weight(self):
+    def _birth_weight(self):
         """
         Returns a weight drawn from a normal distribution with the
         parameter 'w_birth' as the expectation and 'sigma_birth' as the
@@ -72,7 +70,7 @@ class Animals:
         for instance in cls.instances:
             instance.weight -= instance.parameters["eta"] * instance.weight
 
-    def eat_increase_weight(self, food):
+    def _eat_increase_weight(self, food):
         """
         Makes the animal eat x amount of food and increases its weight based on
         the parameter 'beta
@@ -115,7 +113,7 @@ class Animals:
         else:
             return False
 
-    def will_migrate(self):
+    def _will_migrate(self):
         """
         Decides if an animal shall try to migrate
         :return:True (shall try to migrate) or False (Shall not try to migrate)
@@ -135,10 +133,10 @@ class Animals:
         :return: The chosen target for the migration and the current cell
         """
         self.has_tried_migration_this_year = True
-        if self.will_migrate():
+        if self._will_migrate():
             sum_ek_neighbours = 0
             cell_probability = []
-            neighbouring_cells = self.find_neighbouring_cells(current_cell)
+            neighbouring_cells = self._find_neighbouring_cells(current_cell)
             original_neighbouring_cells = copy.deepcopy(neighbouring_cells)
             for cell in original_neighbouring_cells:
                 if cell not in ek_dict.keys():
@@ -157,7 +155,7 @@ class Animals:
             return neighbouring_cells[n]
         return current_cell
 
-    def find_neighbouring_cells(self, coordinates):
+    def _find_neighbouring_cells(self, coordinates):
         """
         Finds an animals neighbouring cell coordinates
         :param coordinates: list
@@ -208,7 +206,7 @@ class Herbivores(Animals):
         :return: None
         """
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
-        self.eat_increase_weight(allowed_amount)
+        self._eat_increase_weight(allowed_amount)
 
     @classmethod
     def set_parameters(cls, new_parameters):
@@ -277,13 +275,13 @@ class Carnivores(Animals):
                            self.parameters["DeltaPhiMax"]
             if random.random() < killing_prop:
                 self.eaten_this_year += herbivore.weight
-                self.eat_increase_weight(herbivore.weight)
+                self._eat_increase_weight(herbivore.weight)
                 return True
             else:
                 return False
         else:
             self.eaten_this_year += herbivore.weight
-            self.eat_increase_weight(herbivore.weight)
+            self._eat_increase_weight(herbivore.weight)
             return True
 
     def reset_amount_eaten_this_year(self):
