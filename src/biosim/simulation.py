@@ -191,6 +191,7 @@ class BioSim:
         herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = self.island.population_age_grups()
         age = ["0-1","2-5", "5-10", "10-15", "15+"]
         [p.remove() for p in reversed(self._pop_pyram_ax.patches)]
+        self._pop_pyram_sub.cla()
         self._pop_pyram_sub.barh(age, herb_list, color='lawngreen')
         self._pop_pyram_sub.barh(age, carn_list, color='red')
         rek1 = self._pop_pyram_ax.barh(age, herb_mean_w_list, color='black')
@@ -360,7 +361,7 @@ if __name__ == "__main__":
                ]
     simmert = BioSim(island_map, ini_pop, 1, img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg')
     #img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
-    simmert.simulate(20)
+    simmert.simulate(50)
     ini_pop2 = [{'loc': (1, 17), 'pop': [
         {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
         range(100)]},
@@ -369,6 +370,6 @@ if __name__ == "__main__":
                    range(100)]}
                ]
     simmert.add_population(ini_pop2)
-    simmert.simulate(15)
-    #simmert.make_movie()
+    simmert.simulate(250)
+    simmert.make_movie()
 
