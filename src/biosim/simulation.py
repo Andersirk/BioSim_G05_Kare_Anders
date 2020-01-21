@@ -122,7 +122,7 @@ class BioSim:
                                            labelsize=8)
             self._heat_herb_ax.set_xlabel('Herbivore heatmap', fontsize=9)
             self._herb_cbar_ax = self._sim_window_fig.add_axes(
-                                                [0.715, 0.915, 0.25, 0.006])
+                                                [0.715, 0.93, 0.25, 0.006])
 
         # setup carnivore heatmap subplot and accompanying colorbar axes
         if self._heat_carn_ax is None:
@@ -131,18 +131,22 @@ class BioSim:
                                            labelsize=8)
             self._heat_carn_ax.set_xlabel('Carnivore heatmap', fontsize=9)
             self._carn_cbar_ax = self._sim_window_fig.add_axes(
-                                                [0.715, 0.458, 0.25, 0.006])
+                                                [0.715, 0.473, 0.25, 0.006])
 
         # setup population pyramid subplot and some parameters along with
         # text for labels
         if self._pop_pyram_ax is None:
             self._pop_pyram_ax = self._sim_window_fig.add_subplot(2, 3, 2)
             self._pop_pyram_obj = self._pop_pyram_ax.twiny()
-            self._sim_window_fig.text(0.465, 0.495, 'Population size',
-                                      fontsize=9)
+            self._sim_window_fig.text(0.5, -0.15, 'Population size',
+                                      fontsize=9,
+                                      transform=self._pop_pyram_ax.transAxes,
+                                      horizontalalignment='center')
             self._pop_pyram_obj.set_xlabel('Average weight', fontsize=9)
-            self._sim_window_fig.text(0.648, 0.78, 'Age groups', fontsize=9,
-                                      rotation=270)
+            self._sim_window_fig.text(1.02, 0.5, 'Age groups', fontsize=9,
+                                      rotation=270,
+                                      transform=self._pop_pyram_ax.transAxes,
+                                      verticalalignment='center')
             self._pop_pyram_ax.tick_params(axis='both', which='major',
                                            labelsize=8)
             self._pop_pyram_obj.tick_params(axis='both', which='major',
@@ -295,9 +299,12 @@ class BioSim:
         self._pop_pyram_ax.barh(age, carn_pop_per_age, color='red')
         rek1 = self._pop_pyram_obj.barh(age, herb_mean_w, color='black')
         rek2 = self._pop_pyram_obj.barh(age, carn_mean_w, color='black')
-        maxlim = max(max(herb_pop_per_age), abs(min(carn_pop_per_age))) + 150
-        self._pop_pyram_ax.set_xlim(-maxlim, maxlim)
-        self._pop_pyram_obj.set_xticks(np.arange(-100, 101, step=20))
+        maxlim_pop_per_age = max(max(herb_pop_per_age),
+                                 abs(min(carn_pop_per_age))) + 150
+        self._pop_pyram_ax.set_xlim(-maxlim_pop_per_age, maxlim_pop_per_age)
+        maxlim_mean_w = max(max(herb_mean_w),
+                            abs(min(carn_mean_w))) + 20
+        self._pop_pyram_obj.set_xlim(-maxlim_mean_w, maxlim_mean_w)
         for rectangle in rek1:
             rectangle.set_x(rectangle.get_width() - 1)
             rectangle.set_width(1)
@@ -439,43 +446,3 @@ class BioSim:
                                    f'{self._img_base}.mp4'])
         except subprocess.CalledProcessError as err:
             raise RuntimeError(f'ERROR: ffmpeg failed with: {err}')
-
-
-if __name__ == "__main__":
-    island_map = """\
-                OOOOOOOOOOOOOOOOOOOOO
-                OOOOOOOOSMMMMJJJJJJJO
-                OSSSSSJJJJMMJJJJJJJOO
-                OSSSSSSSSSMMJJJJJJOOO
-                OSSSSSJJJJJJJJJJJJOOO
-                OSSSSSJJJDDJJJSJJJOOO
-                OSSJJJJJDDDJJJSSSSOOO
-                OOSSSSJJJDDJJJSOOOOOO
-                OSSSJJJJJDDJJJJJJJOOO
-                OSSSSJJJJDDJJJJOOOOOO
-                OOSSSSJJJJJJJJOOOOOOO
-                OOOSSSSJJJJJJJOOOOOOO
-                OOOOOOOOOOOOOOOOOOOOO"""
-
-    ini_pop = [{'loc': (1, 18), 'pop': [
-        {'species': 'Herbivore', 'age': 0, 'weight': None} for _ in
-        range(100)]},
-               {'loc': (11, 8), 'pop': [
-                   {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-                   range(100)]}
-               ]
-    simmert = BioSim(
-        island_map, ini_pop, 1,
-        img_base='C:/Users/ander/OneDrive/Pictures/simtest/testimg')
-    # img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
-    simmert.simulate(20)
-    ini_pop2 = [{'loc': (1, 17), 'pop': [
-        {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-        range(100)]},
-               {'loc': (1, 18), 'pop': [
-                   {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-                   range(99)]}
-               ]
-    simmert.add_population(ini_pop2)
-    # simmert.simulate(20)
-    # simmert.make_movie()

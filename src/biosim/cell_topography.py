@@ -23,11 +23,12 @@ class Topography:
 
     def allowed_fodder_to_consume(self, decrease_amount):
         """
+        :param decrease_amount: The animals desired amount of fodder.
+        :return: The allowed amount of fodder.
+
         Takes a request for how much fodder the animal would like to consume
         and returns the amount it is allowed to consume and decreases the
         the fodder in the cell by the same amount.
-        :param decrease_amount: The animals desired amount of fodder.
-        :return: The allowed amount of fodder.
         """
         if decrease_amount <= self.fodder:
             self.fodder -= decrease_amount
@@ -39,9 +40,10 @@ class Topography:
 
     def remove_animal(self, animal):
         """
+        :param animal: An instance of an animal class.
+
         Removes the instance of an animal from the list of animal instances
         in the cell.
-        :param animal: An instance of an animal class.
         """
         if animal.__class__.__name__ == "Herbivores":
             self.herbivore_list = [herbi for herbi in self.herbivore_list
@@ -52,9 +54,10 @@ class Topography:
 
     def add_animal(self, animal):
         """
+        :param animal: An instance of an animal class.
+
         Adds the instance of an animal to the list of animal instances
         in the cell.
-        :param animal: An instance of an animal class.
         """
         if animal.__class__.__name__ == "Herbivores":
             self.herbivore_list.append(animal)
@@ -70,12 +73,12 @@ class Topography:
 
     def current_occupants(self):
         """
-        Counts the animals in the list of animals and returns a dictionary
-        with the amount of Herbivores, Carnivores and the total of both.
         :return: A dictionary with Herbivores, Carnivores and total as keys,
                  and their population in the cell as values.
-        """
 
+        Counts the animals in the list of animals and returns a dictionary
+        with the amount of Herbivores, Carnivores and the total of both.
+        """
         return {"Herbivores": len(self.herbivore_list),
                 "Carnivores": len(self.carnivore_list),
                 "Total": len(self.carnivore_list) + len(self.herbivore_list)}
@@ -83,7 +86,6 @@ class Topography:
     def breed_all_animals_in_cell(self):
         """
         Makes all animals in a cell breed
-        :return: None
         """
         self.breed_all_herbivores_in_cell()
         self.breed_all_carnivores_in_cell()
@@ -91,7 +93,6 @@ class Topography:
     def breed_all_herbivores_in_cell(self):
         """
         Makes all herbivore in a cell breed
-        :return: None
         """
         number_of_herbivores = len(self.herbivore_list)
         herbivore_reference_list = copy.copy(self.herbivore_list)
@@ -101,7 +102,6 @@ class Topography:
     def breed_all_carnivores_in_cell(self):
         """
         Makes all herbivore in a cell breed
-        :return: None
         """
         number_of_carnivores = len(self.carnivore_list)
         carnivore_reference_list = copy.copy(self.carnivore_list)
@@ -111,7 +111,6 @@ class Topography:
     def natural_death_all_animals_in_cell(self):
         """
         All animals which will die a natual death in a cell are removed  
-        :return: None
         """
         self.natural_death_all_herbivores_in_cell()
         self.natural_death_all_carnivores_in_cell()
@@ -119,7 +118,6 @@ class Topography:
     def natural_death_all_carnivores_in_cell(self):
         """
         All herbivores which will die a natual death  in a cell are removed
-        :return: None
         """
         carnivores_reference_list = copy.copy(self.carnivore_list)
         for carnivore in carnivores_reference_list:
@@ -130,7 +128,6 @@ class Topography:
     def natural_death_all_herbivores_in_cell(self):
         """
         All carnivores for which will die natual death in a cell are removed
-        :return: None
         """
         herbivores_reference_list = copy.copy(self.herbivore_list)
         for herbivore in herbivores_reference_list:
@@ -140,8 +137,9 @@ class Topography:
 
     def biomass_herbivores(self):
         """
+        :return: Total herbivore biomass
+
         Calculates the biomass to all the herbivores in a cell
-        :return: int
         """
         weight_sum = 0
         for herbivore in self.herbivore_list:
@@ -150,8 +148,9 @@ class Topography:
 
     def biomass_carnivores(self):
         """
+        :return: Total carnivore biomass
+
         Calculates the biomass to all the carnivores in a cell
-        :return: int
         """
         weight_sum = 0
         for carnivore in self.carnivore_list:
@@ -161,7 +160,6 @@ class Topography:
     def feed_herbivores_in_cell(self):
         """
         Makes all the herbivores in a cell try to graze
-        :return: None
         """
         herbivore_fitness_sort = sorted(
             self.herbivore_list, key=lambda herbi: herbi.fitness, reverse=True)
@@ -176,7 +174,6 @@ class Topography:
         most fit carnivore tries to kill the least fit herbivore and so on,
         until it have reached it yearly eat-limit. Then its the second fittest
         carnivores turn, etc.
-        :return: None
         """
         herbivore_fitness_sort = sorted(
             self.herbivore_list, key=lambda herbi: herbi.fitness)
@@ -192,10 +189,11 @@ class Topography:
 
     def ek_for_cell(self, species):
         """
-        Calculates the relative amount of relevant fodder (ek) for the
-        carnivores and the herbivores.
         :param species: Carnivores or Herbivores
         :return: herbivore_ek or carnivore_ek as floats.
+
+        Calculates the relative amount of relevant fodder (ek) for the
+        carnivores and the herbivores.
         """
         if species == "Carnivores":
             return self.biomass_herbivores() / (
@@ -209,12 +207,12 @@ class Topography:
     def _migrate_all_herbivores_in_cell(self, island, current_cell,
                                         herbivore_ek):
         """
-        Migrate all the herbivores which dosent already have tried to migrate
-        this year.
         :param island: Class
         :param current_cell: tuple, the location (x,y) of the animal
         :param herbivore_ek: Int
-        :return: None
+
+        Migrate all the herbivores which dosent already have tried to migrate
+        this year.
         """
         for herbivore in self.herbivore_list:
             if not herbivore.has_tried_migration_this_year:
@@ -227,12 +225,12 @@ class Topography:
     def _migrate_all_carnivores_in_cell(self, island, current_cell,
                                         carnivore_ek):
         """
-        Migrate all the carnivores which dosent already have tried to migrate
-        this year.
         :param island: Class
         :param current_cell: tuple, the location (x,y) of the animal
         :param carnivore_ek: Int
-        :return: None
+
+        Migrate all the carnivores which dosent already have tried to migrate
+        this year.
         """
         for carnivore in self.carnivore_list:
             if not carnivore.has_tried_migration_this_year:
@@ -245,13 +243,13 @@ class Topography:
     def migrate_all_animals_in_cell(self, island, current_cell, carnivore_ek,
                                     herbivore_ek):
         """
-        Migrate all the animals which dosent already have tried to migrate
-        this year.
         :param island: Class
         :param current_cell: tuple, the location (x,y) of the animal
         :param carnivore_ek: Int
         :param herbivore_ek: Int
-        :return: None
+
+        Migrate all the animals which dosent already have tried to migrate
+        this year.
         """
         self._migrate_all_herbivores_in_cell(island, current_cell,
                                              herbivore_ek)
@@ -275,12 +273,12 @@ class Jungle(Topography):
     @classmethod
     def set_parameters(cls, new_parameters):
         """
+        :param new_parameters: A dictionary with keys as the parameter to
+            be changed and values as the new parameter value. It is possible to
+            change preexisting parameters only.
+
         Sets the parameters of all Jungle instances to the provided
         new_parameters.
-        :param new_parameters: A dictionary with keys as the parameter to
-        be changed and values as the new parameter value. It is possible to
-        change preexisting parameters only.
-        :return: None
         """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():
@@ -293,7 +291,6 @@ class Jungle(Topography):
     def increase_fodder(self):
         """
         Increases the fodder for the Jungle cell
-        :return: None
         """
         self.fodder = self.parameters["f_max"]
 
@@ -315,12 +312,12 @@ class Savanna(Topography):
     @classmethod
     def set_parameters(cls, new_parameters):
         """
+        :param new_parameters: A dictionary with keys as the parameter to
+            be changed and values as the new parameter value. It is possible to
+            change preexisting parameters only.
+
         Sets the parameters of all Savanna instances to the provided
         new_parameters.
-        :param new_parameters: A dictionary with keys as the parameter to
-        be changed and values as the new parameter value. It is possible to
-        change preexisting parameters only.
-        :return: None
         """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():
@@ -333,7 +330,6 @@ class Savanna(Topography):
     def increase_fodder(self):
         """
         Sets the yearly fodder growth rate for Savanna topography class
-        :return: None
         """
         self.fodder += self.parameters["alpha"] * (self.parameters["f_max"]
                                                    - self.fodder)
@@ -343,7 +339,6 @@ class Desert(Topography):
     """
     Construct the active subclass 'Desert', where the primary production = 0.
     Movement and breeding for all animals is allowed.
-    :return: None
     """
     def __init__(self):
         super().__init__()
@@ -352,7 +347,6 @@ class Desert(Topography):
 
 class Mountain:
     """Construct the passive and non accessible class 'Mountain'
-    :return: None
     """
     def __init__(self):
         self.is_accessible = False
@@ -362,7 +356,6 @@ class Ocean:
     """
     Construct the passive and non accessible class 'Ocean',
     witch surrounds the island
-    :return: None
     """
     def __init__(self):
         self.is_accessible = False
