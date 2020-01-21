@@ -11,6 +11,7 @@ import biosim.Island as isle
 
 @pytest.fixture
 def basic_jungle():
+    """Creates an non-populated test cell"""
     return topo.Jungle()
 
 
@@ -105,6 +106,7 @@ def test_mountain_ocean_is_not_accessible():
 
 @pytest.fixture
 def low_fitness_animals():
+    """Creates some test instances with very low fitness"""
     jungle_cell = topo.Jungle()
     herbivore = animals.Herbivores()
     carnivore = animals.Carnivores()
@@ -118,6 +120,7 @@ def low_fitness_animals():
 
 
 def test_animal_with_fitness_level_0_dies():
+    """Test that an animal with a very low fitness dies"""
     animal = animals.Herbivores(age=200, weight=1)
     cell = topo.Jungle()
     cell.add_animal(animal)
@@ -130,6 +133,7 @@ def test_animal_with_fitness_level_0_dies():
 # migration
 @pytest.fixture
 def standard_map_peninsula():
+    """Creates an populated test island"""
     geogr = """\
                 OOOOOOOOOOOOOOOOOOOOO
                 OOOOOOOOSMMMMJJJJJJJO
@@ -243,6 +247,7 @@ def test_set_parameters_in_a_cell():
 
 
 def test_remove_carnivore():
+    """Test that a carnivore can be removed"""
     jungle_cell = topo.Jungle()
     test_carnivore = animals.Carnivores()
     jungle_cell.add_animal(test_carnivore)
@@ -256,6 +261,7 @@ def test_remove_carnivore():
 
 
 def test_remove_herbivore():
+    """Test that a herbivore can be removed"""
     savanna_cell = topo.Savanna()
     test_herbivore = animals.Herbivores()
     savanna_cell.add_animal(test_herbivore)
