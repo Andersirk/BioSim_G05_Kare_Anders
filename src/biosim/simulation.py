@@ -7,7 +7,6 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import matplotlib.pyplot as plt
-import matplotlib.lines as lines
 from biosim.Island import Island
 from biosim.animals import Herbivores, Carnivores
 from biosim.cell_topography import Jungle, Savanna
@@ -56,12 +55,14 @@ class BioSim:
         self.add_population(ini_pop)
         self._current_year = 0
         self.ymax_animals = ymax_animals
-        plt.ion()
+        self.cmax_animals = cmax_animals
+
 
         self._img_ctr = 0
         self._img_fmt = img_fmt
         self._img_base = img_base
 
+        # Axes and figures to be instantiated in setup_sim_window
         self._final_year = None
         self._sim_window_fig = None
         self._static_map_sub = None
@@ -76,23 +77,26 @@ class BioSim:
         self._stack_area_sub = None
         self._stack_area_ax = None
         self._year_ax = None
-
         self._herb_cbar_ax = None
         self._carn_cbar_ax = None
+        self.rgb_map = self._create_color_map(island_map)
 
-        self.rgbmap = self.create_color_map(island_map)
+        # Data variables for plots to be updated continuously
         self.y_stack = None
         self.herb_y = []
         self.carn_y = []
 
     def setup_sim_window(self):
+        plt.ion()
         # setup main window
         if self._sim_window_fig is None:
             self._sim_window_fig = plt.figure(figsize=(10, 5.63), dpi=150, facecolor="#ccd9ff")
+
         # setup static
         if self._static_map_sub is None:
             self._static_map_sub = self._sim_window_fig.add_subplot(2, 3, 1)
-            self._static_map_ax = self._static_map_sub.imshow(self.rgbmap)
+            self._static_map_ax = self._static_map_sub.imshow(self.rgb_map)
+
         # setup populationplot
         if self._pop_plot_sub is None:
             self._pop_plot_sub = self._sim_window_fig.add_subplot(2, 3, 4)
@@ -109,17 +113,13 @@ class BioSim:
             self._heat_herb_sub.set_xlabel('Herbivore heatmap', fontsize=9)
             self._herb_cbar_ax = self._sim_window_fig.add_axes([0.715, 0.915, 0.25, 0.006])
 
-
         if self._heat_carn_sub is None:
             self._heat_carn_sub = self._sim_window_fig.add_subplot(2, 3, 6)
             self._heat_carn_sub.tick_params(axis='both', which='major',labelsize=8)
             self._heat_carn_sub.set_xlabel('Carnivore heatmap', fontsize=9)
             self._carn_cbar_ax = self._sim_window_fig.add_axes([0.715,0.458,0.25,0.006])
 
-
-
-
-        #setup population pyramid
+        # setup population pyramid
         if self._pop_pyram_sub is None:
             self._pop_pyram_sub = self._sim_window_fig.add_subplot(2, 3, 2)
             self._pop_pyram_ax = self._pop_pyram_sub.twiny()
@@ -131,7 +131,7 @@ class BioSim:
             self._pop_pyram_ax.tick_params(axis='both', which='major',
                          labelsize=8)
 
-        #setup stack area
+        # setup stack area
         if self._stack_area_sub is None:
             self._stack_area_sub = self._sim_window_fig.add_subplot(2, 3, 5)
             self._stack_area_sub.tick_params(axis='both', which='major',
@@ -139,7 +139,7 @@ class BioSim:
             self._stack_area_sub.set_xlabel('Biomass', fontsize=9)
         self._instantiate_stacked_area()
 
-        #setup yearcount
+        # setup yearcount
         if self._year_ax is None:
             self._year_ax = self._sim_window_fig.text(0.04, 0.925, f'Year {self._current_year}', fontsize=18)
 
@@ -154,13 +154,11 @@ class BioSim:
                                                      type=self._img_fmt), facecolor="#ccd9ff")
         self._img_ctr += 1
 
-
     def _update_population_plot(self):
         carn_count, herb_count = self.island.total_number_per_species().values()
         self.carn_y.append(carn_count)
         self.herb_y.append(herb_count)
-        self._pop_plot_sub.plot(range(0,self._current_year+1), self.herb_y, 'red', self.carn_y, 'lawngreen')
-
+        self._pop_plot_sub.plot(range(0, self._current_year+1), self.herb_y, 'red', self.carn_y, 'lawngreen')
 
     def _instantiate_stacked_area(self):
         if self._stack_area_ax is None:
@@ -173,30 +171,34 @@ class BioSim:
             new_empty_values = np.vstack([nanstack, nanstack, nanstack])
             self.y_stack = np.append(self.y_stack, new_empty_values, axis= 1)
 
-    def _update_stacked_area(self, biomass_list):
-        self.y_stack[0][self._current_year] = biomass_list["biomass_carnivores"]
-        self.y_stack[1][self._current_year] = biomass_list["biomass_herbs"]
-        self.y_stack[2][self._current_year] = biomass_list["biomass_fodder"]
-        self._stack_area_sub.stackplot(np.arange(0, self._final_year), self.y_stack,
-                                       colors=['red', 'lawngreen','green'])
-
+    def _update_stacked_area(self, biomassdict):
+        self.y_stack[0][self._current_year] = biomassdict["biomass_carnivores"]
+        self.y_stack[1][self._current_year] = biomassdict["biomass_herbs"]
+        self.y_stack[2][self._current_year] = biomassdict["biomass_fodder"]
+        self._stack_area_sub.stackplot(np.arange(0, self._final_year),
+                                       self.y_stack,
+                                       colors=['red', 'lawngreen', 'green'])
 
     def _update_heatmap_herb(self, array):
         if self._heat_herb_im_ax is None:
             self._heat_herb_im_ax = self._heat_herb_sub.imshow(array, interpolation='nearest', vmax=200, cmap='inferno')
             herb_cbar = plt.colorbar(self._heat_herb_im_ax, cax=self._herb_cbar_ax, shrink=0.5, orientation='horizontal')
             herb_cbar.ax.tick_params(labelsize=6)
+            if self.cmax_animals is not None:
+                self._heat_herb_im_ax.set_clim(
+                    vmax=self.cmax_animals['Herbivore'])
         else:
             self._heat_herb_im_ax.set_data(array)
 
     def _update_heatmap_carn(self, array):
         if self._heat_carn_im_ax is None:
-            self._heat_carn_im_ax = self._heat_carn_sub.imshow(array, interpolation='nearest', vmax=200, cmap='inferno', origin='lower')
+            self._heat_carn_im_ax = self._heat_carn_sub.imshow(array, interpolation='nearest', vmax=200, cmap='inferno')
             carn_cbar = plt.colorbar(self._heat_carn_im_ax, cax=self._carn_cbar_ax, shrink=0.5,orientation='horizontal')
             carn_cbar.ax.tick_params(labelsize=6)
+            if self.cmax_animals is not None:
+                self._heat_carn_im_ax.set_clim(vmax=self.cmax_animals['Carnivore'])
         else:
             self._heat_carn_im_ax.set_data(array)
-
 
     def update_pop_pyram(self):
         herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = self.island.population_age_grups()
@@ -229,7 +231,8 @@ class BioSim:
         self._year_ax.set_text(f'Year {self._current_year}')
         plt.pause(1e-6)
 
-    def create_color_map(self, island_map):
+    @staticmethod
+    def _create_color_map(island_map):
         island_map = island_map.replace(" ", "")
         rgb_value = {'O': (0.0, 0.0, 1.0),  # blue
                      'M': (0.5, 0.5, 0.5),  # grey
@@ -292,8 +295,6 @@ class BioSim:
             if self._current_year % img_years == 0:
                 self._save_graphics()
             self._current_year += 1
-
-
 
     def add_population(self, population):
         """
@@ -365,7 +366,7 @@ if __name__ == "__main__":
                    {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
                    range(100)]}
                ]
-    simmert = BioSim(island_map, ini_pop, 1,img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg')
+    simmert = BioSim(island_map, ini_pop, 1,img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg', cmax_animals={'Herbivore': 50, 'Carnivore': 20})
     #img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
     simmert.simulate(10)
     ini_pop2 = [{'loc': (1, 17), 'pop': [
