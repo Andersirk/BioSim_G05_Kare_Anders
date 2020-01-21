@@ -31,23 +31,23 @@ class BioSim:
         :param ini_pop: List of dictionaries specifying initial population
         :param seed: Integer used as random number seed
         :param ymax_animals: Number specifying y-axis limit for graph showing
-         animal numbers
+            animal numbers
         :param cmax_animals: Dict specifying color-code limits for
-        animal densities
+            animal densities
         :param img_base: String with beginning of file name for figures,
-        including path
+            including path
         :param img_fmt: String with file type for figures, e.g. 'png'
 
         If ymax_animals is None, the y-axis limit will be adjusted dynamically.
 
         If cmax_animals is None, sensible, fixed default values should be used.
         cmax_animals is a dict mapping species names to numbers, e.g.,
-           {'Herbivore': 50, 'Carnivore': 20}
+        {'Herbivore': 50, 'Carnivore': 20}
 
         If img_base is None, no figures are written to file.
         Filenames are formed as
 
-            '{}_{:05d}.{}'.format(img_base, img_no, img_fmt)
+            f'{img_base}_{img_no:05d}.{img_fmt}'
 
         where img_no are consecutive image numbers starting from 0.
         img_base should contain a path and beginning of a file name.
@@ -93,7 +93,6 @@ class BioSim:
         Instantiates the main figure widow and creates subplots for the
         different plots and heatmaps. Also does some setup regarding the
         subplot parameters.
-        :return: None
         """
         plt.ion()
         # setup main window figure
@@ -181,7 +180,6 @@ class BioSim:
         Takes the total number of animal per species for the year it is called
         and appends them to the population plot y values, then plots the plot.
         if ymax is not set it adjusts the ymax the biggest value plotted + 500
-        :return: None
         """
         carn_count, herb_count = self.island.total_number_per_species(
                                                                     ).values()
@@ -201,7 +199,6 @@ class BioSim:
         and appends to the existing "y" when called subsequently. When
         first instantiated it also sets some parameters for the plot,
         and adds a legend.
-        :return: None
         """
         if self._stack_area_obj is None:
             nanstack = np.full(self._final_year, np.nan)
@@ -221,7 +218,6 @@ class BioSim:
         """
         Gets the current years biomass in a dictionary from
         "biomass_food_chain()" and updates the values form the stacked plot
-        :return: None
         """
         biomassdict = self.island.biomass_food_chain()
         self.y_stack[0][self._current_year] = biomassdict["biomass_carnivores"]
@@ -233,13 +229,13 @@ class BioSim:
 
     def _update_heatmap_herb(self, array):
         """
+        :param array: A numpy array
+
         Takes a numpy array with the same dimensions as the island and with
         the ammount of herbivores per cell, where row and col corresponds to
         the x and y of the island. The method sets up the heatmap and colorbar
         when simulate() is first called and updates the data for subsequent
         calls.
-        :param array: A numpy array
-        :return: None
         """
         if self._heat_herb_obj is None:
             self._heat_herb_obj = self._heat_herb_ax.imshow(
@@ -258,13 +254,13 @@ class BioSim:
 
     def _update_heatmap_carn(self, array):
         """
+        :param array: A numpy array
+
         Takes a numpy array with the same dimensions as the island and with
         the ammount of carnivores per cell, where row and col corresponds to
         the x and y of the island. The method sets up the heatmap and colorbar
         when simulate() is first called and updates the data for subsequent
         calls.
-        :param array: A numpy array
-        :return: None
         """
         if self._heat_carn_obj is None:
             self._heat_carn_obj = self._heat_carn_ax.imshow(
@@ -287,7 +283,6 @@ class BioSim:
         the biomass bars from full bars to a line representing the bars extent
         it also automatically adjusts the xlimit of the populationnumbers
         while keeping 0 centered
-        :return: None
         """
         herb_pop_per_age, carn_pop_per_age, herb_mean_w, carn_mean_w = \
             self.island.population_biomass_age_groups()
@@ -315,7 +310,6 @@ class BioSim:
     def _update_sim_window(self):
         """
         This updates the main figure window the current years data.
-        :return: None
         """
         herb_array, carn_array = self.island.arrays_for_heatmap()
         self._update_pop_pyram()
@@ -329,9 +323,10 @@ class BioSim:
     @staticmethod
     def _create_color_map(island_map_string):
         """
-        Creates the basis for the static color map.
         :param island_map_string: Multi-line string specifying island geography
         :return: map_rgb : Nested list with a color value for each cell type
+
+        Creates the basis for the static color map.
         """
         island_map_string = island_map_string.replace(" ", "")
         rgb_value = {'O': (0.0, 0.0, 1.0),  # blue
@@ -347,10 +342,10 @@ class BioSim:
     @staticmethod
     def set_animal_parameters(species, params):
         """
-        Set parameters for animal species.
-
         :param species: String, name of animal species
         :param params: Dict with valid parameter specification for species
+
+        Set parameters for animal species.
         """
         if species == "Herbivore":
             Herbivores.set_parameters(params)
@@ -362,10 +357,10 @@ class BioSim:
     @staticmethod
     def set_landscape_parameters(landscape, params):
         """
-        Set parameters for landscape type.
-
         :param landscape: String, code letter for landscape
         :param params: Dict with valid parameter specification for landscape
+
+        Set parameters for landscape type.
         """
         if landscape == "J":
             Jungle.set_parameters(params)
@@ -378,13 +373,12 @@ class BioSim:
 
     def simulate(self, num_years, vis_years=1, img_years=None):
         """
-        Run simulation while visualizing the result.
-
         :param num_years: number of years to simulate
         :param vis_years: years between visualization updates
         :param img_years: years between visualizations saved to files (
-        default: vis_years)
+                        default: vis_years)
 
+        Run simulation while visualizing the result.
         Image files will be numbered consecutively.
         """
         if img_years is None:
@@ -402,9 +396,9 @@ class BioSim:
 
     def add_population(self, population):
         """
-        Add a population to the island
-
         :param population: List of dictionaries specifying population
+
+        Add a population to the island
         """
         self.island.populate_island(population)
 
