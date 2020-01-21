@@ -97,7 +97,8 @@ class Island:
                     f"An animal cannot be placed in a "
                     f"{self.raster_model[pop_dict['loc']].__class__.__name__}")
 
-    def _check_new_population_age_and_weight(self, new_population_dict):
+    @staticmethod
+    def _check_new_population_age_and_weight(new_population_dict):
         """
         Controls that the variables in the the new population are allowed.
         :param new_population_dict: [{cell-coordinates,
