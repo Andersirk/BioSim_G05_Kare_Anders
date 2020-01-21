@@ -3,7 +3,6 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
-import unittest
 import biosim.animals as ani
 import pytest
 import biosim.cell_topography as topo
@@ -34,7 +33,6 @@ def test_fitness_level_is_zero_when_weight_is_zero():
     carnivore.weight = 0
     assert herbivore.fitness == 0
     assert carnivore.fitness == 0
-
 
 
 def test_fitness_level_is_between_zero_and_one():
@@ -253,34 +251,36 @@ def test_what_cell_one_option(certain_migration_prob_herb, mock_ek):
     assert chosen_cell == (11, 10)
     assert certain_migration_prob_herb.has_tried_migration_this_year
     ani.Animals.reset_migration_attempt()
-    assert certain_migration_prob_herb.has_tried_migration_this_year == False
+    assert certain_migration_prob_herb.has_tried_migration_this_year is False
 
 
 def test_what_cell_no_options(certain_migration_prob_herb):
     """Test that a herbivore never migrates when its have no options"""
     herbivore_ek = {}
-    chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((10, 10),
-                                                                herbivore_ek)
-    assert chosen_cell == (10,10)
+    chosen_cell = certain_migration_prob_herb.what_cell_to_migrate_to((
+        10, 10), herbivore_ek)
+    assert chosen_cell == (10, 10)
+
 
 def test_what_cell_when_will_not_migrate(mock_ek):
     """Test that a herbivore never migrates when the mu-parameter = 0"""
     testanimal = ani.Herbivores()
     testanimal.parameters["mu"] = 0
-    chosen_cell = testanimal.what_cell_to_migrate_to((10,10), mock_ek)
-    assert chosen_cell == (10,10)
+    chosen_cell = testanimal.what_cell_to_migrate_to((10, 10), mock_ek)
+    assert chosen_cell == (10, 10)
+
 
 def test_what_cell_two_options_equal_probability():
     """Test that a carnivores chances to migrate to two cells with equal ek
     are 50-50"""
-    testanimal = ani.Carnivores(age=0,weight=100)
+    testanimal = ani.Carnivores(age=0, weight=100)
     testanimal.parameters["mu"] = 10
     current_cell = (10, 10)
-    mock_ek = {(11,10):1, (10,11): 1}
+    mock_ek = {(11, 10): 1, (10, 11): 1}
     random.seed(2)
-    decisionlist = [testanimal.what_cell_to_migrate_to(current_cell, mock_ek
-                                                       ) for _ in range(1000)]
-    times_11_10_chosen = decisionlist.count((11,10))
+    decisionlist = [testanimal.what_cell_to_migrate_to(
+        current_cell, mock_ek) for _ in range(1000)]
+    times_11_10_chosen = decisionlist.count((11, 10))
     assert 490 < times_11_10_chosen < 510
 
 # Annual weight decrease, age up
