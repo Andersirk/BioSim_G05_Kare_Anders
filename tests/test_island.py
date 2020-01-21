@@ -2,7 +2,6 @@ from biosim.Island import Island
 import biosim.cell_topography as topo
 import biosim.animals as ani
 import pytest
-import numpy as np
 
 # Map generation
 @pytest.fixture
