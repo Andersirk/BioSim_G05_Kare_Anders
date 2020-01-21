@@ -9,8 +9,8 @@ the simulation module of the biosim package.
 Notes:
      - The BioSim class should pass all tests in this set.
      - The tests check only that the class interface can be used, not that
-       the class functions correctly. You need to write your own tests for that.
-     - You should only run these tests on your code *after* you have implemented
+       the class functions correct. You need to write your own tests for that.
+     - You should only run these tests on your code after you have implemented
        both animal and all landscape classes.
 """
 
@@ -247,8 +247,7 @@ def test_set_plot_limits():
 
 @pytest.fixture
 def figfile_root():
-    """Provide name for figfile root and delete figfiles after test completes"""
-
+    """Provide name for figfile root and delete figfiles after test complete"""
     ffroot = os.path.join(".", "testfigroot")
     yield ffroot
     for f in glob.glob(ffroot + "_0*.png"):
@@ -269,4 +268,3 @@ def test_figure_saved(figfile_root):
 
     assert os.path.isfile(figfile_root + "_00000.png")
     assert os.path.isfile(figfile_root + "_00001.png")
-

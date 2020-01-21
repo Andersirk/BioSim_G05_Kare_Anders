@@ -17,10 +17,11 @@ class Island:
 
     def create_map(self, island_map):
         """
+        :param island_map: multistring map
+        :return dictionary, {(x,y)}: topographic class as str}
+
         Creates a dictionary where the keys are coordinates and values
         are a class with the relevant topography category.
-        :param island_map: multistring
-        :return dictionary
         """
         island_map_no_spaces = island_map.replace(" ", "")
         x, y = 0, -1
@@ -53,10 +54,10 @@ class Island:
     @staticmethod
     def check_borders_ocean(raster_model):
         """
-        Checks if the characters in the outer limits of the multistring, that
-        forms the map, consist only of 'O' (Ocean)
-        :param raster_model: multistring
-        :return: None
+        :param raster_model: dictionary {(x,y): topographic class as str}
+
+        Checks if the characters in the outer limits of the map,
+        consist only of 'O' (Ocean)
         """
         max_coordinates = max(raster_model.keys())
         for coordinate, cell_class in raster_model.items():
@@ -71,11 +72,10 @@ class Island:
 
     def populate_island(self, population_list):
         """
+        :param population_list: list of dictionary {(x,y): instance}
+
         Populates an specific accessible cell on the island with instances
         of an animal-class.
-        :param population_list: list of dictionary [{cell-coordinates,
-        instance}]
-        :return: None
         """
         for pop_dict in population_list:
             self._check_new_population_age_and_weight(pop_dict)
@@ -100,10 +100,9 @@ class Island:
     @staticmethod
     def _check_new_population_age_and_weight(new_population_dict):
         """
+        param new_population_list: list of dictionary {(x,y): instance}
+
         Controls that the variables in the the new population are allowed.
-        :param new_population_dict: [{cell-coordinates,
-        instance}]
-        :return: None
         """
         for animal in new_population_dict["pop"]:
             if type(animal["age"]) != int or animal["age"] < 0:
@@ -115,7 +114,6 @@ class Island:
     def _migrate_all_cells(self):
         """
         Makes all instances in all cell on the island try to migrate.
-        :return: None
         """
         carnivore_ek, herbivore_ek = self._generate_ek_for_board()
         for location, cell in self.raster_model.items():
@@ -126,9 +124,10 @@ class Island:
 
     def _generate_ek_for_board(self):
         """
+        :return: floats, carnivore_ek and herbivore_ek
+
         Generates carnivore and herbivore ek for all accessible cells on the
         island
-        :return: carnivore_ek and herbivore_ek as floats
         """
         carnivore_ek = {}
         herbivore_ek = {}
@@ -141,7 +140,6 @@ class Island:
     def _feed_all_animals(self):
         """
         Makes all animals in all accessible cells try to eat
-        :return: None
         """
         for cell in self.raster_model.values():
             if cell.__class__.__name__ == "Jungle" \
@@ -154,7 +152,6 @@ class Island:
     def _increase_fodder_all_cells(self):
         """
         Increase fodder in all primary producing cells
-        :return: None
         """
         for cell in self.raster_model.values():
             if cell.__class__.__name__ == "Jungle" \
@@ -164,7 +161,6 @@ class Island:
     def _annual_death_all_cells(self):
         """
         Runs the annual_death method for all animals in all accessible cells
-        :return: None
         """
         for cell in self.raster_model.values():
             if cell.is_accessible:
@@ -173,7 +169,6 @@ class Island:
     def _breed_in_all_cells(self):
         """
         Runs the breeding method for all animals in all accessible cells
-        :return: None
         """
         for cell in self.raster_model.values():
             if cell.is_accessible:
@@ -182,7 +177,6 @@ class Island:
     def annual_cycle(self):
         """
         Runs all the components of the annual cycle in the correct order
-        :return: None
         """
         self._increase_fodder_all_cells()
         self._feed_all_animals()
@@ -194,8 +188,9 @@ class Island:
 
     def per_cell_count_pandas_dataframe(self):
         """
+        :return: pandas dataframe with cell info about the amount of animals
+
         Counts the number of herbivores and carnivores in every cell
-        :return: dataframe
         """
         pdlist = []
         for coordinate, cell in self.raster_model.items():
@@ -213,8 +208,9 @@ class Island:
 
     def arrays_for_heatmap(self):
         """
+        :return: numpy arrays with info about numbers of animals in a cell
+
         Counts the number of herbivores and carnivores in every cell
-        :return: numpy arrays
         """
         maxcord = max(self.raster_model.keys())
         herb_array = np.zeros(maxcord)
@@ -227,8 +223,9 @@ class Island:
 
     def total_number_per_species(self):
         """
-        Counts the total number of individuals of a species on the island
         :return: dict {species: individuals}
+
+        Counts the total number of individuals of a species on the island
         """
         total_herb = 0
         total_carn = 0
@@ -240,9 +237,11 @@ class Island:
 
     def herbivore_biomass_age_groups(self):
         """
+        :return: two lists with biomass and individual numbers info for each
+        age group for herbivores
+
         Makes lists of herbivores individuals and the total biomass within the
         age groups 0-1, 2-5, 5-10, 10-15 and 15 +.
-        :return: lists
         """
         herbivore_age_numbers = [0, 0, 0, 0, 0]
         herbivore_biomass = [0, 0, 0, 0, 0]
@@ -268,9 +267,11 @@ class Island:
 
     def carnivore_biomass_age_groups(self):
         """
+        :return: two lists with biomass and individual numbers info for each
+        age group for carnivores
+
         Makes lists of carnivores individuals and the total biomass within the
         age groups 0-1, 2-5, 5-10, 10-15 and 15 +.
-        :return: lists
         """
         carnivore_age_numbers = [0, 0, 0, 0, 0]
         carnivore_biomass = [0, 0, 0, 0, 0]
@@ -296,8 +297,11 @@ class Island:
 
     def population_biomass_age_groups(self):
         """
-        Uses this information to calculate the mean weight within a age group.
-        :return: lists where the first index are the age group 0-1 etc.
+        :return: two lists for each species with average weight and individual
+        numbers info for each age group
+
+        Uses biomass and age group numbers information to calculate the mean
+        weight within a age group.
         """
         herbivore_age_numbers, herbivore_biomass =\
             self.herbivore_biomass_age_groups()
@@ -320,9 +324,10 @@ class Island:
 
     def biomass_food_chain(self):
         """
+        :return: dictionary, biomass info for fodder, herbivores and carnivores
+
         Calculates the total amount of fodder and the total biomass for the
         herbivores and carnivores.
-        :return: dictionary
         """
         biomass_fodder = 0
         biomass_herbs = 0

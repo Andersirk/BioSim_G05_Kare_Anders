@@ -12,6 +12,8 @@ import functools
 
 class Animals:
     instances = []
+    parameters = {}
+
     """This is the overall class for the animals which lives on the island"""
     def __init__(self, age, weight, potential_newborn):
         self.age = age
@@ -47,9 +49,8 @@ class Animals:
         else:
             return (1 + exp(
                 self.parameters["phi_age"] * (
-                        self.age - self.parameters["a_half"])))** -1 * (
-                    1 + exp(
-                -self.parameters["phi_weight"] *(
+                        self.age - self.parameters["a_half"]))) ** -1 * (
+                    1 + exp(-self.parameters["phi_weight"] * (
                         self.weight - self.parameters["w_half"]))) ** -1
 
     @classmethod
@@ -155,7 +156,8 @@ class Animals:
             return neighbouring_cells[n]
         return current_cell
 
-    def _find_neighbouring_cells(self, coordinates):
+    @staticmethod
+    def _find_neighbouring_cells(coordinates):
         """
         Finds an animals neighbouring cell coordinates
         :param coordinates: list
@@ -314,4 +316,3 @@ class Carnivores(Animals):
                 cls.parameters[parameter] = value
             else:
                 raise ValueError(f"{parameter} is not an accepted parameter")
-
