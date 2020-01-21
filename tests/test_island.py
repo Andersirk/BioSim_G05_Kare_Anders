@@ -1,4 +1,4 @@
-from biosim.Island import Island
+from biosim.island import Island
 import biosim.cell_topography as topo
 import biosim.animals as ani
 import pytest
