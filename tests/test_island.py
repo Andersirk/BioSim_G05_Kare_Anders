@@ -243,9 +243,9 @@ def test_population_age_groups(test_map):
     test_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=14, weight=10))
     test_map.raster_model[(3, 4)].add_animal(ani.Carnivores(age=50, weight=10))
     herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = \
-        test_map.population_age_grups()
-    np.testing.assert_array_equal(herb_list, np.array([1, 1, 1, 1, 1]))
-    np.testing.assert_array_equal(carn_list, np.array([-1, -1, -1, -1, -1]))
+        test_map.population_biomass_age_groups()
+    assert herb_list == [1, 1, 1, 1, 1]
+    assert carn_list == [-1, -1, -1, -1, -1]
     assert herb_mean_w_list == [10, 10, 10, 10, 10]
     assert carn_mean_w_list == [-10, -10, -10, -10, -10]
 

@@ -229,17 +229,14 @@ class Island:
                 total_herb += len(cell.herbivore_list)
         return {'Herbivore': total_herb, 'Carnivore': total_carn}
 
-    def population_age_grups(self):
+    def herbivore_biomass_age_groups(self):
         """
-        Makes lists of total amount of animals and total biomass within an the
-        age groups 0-1, 2-5, 5-10, 10-15 and 15 +. Uses this information to
-        calculate the average weight within a age group.
-        :return: lists where the first index are the age group 0-1 etc.
+        Makes lists of herbivores individuals and the total biomass within the
+        age groups 0-1, 2-5, 5-10, 10-15 and 15 +.
+        :return: lists
         """
         herbivore_age_numbers = [0, 0, 0, 0, 0]
-        carnivore_age_numbers = [0, 0, 0, 0, 0]
         herbivore_biomass = [0, 0, 0, 0, 0]
-        carnivore_biomass = [0, 0, 0, 0, 0]
         for cell in self.raster_model.values():
             if cell.is_accessible:
                 for herbivore in cell.herbivore_list:
@@ -258,6 +255,18 @@ class Island:
                     elif herbivore.age >= 15:
                         herbivore_age_numbers[4] += 1
                         herbivore_biomass[4] += herbivore.weight
+        return herbivore_age_numbers, herbivore_biomass
+
+    def carnivore_biomass_age_groups(self):
+        """
+        Makes lists of carnivores individuals and the total biomass within the
+        age groups 0-1, 2-5, 5-10, 10-15 and 15 +.
+        :return: lists
+        """
+        carnivore_age_numbers = [0, 0, 0, 0, 0]
+        carnivore_biomass = [0, 0, 0, 0, 0]
+        for cell in self.raster_model.values():
+            if cell.is_accessible:
                 for carnivore in cell.carnivore_list:
                     if carnivore.age <= 1:
                         carnivore_age_numbers[0] -= 1
@@ -274,8 +283,17 @@ class Island:
                     elif carnivore.age >= 15:
                         carnivore_age_numbers[4] -= 1
                         carnivore_biomass[4] += carnivore.weight
-        herb_list = np.array(herbivore_age_numbers)
-        carn_list = np.array(carnivore_age_numbers)
+        return carnivore_age_numbers, carnivore_biomass
+
+    def population_biomass_age_groups(self):
+        """
+        Uses this information to calculate the average weight within a age group.
+        :return: lists where the first index are the age group 0-1 etc.
+        """
+        herbivore_age_numbers, herbivore_biomass =\
+            self.herbivore_biomass_age_groups()
+        carnivore_age_numbers, carnivore_biomass = \
+            self.carnivore_biomass_age_groups()
         herb_mean_w_list = []
         carn_mean_w_list = []
         for biomass, age in zip(herbivore_biomass, herbivore_age_numbers):
@@ -288,7 +306,7 @@ class Island:
                 carn_mean_w_list.append(biomass/age)
             else:
                 carn_mean_w_list.append(0)
-        return herb_list, carn_list, herb_mean_w_list, carn_mean_w_list
+        return herbivore_age_numbers, carnivore_age_numbers, herb_mean_w_list, carn_mean_w_list
 
     def biomass_food_chain(self):
         """
