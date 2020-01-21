@@ -48,6 +48,7 @@ def test_fitness_level_is_between_zero_and_one():
 
 @pytest.fixture
 def strong_vs_weak():
+    """Creates a test herbivore and carnivore instance"""
     cell = topo.Desert()
     herbivore = ani.Herbivores()
     carnivore = ani.Carnivores()
@@ -217,6 +218,7 @@ def test_breed_certain_prob_overweight_newborn():
 # Migration
 @pytest.fixture
 def certain_migration_prob_herb():
+    """Creates a test herbivore instance"""
     testanimal = ani.Herbivores(age=2, weight=40)
     testanimal.set_parameters({"mu": 4})
     return testanimal
@@ -239,6 +241,7 @@ def test_will_migrate_50_chance():
 
 @pytest.fixture
 def mock_ek():
+    """Creates a test herbivore_ek dict"""
     herbivore_ek = {(11, 10): 1}
     return herbivore_ek
 

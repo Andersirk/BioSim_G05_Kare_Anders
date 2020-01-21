@@ -7,6 +7,7 @@ import numpy as np
 # Map generation
 @pytest.fixture
 def test_map():
+    """Creates an non-populated test island"""
     geogr = """\
                 OOOOOOOOOOOOOOOOOOOOO
                 OOOOOOOOSMMMMJJJJJJJO
@@ -140,6 +141,7 @@ def test_inconsistent_height():
 
 @pytest.fixture
 def small_island_map():
+    """Creates an populated test island"""
     geogr = """\
                 OOOOO
                 OJMDO
