@@ -25,6 +25,7 @@ class Island:
         island_map_no_spaces = island_map.replace(" ", "")
         x, y = 0, -1
         raster_model = {}
+        previous_y_max = None
         for number, landscape_code in enumerate(island_map_no_spaces):
             y += 1
             if landscape_code == "D":
@@ -76,23 +77,25 @@ class Island:
         instance}]
         :return: None
         """
-        for dictionary in population_list:
-            self._check_new_population_age_and_weight(dictionary)
-            if dictionary["loc"] not in self.raster_model.keys():
+        for pop_dict in population_list:
+            self._check_new_population_age_and_weight(pop_dict)
+            if pop_dict["loc"] not in self.raster_model.keys():
                 raise ValueError("These coordinates do not exist in this map's"
                                  " coordinate system.")
-            if self.raster_model[dictionary["loc"]].is_accessible:
-                for population in dictionary["pop"]:
+            if self.raster_model[pop_dict["loc"]].is_accessible:
+                for population in pop_dict["pop"]:
                     if population["species"] == "Herbivore":
-                        self.raster_model[dictionary["loc"]].add_animal(
+                        self.raster_model[pop_dict["loc"]].add_animal(
                             Herbivores(age=population["age"],
                                        weight=population["weight"]))
                     elif population["species"] == "Carnivore":
-                        self.raster_model[dictionary["loc"]].add_animal(
+                        self.raster_model[pop_dict["loc"]].add_animal(
                             Carnivores(age=population["age"],
                                        weight=population["weight"]))
             else:
-                raise ValueError(f"An animal cannot be placed on a {self.raster_model[dictionary['loc']].__class__.__name__} cell")
+                raise ValueError(
+                    f"An animal cannot be placed in a "
+                    f"{self.raster_model[pop_dict['loc']].__class__.__name__}")
 
     def _check_new_population_age_and_weight(self, new_population_dict):
         """
@@ -103,7 +106,7 @@ class Island:
         """
         for animal in new_population_dict["pop"]:
             if type(animal["age"]) != int or animal["age"] < 0:
-                raise ValueError("The animals age must be a non-negative integer")
+                raise ValueError("The animals age must be a non-negative int")
             if animal["weight"] is not None:
                 if animal["weight"] <= 0:
                     raise ValueError("The animal must have a positive weight")
@@ -116,7 +119,8 @@ class Island:
         carnivore_ek, herbivore_ek = self._generate_ek_for_board()
         for location, cell in self.raster_model.items():
             if cell.is_accessible:
-                cell.migrate_all_animals_in_cell(self, location, carnivore_ek, herbivore_ek)
+                cell.migrate_all_animals_in_cell(self, location, carnivore_ek,
+                                                 herbivore_ek)
         Animals.reset_migration_attempt()
 
     def _generate_ek_for_board(self):
@@ -139,7 +143,8 @@ class Island:
         :return: None
         """
         for cell in self.raster_model.values():
-            if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
+            if cell.__class__.__name__ == "Jungle" \
+                    or cell.__class__.__name__ == "Savanna":
                 cell.feed_herbivores_in_cell()
         for cell in self.raster_model.values():
             if cell.is_accessible:
@@ -151,7 +156,8 @@ class Island:
         :return: None
         """
         for cell in self.raster_model.values():
-            if cell.__class__.__name__ == "Jungle" or cell.__class__.__name__ == "Savanna":
+            if cell.__class__.__name__ == "Jungle" \
+                    or cell.__class__.__name__ == "Savanna":
                 cell.increase_fodder()
 
     def _annual_death_all_cells(self):
@@ -198,8 +204,10 @@ class Island:
             else:
                 herb_amount = 0
                 carn_amount = 0
-            pdlist.append([coordinate[0], coordinate[1], herb_amount, carn_amount])
-        dataframe = pd.DataFrame(pdlist,columns=['Row','Col', 'Herbivore', 'Carnivore'])
+            pdlist.append(
+                [coordinate[0], coordinate[1], herb_amount, carn_amount])
+        dataframe = pd.DataFrame(
+            pdlist, columns=['Row', 'Col', 'Herbivore', 'Carnivore'])
         return dataframe
 
     def arrays_for_heatmap(self):
@@ -287,7 +295,7 @@ class Island:
 
     def population_biomass_age_groups(self):
         """
-        Uses this information to calculate the average weight within a age group.
+        Uses this information to calculate the mean weight within a age group.
         :return: lists where the first index are the age group 0-1 etc.
         """
         herbivore_age_numbers, herbivore_biomass =\
@@ -298,15 +306,16 @@ class Island:
         carn_mean_w_list = []
         for biomass, age in zip(herbivore_biomass, herbivore_age_numbers):
             if age > 0:
-                herb_mean_w_list.append(biomass/age)
+                herb_mean_w_list.append(biomass / age)
             else:
                 herb_mean_w_list.append(0)
         for biomass, age in zip(carnivore_biomass, carnivore_age_numbers):
             if age < 0:
-                carn_mean_w_list.append(biomass/age)
+                carn_mean_w_list.append(biomass / age)
             else:
                 carn_mean_w_list.append(0)
-        return herbivore_age_numbers, carnivore_age_numbers, herb_mean_w_list, carn_mean_w_list
+        return herbivore_age_numbers, carnivore_age_numbers,\
+            herb_mean_w_list, carn_mean_w_list
 
     def biomass_food_chain(self):
         """
@@ -322,112 +331,7 @@ class Island:
                 biomass_fodder += cell.fodder
                 biomass_herbs += cell.biomass_herbivores()
                 biomass_carnivores += cell.biomass_carnivores()
-        biomass_dict = {"biomass_fodder":biomass_fodder,
-                        "biomass_herbs":biomass_herbs,
+        biomass_dict = {"biomass_fodder": biomass_fodder,
+                        "biomass_herbs": biomass_herbs,
                         "biomass_carnivores": biomass_carnivores}
         return biomass_dict
-
-if __name__ == "__main__":
-    # random.seed(1)
-    # geogr = """\
-    #             OOOOOOOOOOOOOOOOOOOOO
-    #             OOOOOOOOSMMMMJJJJJJJO
-    #             OSSSSSJJJJMMJJJJJJJOO
-    #             OSSSSSSSSSMMJJJJJJOOO
-    #             OSSSSSJJJJJJJJJJJJOOO
-    #             OSSSSSJJJDDJJJSJJJOOO
-    #             OSSJJJJJDDDJJJSSSSOOO
-    #             OOSSSSJJJDDJJJSOOOOOO
-    #             OSSSJJJJJDDJJJJJJJOOO
-    #             OSSSSJJJJDDJJJJOOOOOO
-    #             OOSSSSJJJJJJJJOOOOOOO
-    #             OOOSSSSJJJJJJJOOOOOOO
-    #             OOOOOOOOOOOOOOOOOOOOO"""
-    # island = Island(geogr)
-    # island.populate_island([{'loc': (1, 18),
-    #        'pop': [{'species': 'Herbivore',
-    #            'age': 0, 'weight': 80},
-    #           {'species': 'Herbivore',
-    #            'age': 0, 'weight': 80.3},
-    #                {'species': 'Herbivore',
-    #                 'age': 0, 'weight': 80.5},
-    #                {'species': 'Herbivore',
-    #                 'age': 0, 'weight': 10.5}]}])
-    #
-    # island.populate_island([{'loc': (1, 18), 'pop': [{'species': 'Herbivore', 'age': 0, 'weight': None} for _ in range(100)]}])
-    #
-    # for x in range(30):
-    #     island.annual_cycle()
-    #     print("year", x)
-    #     print("total ani", len(Animals.instances))
-    #     print(len(island.raster_model[(1,18)].herbivore_list))
-    #     print(island.raster_model[(1,18)].biomass_herbivores())
-    #     print("############")
-    #
-    # island.populate_island([{'loc': (1, 17), 'pop': [{'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in range(300)]}])
-    #
-    #
-    # for x in range(10):
-    #     island.annual_cycle()
-    #     print("year", x)
-    #     print("total ani", len(Animals.instances))
-    #     total_herb = 0
-    #     total_carn = 0
-    #     for cell in island.raster_model.values():
-    #         if cell.is_accessible:
-    #             total_carn += len(cell.carnivore_list)
-    #             total_herb += len(cell.herbivore_list)
-    #     print("total herbs:", total_herb)
-    #     print("total carns:", total_carn)
-    #     print(len(island.raster_model[(1, 18)].herbivore_list))
-    #     print(island.raster_model[(1, 18)].biomass_herbivores())
-    #     print("############")
-    #
-    #
-    # print(island.array_for_heatmap())
-    # # island.pandas_dataframe()
-    # print(island.population_age_grups())
-    # # island.population_pyramid()
-    # print(island.biomass_food_chain())
-    island_map = """\
-                OOOOOOOOOOOOOOOOOOOOO
-                OOOOOOOOSMMMMJJJJJJJO
-                OSSSSSJJJJMMJJJJJJJOO
-                OSSSSSSSSSMMJJJJJJOOO
-                OSSSSSJJJJJJJJJJJJOOO
-                OSSSSSJJJDDJJJSJJJOOO
-                OSSJJJJJDDDJJJSSSSOOO
-                OOSSSSJJJDDJJJSOOOOOO
-                OSSSJJJJJDDJJJJJJJOOO
-                OSSSSJJJJDDJJJJOOOOOO
-                OOSSSSJJJJJJJJOOOOOOO
-                OOOSSSSJJJJJJJOOOOOOO
-                OOOOOOOOOOOOOOOOOOOOO"""
-
-    ini_pop = [{'loc': (1, 18), 'pop': [
-        {'species': 'Herbivore', 'age': 0, 'weight': 80} for _ in
-        range(100)]},
-               {'loc': (11, 8), 'pop': [
-                   {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-                   range(100)]}
-               ]
-    island = Island(island_map)
-    island.populate_island(ini_pop)
-    for _ in range (20):
-        island.annual_cycle()
-        print(island.population_age_grups())
-        print(island.total_number_per_species().values())
-        print("#############")
-    ini_pop2 = [{'loc': (1, 17), 'pop': [
-        {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-        range(100)]},
-               {'loc': (1, 18), 'pop': [
-                   {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-                   range(100)]}
-               ]
-    island.populate_island(ini_pop2)
-    for _ in range (50):
-        island.annual_cycle()
-        print(island.population_age_grups())
-        print(island.total_number_per_species().values())
-        print("#############")
