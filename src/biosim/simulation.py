@@ -3,6 +3,7 @@
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
+
 import matplotlib.pyplot as plt
 from biosim.Island import Island
 from biosim.animals import Herbivores, Carnivores
@@ -12,6 +13,7 @@ import random
 import subprocess
 
 _FFMPEG_BINARY = 'C:/Users/ander/OneDrive/Pictures/simtest/ffmpeeg/ffmpeg.exe'
+
 
 class BioSim:
     def __init__(
@@ -28,12 +30,15 @@ class BioSim:
         :param island_map: Multi-line string specifying island geography
         :param ini_pop: List of dictionaries specifying initial population
         :param seed: Integer used as random number seed
-        :param ymax_animals: Number specifying y-axis limit for graph showing animal numbers
-        :param cmax_animals: Dict specifying color-code limits for animal densities
-        :param img_base: String with beginning of file name for figures, including path
+        :param ymax_animals: Number specifying y-axis limit for graph showing
+         animal numbers
+        :param cmax_animals: Dict specifying color-code limits for
+        animal densities
+        :param img_base: String with beginning of file name for figures,
+        including path
         :param img_fmt: String with file type for figures, e.g. 'png'
 
-        If ymax_animals is None, the y-axis limit should be adjusted automatically.
+        If ymax_animals is None, the y-axis limit will be adjusted dynamically.
 
         If cmax_animals is None, sensible, fixed default values should be used.
         cmax_animals is a dict mapping species names to numbers, e.g.,
@@ -55,8 +60,7 @@ class BioSim:
         self.ymax_animals = ymax_animals
         self.cmax_animals = cmax_animals
 
-
-
+        # attributes for saving images
         self._img_ctr = 0
         self._img_fmt = img_fmt
         self._img_base = img_base
@@ -94,7 +98,8 @@ class BioSim:
         plt.ion()
         # setup main window figure
         if self._sim_window_fig is None:
-            self._sim_window_fig = plt.figure(figsize=(10, 5.63), dpi=150, facecolor="#ccd9ff")
+            self._sim_window_fig = plt.figure(figsize=(10, 5.63), dpi=150,
+                                              facecolor="#ccd9ff")
 
         # setup static map axis and create the map object
         if self._static_map_ax is None:
@@ -113,25 +118,31 @@ class BioSim:
         # setup herbivore heatmap subplot and accompanying colorbar axes
         if self._heat_herb_ax is None:
             self._heat_herb_ax = self._sim_window_fig.add_subplot(2, 3, 3)
-            self._heat_herb_ax.tick_params(axis='both', which='major', labelsize=8)
+            self._heat_herb_ax.tick_params(axis='both', which='major',
+                                           labelsize=8)
             self._heat_herb_ax.set_xlabel('Herbivore heatmap', fontsize=9)
-            self._herb_cbar_ax = self._sim_window_fig.add_axes([0.715, 0.915, 0.25, 0.006])
+            self._herb_cbar_ax = self._sim_window_fig.add_axes(
+                                                [0.715, 0.915, 0.25, 0.006])
 
         # setup carnivore heatmap subplot and accompanying colorbar axes
         if self._heat_carn_ax is None:
             self._heat_carn_ax = self._sim_window_fig.add_subplot(2, 3, 6)
-            self._heat_carn_ax.tick_params(axis='both', which='major', labelsize=8)
+            self._heat_carn_ax.tick_params(axis='both', which='major',
+                                           labelsize=8)
             self._heat_carn_ax.set_xlabel('Carnivore heatmap', fontsize=9)
-            self._carn_cbar_ax = self._sim_window_fig.add_axes([0.715,0.458,0.25,0.006])
+            self._carn_cbar_ax = self._sim_window_fig.add_axes(
+                                                [0.715, 0.458, 0.25, 0.006])
 
         # setup population pyramid subplot and some parameters along with
         # text for labels
         if self._pop_pyram_ax is None:
             self._pop_pyram_ax = self._sim_window_fig.add_subplot(2, 3, 2)
             self._pop_pyram_obj = self._pop_pyram_ax.twiny()
-            self._sim_window_fig.text(0.465,0.495,'Population size', fontsize=9)
+            self._sim_window_fig.text(0.465, 0.495, 'Population size',
+                                      fontsize=9)
             self._pop_pyram_obj.set_xlabel('Average weight', fontsize=9)
-            self._sim_window_fig.text(0.648,0.78,'Age groups', fontsize=9, rotation=270)
+            self._sim_window_fig.text(0.648, 0.78, 'Age groups', fontsize=9,
+                                      rotation=270)
             self._pop_pyram_ax.tick_params(axis='both', which='major',
                                            labelsize=8)
             self._pop_pyram_obj.tick_params(axis='both', which='major',
@@ -147,7 +158,8 @@ class BioSim:
 
         # setup year counter
         if self._year_ax is None:
-            self._year_ax = self._sim_window_fig.text(0.04, 0.925, f'Year {self._current_year}', fontsize=18)
+            self._year_ax = self._sim_window_fig.text(
+                0.04, 0.925, f'Year {self._current_year}', fontsize=18)
 
         self._sim_window_fig.tight_layout()
 
@@ -167,12 +179,16 @@ class BioSim:
         if ymax is not set it adjusts the ymax the biggest value plotted + 500
         :return: None
         """
-        carn_count, herb_count = self.island.total_number_per_species().values()
+        carn_count, herb_count = self.island.total_number_per_species(
+                                                                    ).values()
         self.carn_y.append(carn_count)
         self.herb_y.append(herb_count)
-        self._pop_plot_ax.plot(range(0, self._current_year + 1), self.herb_y, 'red', self.carn_y, 'lawngreen')
+        self._pop_plot_ax.plot(range(0, self._current_year + 1),
+                               self.herb_y, 'red', self.carn_y, 'lawngreen'
+                               )
         if self.ymax_animals is None:
-            self._pop_plot_ax.set_ylim(0, max(max(self.herb_y), max(self.carn_y)) + 500)
+            self._pop_plot_ax.set_ylim(
+                0, max(max(self.herb_y), max(self.carn_y)) + 500)
 
     def _instantiate_stacked_area(self):
         """
@@ -186,12 +202,16 @@ class BioSim:
         if self._stack_area_obj is None:
             nanstack = np.full(self._final_year, np.nan)
             self.y_stack = np.vstack([nanstack, nanstack, nanstack])
-            self._stack_area_obj = self._stack_area_ax.stackplot(np.arange(0, self._final_year), self.y_stack, colors=['red', 'lawngreen', 'green'], labels=["Carnivores", "Herbivores", "Fodder"])
+            self._stack_area_obj = self._stack_area_ax.stackplot(
+                np.arange(0, self._final_year), self.y_stack,
+                colors=['red', 'lawngreen', 'green'],
+                labels=["Carnivores", "Herbivores", "Fodder"]
+            )
             self._stack_area_ax.legend(fontsize='small', borderpad=0.1, loc=2)
         else:
-            nanstack= np.full(self._final_year-self._current_year, np.nan)
+            nanstack = np.full(self._final_year-self._current_year, np.nan)
             new_empty_values = np.vstack([nanstack, nanstack, nanstack])
-            self.y_stack = np.append(self.y_stack, new_empty_values, axis= 1)
+            self.y_stack = np.append(self.y_stack, new_empty_values, axis=1)
 
     def _update_stacked_area(self):
         """
@@ -218,8 +238,13 @@ class BioSim:
         :return: None
         """
         if self._heat_herb_obj is None:
-            self._heat_herb_obj = self._heat_herb_ax.imshow(array, interpolation='nearest', vmax=200, cmap='inferno')
-            herb_cbar = plt.colorbar(self._heat_herb_obj, cax=self._herb_cbar_ax, shrink=0.5, orientation='horizontal')
+            self._heat_herb_obj = self._heat_herb_ax.imshow(
+                array, interpolation='nearest', vmax=200, cmap='inferno'
+            )
+            herb_cbar = plt.colorbar(
+                self._heat_herb_obj, cax=self._herb_cbar_ax,
+                shrink=0.5, orientation='horizontal'
+            )
             herb_cbar.ax.tick_params(labelsize=6)
             if self.cmax_animals is not None:
                 self._heat_herb_obj.set_clim(
@@ -238,8 +263,13 @@ class BioSim:
         :return: None
         """
         if self._heat_carn_obj is None:
-            self._heat_carn_obj = self._heat_carn_ax.imshow(array, interpolation='nearest', vmax=200, cmap='inferno')
-            carn_cbar = plt.colorbar(self._heat_carn_obj, cax=self._carn_cbar_ax, shrink=0.5, orientation='horizontal')
+            self._heat_carn_obj = self._heat_carn_ax.imshow(
+                array, interpolation='nearest', vmax=200, cmap='inferno'
+            )
+            carn_cbar = plt.colorbar(
+                self._heat_carn_obj, cax=self._carn_cbar_ax,
+                shrink=0.5, orientation='horizontal'
+            )
             carn_cbar.ax.tick_params(labelsize=6)
             if self.cmax_animals is not None:
                 self._heat_carn_obj.set_clim(
@@ -290,13 +320,13 @@ class BioSim:
         plt.pause(1e-6)
 
     @staticmethod
-    def _create_color_map(island_map):
+    def _create_color_map(island_map_string):
         """
         Creates the basis for the static color map.
-        :param island_map: Multi-line string specifying island geography
+        :param island_map_string: Multi-line string specifying island geography
         :return: map_rgb : Nested list with a color value for each cell type
         """
-        island_map = island_map.replace(" ", "")
+        island_map_string = island_map_string.replace(" ", "")
         rgb_value = {'O': (0.0, 0.0, 1.0),  # blue
                      'M': (0.5, 0.5, 0.5),  # grey
                      'J': (0.0, 0.6, 0.0),  # dark green
@@ -304,10 +334,11 @@ class BioSim:
                      'D': (1.0, 1.0, 0.5)}  # light yellow
 
         map_rgb = [[rgb_value[column] for column in row]
-                   for row in island_map.splitlines()]
+                   for row in island_map_string.splitlines()]
         return map_rgb
 
-    def set_animal_parameters(self, species, params):
+    @staticmethod
+    def set_animal_parameters(species, params):
         """
         Set parameters for animal species.
 
@@ -321,7 +352,8 @@ class BioSim:
         else:
             raise ValueError(f"{species} is not a species in this simulation")
 
-    def set_landscape_parameters(self, landscape, params):
+    @staticmethod
+    def set_landscape_parameters(landscape, params):
         """
         Set parameters for landscape type.
 
@@ -333,8 +365,9 @@ class BioSim:
         elif landscape == "S":
             Savanna.set_parameters(params)
         else:
-            raise ValueError(f"{landscape} is not an acceptable landscape code for setting parameters")
-
+            raise ValueError(
+                f"{landscape} is not an acceptable"
+                f" landscape code for setting parameters")
 
     def simulate(self, num_years, vis_years=1, img_years=None):
         """
@@ -342,7 +375,8 @@ class BioSim:
 
         :param num_years: number of years to simulate
         :param vis_years: years between visualization updates
-        :param img_years: years between visualizations saved to files (default: vis_years)
+        :param img_years: years between visualizations saved to files (
+        default: vis_years)
 
         Image files will be numbered consecutively.
         """
@@ -384,15 +418,17 @@ class BioSim:
 
     @property
     def animal_distribution(self):
-        """Pandas DataFrame with animal count per species for each cell on island."""
+        """Pandas DataFrame with animal count per species
+         for each cell on island."""
         return self.island.per_cell_count_pandas_dataframe()
 
     def make_movie(self):
         """Create MPEG4 movie from visualization images saved."""
         if self._img_base is None:
-                    raise RuntimeError("No filename defined.")
+            raise RuntimeError("No filename defined.")
         try:
-            # Parameters chosen according to http://trac.ffmpeg.org/wiki/Encode/H.264,
+            # Parameters chosen according to
+            # http://trac.ffmpeg.org/wiki/Encode/H.264,
             # section "Compatibility"
             subprocess.check_call([_FFMPEG_BINARY, '-framerate', '15',
                                    '-i', f'{self._img_base}_%05d.png',
@@ -403,7 +439,6 @@ class BioSim:
                                    f'{self._img_base}.mp4'])
         except subprocess.CalledProcessError as err:
             raise RuntimeError(f'ERROR: ffmpeg failed with: {err}')
-
 
 
 if __name__ == "__main__":
@@ -429,17 +464,18 @@ if __name__ == "__main__":
                    {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
                    range(100)]}
                ]
-    simmert = BioSim(island_map, ini_pop, 1,img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg')
-    #img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
+    simmert = BioSim(
+        island_map, ini_pop, 1,
+        img_base='C:/Users/ander/OneDrive/Pictures/simtest/testimg')
+    # img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
     simmert.simulate(20)
     ini_pop2 = [{'loc': (1, 17), 'pop': [
         {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
         range(100)]},
                {'loc': (1, 18), 'pop': [
                    {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
-                   range(100)]}
+                   range(99)]}
                ]
     simmert.add_population(ini_pop2)
-    #simmert.simulate(20)
-    #simmert.make_movie()
-
+    # simmert.simulate(20)
+    # simmert.make_movie()
