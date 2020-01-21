@@ -5,7 +5,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 
 import matplotlib.pyplot as plt
-from biosim.Island import Island
+from biosim.island import Island
 from biosim.animals import Herbivores, Carnivores
 from biosim.cell_topography import Jungle, Savanna
 import numpy as np

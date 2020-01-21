@@ -6,7 +6,7 @@ __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 import biosim.cell_topography as topo
 import pytest
 import biosim.animals as animals
-import biosim.Island as isle
+import biosim.island as isle
 
 
 @pytest.fixture
