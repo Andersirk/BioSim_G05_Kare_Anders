@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-"""
-
 __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
@@ -166,13 +163,16 @@ class BioSim:
     def _update_population_plot(self):
         """
         Takes the total number of animal per species for the year it is called
-        and appends them to the population plot y values, then plots the plot
+        and appends them to the population plot y values, then plots the plot.
+        if ymax is not set it adjusts the ymax the biggest value plotted + 500
         :return: None
         """
         carn_count, herb_count = self.island.total_number_per_species().values()
         self.carn_y.append(carn_count)
         self.herb_y.append(herb_count)
         self._pop_plot_ax.plot(range(0, self._current_year + 1), self.herb_y, 'red', self.carn_y, 'lawngreen')
+        if self.ymax_animals is None:
+            self._pop_plot_ax.set_ylim(0, max(max(self.herb_y), max(self.carn_y)) + 500)
 
     def _instantiate_stacked_area(self):
         """
@@ -249,41 +249,53 @@ class BioSim:
 
     def _update_pop_pyram(self):
         """
-        Creates/updates the population and biomass pyramid 
-        :return:
+        Creates/updates the population and biomass pyramid. This modifies
+        the biomass bars from full bars to a line representing the bars extent
+        it also automatically adjusts the xlimit of the populationnumbers
+        while keeping 0 centered
+        :return: None
         """
-        herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = self.island.population_age_grups()
-        age = ["0-1","2-5", "5-10", "10-15", "15+"]
-        [rectangle.remove() for rectangle in reversed(self._pop_pyram_obj.patches)]
+        herb_pop_per_age, carn_pop_per_age, herb_mean_w, carn_mean_w = \
+            self.island.population_biomass_age_groups()
+        age = ["0-1", "2-5", "5-10", "10-15", "15+"]
+        [rectangle.remove() for rectangle in reversed(
+                                                self._pop_pyram_obj.patches)]
         self._pop_pyram_ax.cla()
-        self._pop_pyram_ax.barh(age, herb_list, color='lawngreen')
-        self._pop_pyram_ax.barh(age, carn_list, color='red')
-        rek1 = self._pop_pyram_obj.barh(age, herb_mean_w_list, color='black')
-        rek2 = self._pop_pyram_obj.barh(age, carn_mean_w_list, color='black')
-        maxlim= max(max(herb_list), abs(min(carn_list))) + 150
+        self._pop_pyram_ax.barh(age, herb_pop_per_age, color='lawngreen')
+        self._pop_pyram_ax.barh(age, carn_pop_per_age, color='red')
+        rek1 = self._pop_pyram_obj.barh(age, herb_mean_w, color='black')
+        rek2 = self._pop_pyram_obj.barh(age, carn_mean_w, color='black')
+        maxlim = max(max(herb_pop_per_age), abs(min(carn_pop_per_age))) + 150
         self._pop_pyram_ax.set_xlim(-maxlim, maxlim)
         self._pop_pyram_obj.set_xticks(np.arange(-100, 101, step=20))
-        for rektangle in rek1:
-            rektangle.set_x(rektangle.get_width() - 1)
-            rektangle.set_width(1)
-        for rektangle in rek2:
-            rektangle.set_x(rektangle.get_width() + 1)
-            rektangle.set_width(1)
+        for rectangle in rek1:
+            rectangle.set_x(rectangle.get_width() - 1)
+            rectangle.set_width(1)
+        for rectangle in rek2:
+            rectangle.set_x(rectangle.get_width() + 1)
+            rectangle.set_width(1)
 
     def _update_sim_window(self):
+        """
+        This updates the main figure window the current years data.
+        :return: None
+        """
         herb_array, carn_array = self.island.arrays_for_heatmap()
         self._update_pop_pyram()
         self._update_heatmap_herb(herb_array)
         self._update_heatmap_carn(carn_array)
         self._update_population_plot()
-        if self.ymax_animals is None:
-            self._pop_plot_ax.set_ylim(0, max(max(self.herb_y), max(self.carn_y)) + 500)
         self._update_stacked_area()
         self._year_ax.set_text(f'Year {self._current_year}')
         plt.pause(1e-6)
 
     @staticmethod
     def _create_color_map(island_map):
+        """
+        Creates the basis for the static color map.
+        :param island_map: Multi-line string specifying island geography
+        :return: map_rgb : Nested list with a color value for each cell type
+        """
         island_map = island_map.replace(" ", "")
         rgb_value = {'O': (0.0, 0.0, 1.0),  # blue
                      'M': (0.5, 0.5, 0.5),  # grey
@@ -291,9 +303,9 @@ class BioSim:
                      'S': (0.5, 1.0, 0.5),  # light green
                      'D': (1.0, 1.0, 0.5)}  # light yellow
 
-        kart_rgb = [[rgb_value[column] for column in row]
-                    for row in island_map.splitlines()]
-        return kart_rgb
+        map_rgb = [[rgb_value[column] for column in row]
+                   for row in island_map.splitlines()]
+        return map_rgb
 
     def set_animal_parameters(self, species, params):
         """
