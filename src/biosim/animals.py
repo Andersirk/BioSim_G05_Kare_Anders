@@ -11,11 +11,19 @@ import functools
 
 
 class Animals:
+    """The overall class for the animals which lives on the island"""
     instances = []
     parameters = {}
 
-    """This is the overall class for the animals which lives on the island"""
     def __init__(self, age, weight, potential_newborn):
+        """
+        :param age: int, the age of an animal
+        :param weight: float, the weight of an animal
+        :param potential_newborn: boolean, if True the instance is not added
+            to class instance list
+
+        Constructor for the Animal class
+        """
         self.age = age
         self.weight = self._birth_weight() if weight is None else weight
         if not potential_newborn:
@@ -24,10 +32,11 @@ class Animals:
 
     def _birth_weight(self):
         """
+        :return: float, weight of a newborn
+
         Returns a weight drawn from a normal distribution with the
         parameter 'w_birth' as the expectation and 'sigma_birth' as the
         standard deviation
-        :return: float :weight of a newborn
         """
         return random.normalvariate(
             self.parameters["w_birth"],
@@ -38,11 +47,11 @@ class Animals:
     @functools.lru_cache(maxsize=256)
     def fitness(self):
         """
+        :return: float: the fitness of the animal
+
         Computes the fitness of an animal based on the weight and age of the
         animal along with some species specific parameters. The animal has zero
         fitness if is has zero weight.
-
-        :return: float: the fitness of the animal
         """
         if self.weight <= 0:
             return 0
@@ -57,7 +66,6 @@ class Animals:
     def age_up(cls):
         """
         Increases the age by one year of all animals alive.
-        :return: None
         """
         for instance in cls.instances:
             instance.age += 1
@@ -66,27 +74,26 @@ class Animals:
     def annual_metabolism(cls):
         """
         Decreases the animals weight based on the parameter 'eta'
-        :return: None
         """
         for instance in cls.instances:
             instance.weight -= instance.parameters["eta"] * instance.weight
 
     def _eat_increase_weight(self, food):
         """
+        :param food: float: amount of food eaten
+
         Makes the animal eat x amount of food and increases its weight based on
         the parameter 'beta
-        :param food: float: amount of food eaten
-        :return: None
         """
         self.weight += self.parameters["beta"] * food
 
     def breed(self, cell, cell_population):
         """
-        Makes an animal try to breed
-        :param cell: The animals location cell at the start of the year
+        :param cell: instance of the cell the animal is in
         :param cell_population: The amount of animals in the respective
-        population
-        :return: None
+            population
+
+        Makes an animal try to breed
         """
         breeding_probability = min(1, self.parameters["gamma"] *
                                    self.fitness * (cell_population - 1))
@@ -105,8 +112,9 @@ class Animals:
 
     def will_die_natural_death(self):
         """
+        :return: boolean, True if an animal shall die or False if not
+
         Decides if an animal will die a 'natural' death
-        :return: True or False
         """
         if self.fitness == 0 or random.random() <\
                 self.parameters["omega"] * (1 - self.fitness):
@@ -116,8 +124,10 @@ class Animals:
 
     def _will_migrate(self):
         """
+        :return: boolean, True if an animal shall try to migrate or False
+            if not
+
         Decides if an animal shall try to migrate
-        :return:True (shall try to migrate) or False (Shall not try to migrate)
         """
         probability_to_move = self.parameters["mu"] * self.fitness
         if random.random() < probability_to_move:
@@ -127,11 +137,13 @@ class Animals:
 
     def what_cell_to_migrate_to(self, current_cell, ek_dict):
         """
-        Decides which of the neighbouring cell an animal shall to migrate to.
-        :param current_cell: The animals location cell at the start of the year
-        :param ek_dict: Dictionary with the neighbouring cells
-        coordinates (key) and the respective cells relevant ek.
+        :param current_cell: tuple, the animal's location cell at the start of
+            the year
+        :param ek_dict: dictionary with the neighbouring cells coordinates
+            (key) and the respective cells relevant ek.
         :return: The chosen target for the migration and the current cell
+
+        Decides which of the neighbouring cell an animal shall to migrate to.
         """
         self.has_tried_migration_this_year = True
         if self._will_migrate():
@@ -159,9 +171,10 @@ class Animals:
     @staticmethod
     def _find_neighbouring_cells(coordinates):
         """
-        Finds an animals neighbouring cell coordinates
-        :param coordinates: list
+        :param coordinates: list with tuples (coordinates)
         :return: a list with an animals neighbouring cell coordinates
+
+        Finds an animals neighbouring cell coordinates
         """
         neighbouring_cells = [(coordinates[0]+1, coordinates[1]),
                               (coordinates[0]-1, coordinates[1]),
@@ -171,14 +184,16 @@ class Animals:
 
     @classmethod
     def reset_migration_attempt(cls):
+        """
+        Resets an animals migration attempts attribute
+        """
         for instance in cls.instances:
             instance.has_tried_migration_this_year = False
 
 
 class Herbivores(Animals):
     """
-    This is the class for the plant eating herbivores which lives on
-    the island
+    The class for the plant eating herbivores which lives on the island
     """
     parameters = {"w_birth": 8.0,
                   "sigma_birth": 1.5,
@@ -199,13 +214,21 @@ class Herbivores(Animals):
                   }
 
     def __init__(self, age=0, weight=None, potential_newborn=False):
+        """
+        :param age: int, the age of an herbivore
+        :param weight: float, the weight of an herbivore
+        :param potential_newborn: boolean, if True the instance is not added
+            to class instance list
+
+        Constructor for the Herbivore subclass
+        """
         super().__init__(age, weight, potential_newborn)
 
     def graze(self, cell):
         """
+        :param cell: instance of the cell the animal is in
+
         A method which makes the herbivore graze
-        :param cell: The animals location cell at the start of the year
-        :return: None
         """
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self._eat_increase_weight(allowed_amount)
@@ -213,12 +236,12 @@ class Herbivores(Animals):
     @classmethod
     def set_parameters(cls, new_parameters):
         """
+        :param new_parameters: A dictionary with keys as the parameter to
+            be changed and values as the new parameter value. It is possible to
+            change preexisting parameters only.
+
         Sets the parameters of all herbivore instances to the provided
         new_parameters.
-        :param new_parameters: A dictionary with keys as the parameter to
-        be changed and values as the new parameter value. It is possible to
-        change preexisting parameters only.
-        :return: None
         """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():
@@ -259,14 +282,21 @@ class Carnivores(Animals):
                   "DeltaPhiMax": 10}
 
     def __init__(self, age=0, weight=None, potential_newborn=False):
+        """
+        :param age: int, the age of an animal
+        :param weight: float, the weight of an animal
+        :param potential_newborn: boolean, if True the instance is not added
+            to class instance list
+        """
         super().__init__(age, weight, potential_newborn)
         self.eaten_this_year = 0
 
     def kills_herbivore(self, herbivore):
         """
-        This function makes the carnivores try to kill and eat a herbivore
         :param herbivore: instance in the herbivore subclass
-        :return: True (if the killing was successful) or False if it failed
+        :return: boolean, True if the killing was successful, False if not
+
+        This function makes the carnivores try to kill and eat a herbivore
         """
         if self.fitness < herbivore.fitness or self.eaten_this_year >= \
                 self.parameters["F"]:
@@ -289,19 +319,18 @@ class Carnivores(Animals):
     def reset_amount_eaten_this_year(self):
         """
         Resets the amount of food a carnivore has eaten for one year
-        :return:None
         """
         self.eaten_this_year = 0
 
     @classmethod
     def set_parameters(cls, new_parameters):
         """
+        :param new_parameters: A dictionary with keys as the parameter to
+            be changed and values as the new parameter value. It is possible to
+            change preexisting parameters only.
+
         Sets the parameters of all carnivore instances to the provided
         new_parameters.
-        :param new_parameters: A dictionary with keys as the parameter to
-        be changed and values as the new parameter value. It is possible to
-        change preexisting parameters only.
-        :return: None
         """
         for parameter, value in new_parameters.items():
             if parameter in cls.parameters.keys():

@@ -11,7 +11,9 @@ import numpy as np
 
 class Island:
     """This is the overall class for the global events on Rossumøya"""
+
     def __init__(self, island_map):
+        """Constructor for the Island class"""
         self.raster_model = self.create_map(island_map)
         self.current_year = 0
 
@@ -238,7 +240,7 @@ class Island:
     def herbivore_biomass_age_groups(self):
         """
         :return: two lists with biomass and individual numbers info for each
-        age group for herbivores
+            age group for herbivores
 
         Makes lists of herbivores individuals and the total biomass within the
         age groups 0-1, 2-5, 5-10, 10-15 and 15 +.
@@ -268,7 +270,7 @@ class Island:
     def carnivore_biomass_age_groups(self):
         """
         :return: two lists with biomass and individual numbers info for each
-        age group for carnivores
+            age group for carnivores
 
         Makes lists of carnivores individuals and the total biomass within the
         age groups 0-1, 2-5, 5-10, 10-15 and 15 +.
@@ -298,7 +300,7 @@ class Island:
     def population_biomass_age_groups(self):
         """
         :return: two lists for each species with average weight and individual
-        numbers info for each age group
+            numbers info for each age group
 
         Uses biomass and age group numbers information to calculate the mean
         weight within a age group.
