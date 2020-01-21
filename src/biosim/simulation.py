@@ -7,6 +7,7 @@ __author__ = "Kåre Johnsen & Anders Karlsen"
 __email__ = "kajohnse@nmbu.no & anderska@nmbu.no"
 
 import matplotlib.pyplot as plt
+import matplotlib.lines as lines
 from biosim.Island import Island
 from biosim.animals import Herbivores, Carnivores
 from biosim.cell_topography import Jungle, Savanna
@@ -76,6 +77,9 @@ class BioSim:
         self._stack_area_ax = None
         self._year_ax = None
 
+        self._herb_cbar_ax = None
+        self._carn_cbar_ax = None
+
         self.rgbmap = self.create_color_map(island_map)
         self.y_stack = None
         self.herb_y = []
@@ -85,7 +89,6 @@ class BioSim:
         # setup main window
         if self._sim_window_fig is None:
             self._sim_window_fig = plt.figure(figsize=(10, 5.63), dpi=150, facecolor="#ccd9ff")
-
         # setup static
         if self._static_map_sub is None:
             self._static_map_sub = self._sim_window_fig.add_subplot(2, 3, 1)
@@ -93,6 +96,7 @@ class BioSim:
         # setup populationplot
         if self._pop_plot_sub is None:
             self._pop_plot_sub = self._sim_window_fig.add_subplot(2, 3, 4)
+            self._pop_plot_sub.set_xlabel('Population', fontsize=9)
             if self.ymax_animals is not None:
                 self._pop_plot_sub.set_ylim(0, self.ymax_animals)
         self._pop_plot_sub.set_xlim(0, self._final_year + 1)
@@ -102,35 +106,42 @@ class BioSim:
         if self._heat_herb_sub is None:
             self._heat_herb_sub = self._sim_window_fig.add_subplot(2, 3, 3)
             self._heat_herb_sub.tick_params(axis='both', which='major', labelsize=8)
+            self._heat_herb_sub.set_xlabel('Herbivore heatmap', fontsize=9)
+            self._herb_cbar_ax = self._sim_window_fig.add_axes([0.715, 0.915, 0.25, 0.006])
 
 
         if self._heat_carn_sub is None:
             self._heat_carn_sub = self._sim_window_fig.add_subplot(2, 3, 6)
-            self._heat_carn_sub.tick_params(axis='both', which='major',
-                                            labelsize=8)
+            self._heat_carn_sub.tick_params(axis='both', which='major',labelsize=8)
+            self._heat_carn_sub.set_xlabel('Carnivore heatmap', fontsize=9)
+            self._carn_cbar_ax = self._sim_window_fig.add_axes([0.715,0.458,0.25,0.006])
+
+
+
 
         #setup population pyramid
         if self._pop_pyram_sub is None:
             self._pop_pyram_sub = self._sim_window_fig.add_subplot(2, 3, 2)
             self._pop_pyram_ax = self._pop_pyram_sub.twiny()
-            self._pop_pyram_sub.set_xlabel('Population size', fontsize=9)
+            self._sim_window_fig.text(0.465,0.495,'Population size', fontsize=9)
             self._pop_pyram_ax.set_xlabel('Average weight', fontsize=9)
+            self._sim_window_fig.text(0.648,0.78,'Age groups', fontsize=9, rotation=270)
             self._pop_pyram_sub.tick_params(axis='both', which='major',
-                         labelsize=8, labelrotation=30)
+                         labelsize=8)
             self._pop_pyram_ax.tick_params(axis='both', which='major',
                          labelsize=8)
-            #self._pop_pyram_sub.legend(fontsize= 'small', borderpad=0.1, loc=2)
-
 
         #setup stack area
         if self._stack_area_sub is None:
             self._stack_area_sub = self._sim_window_fig.add_subplot(2, 3, 5)
             self._stack_area_sub.tick_params(axis='both', which='major',
                                             labelsize=8)
+            self._stack_area_sub.set_xlabel('Biomass', fontsize=9)
         self._instantiate_stacked_area()
 
+        #setup yearcount
         if self._year_ax is None:
-            self._year_ax = self._sim_window_fig.text(0.04, 0.925, f'Year {self._current_year}', fontsize=20)
+            self._year_ax = self._sim_window_fig.text(0.04, 0.925, f'Year {self._current_year}', fontsize=18)
 
         self._sim_window_fig.tight_layout()
 
@@ -140,7 +151,7 @@ class BioSim:
             return
         self._sim_window_fig.savefig('{base}_{num:05d}.{type}'.format(base=self._img_base,
                                                      num=self._img_ctr,
-                                                     type=self._img_fmt))
+                                                     type=self._img_fmt), facecolor="#ccd9ff")
         self._img_ctr += 1
 
 
@@ -172,17 +183,17 @@ class BioSim:
 
     def _update_heatmap_herb(self, array):
         if self._heat_herb_im_ax is None:
-            self._heat_herb_im_ax = self._heat_herb_sub.imshow(array, interpolation='nearest', vmax=400, cmap='inferno')
-            self._heat_herb_im_ax.axes.get_xaxis().set_visible(False)
-            self._heat_herb_im_ax.axes.get_yaxis().set_visible(False)
-            self._sim_window_fig.colorbar(self._heat_herb_im_ax, ax=self._heat_herb_sub, shrink=0.5)
+            self._heat_herb_im_ax = self._heat_herb_sub.imshow(array, interpolation='nearest', vmax=200, cmap='inferno')
+            herb_cbar = plt.colorbar(self._heat_herb_im_ax, cax=self._herb_cbar_ax, shrink=0.5, orientation='horizontal')
+            herb_cbar.ax.tick_params(labelsize=6)
         else:
             self._heat_herb_im_ax.set_data(array)
 
     def _update_heatmap_carn(self, array):
         if self._heat_carn_im_ax is None:
-            self._heat_carn_im_ax = self._heat_carn_sub.imshow(array, interpolation='nearest', vmax=100, cmap='inferno')
-            self._sim_window_fig.colorbar(self._heat_carn_im_ax, ax=self._heat_carn_sub, shrink=0.5)
+            self._heat_carn_im_ax = self._heat_carn_sub.imshow(array, interpolation='nearest', vmax=200, cmap='inferno', origin='lower')
+            carn_cbar = plt.colorbar(self._heat_carn_im_ax, cax=self._carn_cbar_ax, shrink=0.5,orientation='horizontal')
+            carn_cbar.ax.tick_params(labelsize=6)
         else:
             self._heat_carn_im_ax.set_data(array)
 
@@ -190,16 +201,14 @@ class BioSim:
     def update_pop_pyram(self):
         herb_list, carn_list, herb_mean_w_list, carn_mean_w_list = self.island.population_age_grups()
         age = ["0-1","2-5", "5-10", "10-15", "15+"]
-        [p.remove() for p in reversed(self._pop_pyram_ax.patches)]
+        [rectangle.remove() for rectangle in reversed(self._pop_pyram_ax.patches)]
         self._pop_pyram_sub.cla()
         self._pop_pyram_sub.barh(age, herb_list, color='lawngreen')
         self._pop_pyram_sub.barh(age, carn_list, color='red')
         rek1 = self._pop_pyram_ax.barh(age, herb_mean_w_list, color='black')
         rek2 = self._pop_pyram_ax.barh(age, carn_mean_w_list, color='black')
-        #maxticks= max(max(herb_list),abs(min(carn_list)))
-        #self._pop_pyram_sub.set_xticks(np.arange(-maxticks, maxticks, step=(maxticks/100)))
-        self._pop_pyram_sub.set_xticks(
-            np.arange(-2000, 2001, step=500), )
+        maxlim= max(max(herb_list), abs(min(carn_list))) + 150
+        self._pop_pyram_sub.set_xlim(-maxlim, maxlim)
         self._pop_pyram_ax.set_xticks(np.arange(-100, 101, step=20))
         for rektangle in rek1:
             rektangle.set_x(rektangle.get_width() - 1)
@@ -231,9 +240,6 @@ class BioSim:
         kart_rgb = [[rgb_value[column] for column in row]
                     for row in island_map.splitlines()]
         return kart_rgb
-
-
-
 
     def set_animal_parameters(self, species, params):
         """
@@ -359,9 +365,9 @@ if __name__ == "__main__":
                    {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
                    range(100)]}
                ]
-    simmert = BioSim(island_map, ini_pop, 1, img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg')
+    simmert = BioSim(island_map, ini_pop, 1,img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg')
     #img_base = 'C:/Users/ander/OneDrive/Pictures/simtest/testimg'
-    simmert.simulate(50)
+    simmert.simulate(10)
     ini_pop2 = [{'loc': (1, 17), 'pop': [
         {'species': 'Carnivore', 'age': 0, 'weight': 80} for _ in
         range(100)]},
@@ -370,6 +376,6 @@ if __name__ == "__main__":
                    range(100)]}
                ]
     simmert.add_population(ini_pop2)
-    simmert.simulate(250)
-    simmert.make_movie()
+    #simmert.simulate(20)
+    #simmert.make_movie()
 
