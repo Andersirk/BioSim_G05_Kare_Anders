@@ -12,6 +12,7 @@ import numpy as np
 import random
 import subprocess
 
+# replace this with the ffmpeg directory
 _FFMPEG_BINARY = 'C:/Users/ander/OneDrive/Pictures/simtest/ffmpeeg/ffmpeg.exe'
 
 
