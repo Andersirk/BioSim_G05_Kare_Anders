@@ -104,7 +104,8 @@ class Island:
         """
         param new_population_list: list of dictionary {(x,y): instance}
 
-        Controls that the variables in the the new population are allowed.
+        Controls that the age and weight of animal in the the new population
+        are allowed.
         """
         for animal in new_population_dict["pop"]:
             if type(animal["age"]) != int or animal["age"] < 0:
@@ -212,7 +213,9 @@ class Island:
         """
         :return: numpy arrays with info about numbers of animals in a cell
 
-        Counts the number of herbivores and carnivores in every cell
+        Counts the number of herbivores and carnivores in every cell and
+        places them in a numpy array where [row][col] corresponds to the
+        islands x,y
         """
         maxcord = max(self.raster_model.keys())
         herb_array = np.zeros(maxcord)
@@ -227,7 +230,7 @@ class Island:
         """
         :return: dict {species: individuals}
 
-        Counts the total number of individuals of a species on the island
+        Counts the total number of individuals of each species on the island
         """
         total_herb = 0
         total_carn = 0
@@ -239,7 +242,7 @@ class Island:
 
     def herbivore_biomass_age_groups(self):
         """
-        :return: two lists with biomass and individual numbers info for each
+        :return: two lists with biomass and population size per
             age group for herbivores
 
         Makes lists of herbivores individuals and the total biomass within the
@@ -269,7 +272,7 @@ class Island:
 
     def carnivore_biomass_age_groups(self):
         """
-        :return: two lists with biomass and individual numbers info for each
+        :return: two lists with biomass and population size per
             age group for carnivores
 
         Makes lists of carnivores individuals and the total biomass within the
@@ -299,8 +302,8 @@ class Island:
 
     def population_biomass_age_groups(self):
         """
-        :return: two lists for each species with average weight and individual
-            numbers info for each age group
+        :return: two lists for each species with average weight and population
+            size for each age group
 
         Uses biomass and age group numbers information to calculate the mean
         weight within a age group.

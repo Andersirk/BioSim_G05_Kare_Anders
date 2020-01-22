@@ -66,8 +66,9 @@ class Topography:
 
     def current_fodder(self):
         """
+        :return: float, current amount of fodder
+
         Finds the current amount of fodder in a cell
-        :return: A float
         """
         return self.fodder
 
@@ -189,8 +190,8 @@ class Topography:
 
     def ek_for_cell(self, species):
         """
-        :param species: Carnivores or Herbivores
-        :return: herbivore_ek or carnivore_ek as floats.
+        :param species: What species to calculate ek for.
+        :return: herbivore_ek or carnivore_ek as a float.
 
         Calculates the relative amount of relevant fodder (ek) for the
         carnivores and the herbivores.
@@ -207,11 +208,11 @@ class Topography:
     def _migrate_all_herbivores_in_cell(self, island, current_cell,
                                         herbivore_ek):
         """
-        :param island: Class
+        :param island: Instance of the island the animal is on
         :param current_cell: tuple, the location (x,y) of the animal
-        :param herbivore_ek: Int
+        :param herbivore_ek: dict with ek for all cells
 
-        Migrate all the herbivores which dosent already have tried to migrate
+        Migrate all the herbivores who haven't already tried to migrate
         this year.
         """
         for herbivore in self.herbivore_list:
@@ -265,7 +266,7 @@ class Jungle(Topography):
     parameters = {"f_max": 800}
 
     def __init__(self):
-        """Constructor for the Jungle subclass, sets the initial fodder based
+        """The constructor for the Jungle subclass, sets the initial fodder based
         on the initial value of f_max"""
         super().__init__()
         self.fodder = self.parameters["f_max"]
@@ -304,7 +305,7 @@ class Savanna(Topography):
     parameters = {"f_max": 300, "alpha": 0.3}
 
     def __init__(self):
-        """Constructor for the Savanna subclass, sets the initial fodder based
+        """The constructor for the Savanna subclass, sets the initial fodder based
         on the initial value of f_max"""
         super().__init__()
         self.fodder = self.parameters["f_max"]

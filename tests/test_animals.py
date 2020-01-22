@@ -65,6 +65,7 @@ def test_natural_death(strong_vs_weak):
     Tests that an very unfit herbivore's natural death prop = 0.4(1-0) ≃ 0.4,
     and that a very fit carnivore's natural death prop = 0.9(1-0.95) ≃ 0.045
     """
+    random.seed(1)
     die_rate_herbivore = [strong_vs_weak[0].will_die_natural_death() for _ in
                           range(1000)]
     herbivore_amount = die_rate_herbivore.count(True)

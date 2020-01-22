@@ -15,6 +15,31 @@ class Animals:
     instances = []
     parameters = {}
 
+    @classmethod
+    def age_up(cls):
+        """
+        Increases the age by one year of all animals alive.
+        """
+        for instance in cls.instances:
+            instance.age += 1
+
+    @classmethod
+    def annual_metabolism(cls):
+        """
+        Decreases the animals weight based on the parameter 'eta'. The decrease
+        amount is a factor of 'eta' times weight
+        """
+        for instance in cls.instances:
+            instance.weight -= instance.parameters["eta"] * instance.weight
+
+    @classmethod
+    def reset_migration_attempt(cls):
+        """
+        Resets an animals migration attempts attribute
+        """
+        for instance in cls.instances:
+            instance.has_tried_migration_this_year = False
+
     def __init__(self, age, weight, potential_newborn):
         """
         :param age: int, the age of an animal
@@ -62,22 +87,6 @@ class Animals:
                     1 + exp(-self.parameters["phi_weight"] * (
                         self.weight - self.parameters["w_half"]))) ** -1
 
-    @classmethod
-    def age_up(cls):
-        """
-        Increases the age by one year of all animals alive.
-        """
-        for instance in cls.instances:
-            instance.age += 1
-
-    @classmethod
-    def annual_metabolism(cls):
-        """
-        Decreases the animals weight based on the parameter 'eta'
-        """
-        for instance in cls.instances:
-            instance.weight -= instance.parameters["eta"] * instance.weight
-
     def _eat_increase_weight(self, food):
         """
         :param food: float: amount of food eaten
@@ -91,9 +100,9 @@ class Animals:
         """
         :param cell: instance of the cell the animal is in
         :param cell_population: The amount of animals in the respective
-            population
+            location of the same species
 
-        Makes an animal try to breed
+        Makes an animal try to breed.
         """
         breeding_probability = min(1, self.parameters["gamma"] *
                                    self.fitness * (cell_population - 1))
@@ -114,7 +123,9 @@ class Animals:
         """
         :return: boolean, True if an animal shall die or False if not
 
-        Decides if an animal will die a 'natural' death
+        Decides if an animal will die a 'natural' death based on a probability
+        computed by the parameter 'omega' * (1 - fitness). If the animals
+        fitness is 0 it dies with certain probability.
         """
         if self.fitness == 0 or random.random() <\
                 self.parameters["omega"] * (1 - self.fitness):
@@ -139,11 +150,12 @@ class Animals:
         """
         :param current_cell: tuple, the animal's location cell at the start of
             the year
-        :param ek_dict: dictionary with the neighbouring cells coordinates
-            (key) and the respective cells relevant ek.
-        :return: The chosen target for the migration and the current cell
+        :param ek_dict: dictionary with ek for all cells on the island
+        :return: The chosen cell to migrate to
 
         Decides which of the neighbouring cell an animal shall to migrate to.
+        based on it's current cell and the neighbouring cells abundance of
+        fodder(ek)
         """
         self.has_tried_migration_this_year = True
         if self._will_migrate():
@@ -182,14 +194,6 @@ class Animals:
                               (coordinates[0], coordinates[1]-1)]
         return neighbouring_cells
 
-    @classmethod
-    def reset_migration_attempt(cls):
-        """
-        Resets an animals migration attempts attribute
-        """
-        for instance in cls.instances:
-            instance.has_tried_migration_this_year = False
-
 
 class Herbivores(Animals):
     """
@@ -220,7 +224,9 @@ class Herbivores(Animals):
         :param potential_newborn: boolean, if True the instance is not added
             to class instance list
 
-        Constructor for the Herbivore subclass
+        Constructor for the Herbivore subclass. If weight is set to None
+        the weight will be drawn from a gaussian distribution, with 'w_birth'
+        as the expectation and 'sigma_birth' as the standard deviation.
         """
         super().__init__(age, weight, potential_newborn)
 
@@ -228,7 +234,8 @@ class Herbivores(Animals):
         """
         :param cell: instance of the cell the animal is in
 
-        A method which makes the herbivore graze
+        A method which makes the herbivore attempt to graze, dependent on
+        the remaining amount of fodder in it's respective cell.
         """
         allowed_amount = cell.allowed_fodder_to_consume(self.parameters["F"])
         self._eat_increase_weight(allowed_amount)
@@ -287,13 +294,17 @@ class Carnivores(Animals):
         :param weight: float, the weight of an animal
         :param potential_newborn: boolean, if True the instance is not added
             to class instance list
+
+        Constructor for the Carnivore subclass. If weight is set to None
+        the weight will be drawn from a gaussian distribution, with 'w_birth'
+        as the expectation and 'sigma_birth' as the standard deviation.
         """
         super().__init__(age, weight, potential_newborn)
         self.eaten_this_year = 0
 
     def kills_herbivore(self, herbivore):
         """
-        :param herbivore: instance in the herbivore subclass
+        :param herbivore: The herbivore the carnivore will attempt to kill
         :return: boolean, True if the killing was successful, False if not
 
         This function makes the carnivores try to kill and eat a herbivore
